@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Carte RP GTA V</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <aside id="sidebar">
+    <h1>Carte RP GTA V</h1>
+    <p class="hint">Ajoutez votre image dans <code>assets/gta-v-map.jpg</code>.</p>
+
+    <div class="panel">
+      <h2>Filtres</h2>
+      <label><input type="checkbox" class="filter" value="police" checked> 🚓 Police / Justice</label>
+      <label><input type="checkbox" class="filter" value="ems" checked> 🚑 EMS</label>
+      <label><input type="checkbox" class="filter" value="entreprise" checked> 🏢 Entreprises</label>
+      <label><input type="checkbox" class="filter" value="gang" checked> 🔴 Gangs</label>
+      <label><input type="checkbox" class="filter" value="event" checked> 🎭 Événements</label>
+      <label><input type="checkbox" class="filter" value="autre" checked> 📍 Autres</label>
+    </div>
+
+    <div class="panel">
+      <h2>Ajouter un point</h2>
+      <p>Clique sur la map, puis remplis le formulaire.</p>
+      <form id="place-form">
+        <input id="place-name" placeholder="Nom du lieu" required />
+        <select id="place-category">
+          <option value="police">🚓 Police / Justice</option>
+          <option value="ems">🚑 EMS</option>
+          <option value="entreprise">🏢 Entreprise</option>
+          <option value="gang">🔴 Gang</option>
+          <option value="event">🎭 Événement</option>
+          <option value="autre">📍 Autre</option>
+        </select>
+        <textarea id="place-description" placeholder="Description RP"></textarea>
+        <button type="submit">Ajouter le marqueur</button>
+      </form>
+    </div>
+
+    <div class="panel">
+      <h2>Sauvegarde</h2>
+      <button id="export-json">Exporter les lieux</button>
+      <p class="hint">Pour collaborer en ligne, branche ensuite Firebase ou Supabase.</p>
+    </div>
+  </aside>
+
+  <main id="map"></main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+  <script src="places.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
