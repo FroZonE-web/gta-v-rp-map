@@ -1,4 +1,3 @@
-// Dimensions virtuelles de la carte. Si votre image est déformée, ajustez ces valeurs.
 const MAP_WIDTH = 8192;
 const MAP_HEIGHT = 8192;
 const imageUrl = "assets/gta-v-map.jpg";
@@ -25,6 +24,7 @@ const iconByCategory = {
 };
 
 const markersLayer = L.layerGroup().addTo(map);
+
 const drawnItems = new L.FeatureGroup();
 map.addLayer(drawnItems);
 
@@ -37,23 +37,61 @@ const drawControl = new L.Control.Draw({
     polygon: true,
     rectangle: true
   },
-  edit: { featureGroup: drawnItems }
+  edit: {
+    featureGroup: drawnItems
+  }
 });
-map.addControl(drawControl);
-map.on(L.Draw.Event.CREATED, event => drawnItems.addLayer(event.layer));
 
-let places = [...(window.PLACES || [])];
+map.addControl(drawControl);
+
+map.on(L.Draw.Event.CREATED, event => {
+  drawnItems.addLayer(event.layer);
+});
+
+let places = [];
 let pendingClick = null;
 
-function percentToLatLng(x, y) {
-  return [MAP_HEIGHT * y / 100, MAP_WIDTH * x / 100];
+function getPlayerName() {
+  let name = localStorage.getItem("rp_player_name");
+
+  if (!name) {
+    name = prompt("Entre ton pseudo RP :");
+
+    if (!name || !name.trim()) {
+      name = "Anonyme";
+    }
+
+    localStorage.setItem("rp_player_name", name.trim());
+  }
+
+  const playerNameElement = document.getElementById("player-name");
+
+  if (playerNameElement) {
+    playerNameElement.textContent = name;
+  }
+
+  return name;
 }
 
-function latLngToPercent(latlng) {
-  return {
-    x: +(latlng.lng / MAP_WIDTH * 100).toFixed(2),
-    y: +(latlng.lat / MAP_HEIGHT * 100).toFixed(2)
-  };
+let playerName = getPlayerName();
+
+const changeNameButton = document.getElementById("change-name");
+
+if (changeNameButton) {
+  changeNameButton.addEventListener("click", () => {
+    const newName = prompt("Nouveau pseudo RP :", playerName);
+
+    if (newName && newName.trim()) {
+      playerName = newName.trim();
+      localStorage.setItem("rp_player_name", playerName);
+
+      const playerNameElement = document.getElementById("player-name");
+
+      if (playerNameElement) {
+        playerNameElement.textContent = playerName;
+      }
+    }
+  });
 }
 
 function makeIcon(category) {
@@ -67,57 +105,116 @@ function makeIcon(category) {
 
 function renderMarkers() {
   markersLayer.clearLayers();
-  const active = new Set([...document.querySelectorAll(".filter:checked")].map(el => el.value));
-  places.filter(place => active.has(place.category)).forEach(place => {
-    const marker = L.marker(percentToLatLng(place.x, place.y), { icon: makeIcon(place.category) });
-    marker.bindPopup(`
-      <strong>${place.name}</strong><br>
-      <em>${place.category}</em><br>
-      <p>${place.description || "Aucune description."}</p>
-      <small>x: ${place.x} / y: ${place.y}</small>
-    `);
-    marker.addTo(markersLayer);
-  });
+
+  const activeCategories = new Set(
+    [...document.querySelectorAll(".filter:checked")].map(input => input.value)
+  );
+
+  places
+    .filter(place => activeCategories.has(place.category))
+    .forEach(place => {
+      const marker = L.marker([place.lat, place.lng], {
+        icon: makeIcon(place.category)
+      });
+
+      marker.bindPopup(`
+        <strong>${place.name}</strong><br>
+        <em>${place.category}</em><br>
+        <p>${place.description || "Aucune description."}</p>
+        <small>Ajouté par : ${place.author || "Inconnu"}</small><br>
+        <small>lat : ${Math.round(place.lat)} / lng : ${Math.round(place.lng)}</small>
+      `);
+
+      marker.addTo(markersLayer);
+    });
 }
 
-map.on("click", e => {
-  pendingClick = e.latlng;
-  document.getElementById("place-name").focus();
-});
+async function loadMarkers() {
+  const { data, error } = await supabaseClient
+    .from("markers")
+    .select("*")
+    .order("created_at", { ascending: true });
 
-document.getElementById("place-form").addEventListener("submit", event => {
-  event.preventDefault();
-  if (!pendingClick) {
-    alert("Clique d'abord sur la carte pour choisir l'emplacement.");
+  if (error) {
+    alert("Erreur chargement Supabase : " + error.message);
+    console.error(error);
     return;
   }
 
-  const coords = latLngToPercent(pendingClick);
-  places.push({
-    id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
-    name: document.getElementById("place-name").value,
-    category: document.getElementById("place-category").value,
-    description: document.getElementById("place-description").value,
-    x: coords.x,
-    y: coords.y
-  });
-
-  event.target.reset();
-  pendingClick = null;
+  places = data || [];
   renderMarkers();
+}
+
+async function addMarker(place) {
+  const { error } = await supabaseClient
+    .from("markers")
+    .insert([place]);
+
+  if (error) {
+    alert("Erreur ajout Supabase : " + error.message);
+    console.error(error);
+    return false;
+  }
+
+  return true;
+}
+
+map.on("click", event => {
+  pendingClick = event.latlng;
+
+  const nameInput = document.getElementById("place-name");
+
+  if (nameInput) {
+    nameInput.focus();
+  }
 });
 
-document.querySelectorAll(".filter").forEach(input => input.addEventListener("change", renderMarkers));
+const placeForm = document.getElementById("place-form");
 
-document.getElementById("export-json").addEventListener("click", () => {
-  const content = "window.PLACES = " + JSON.stringify(places, null, 2) + ";\n";
-  const blob = new Blob([content], { type: "application/javascript" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "places.js";
-  a.click();
-  URL.revokeObjectURL(url);
+if (placeForm) {
+  placeForm.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    if (!pendingClick) {
+      alert("Clique d'abord sur la carte pour choisir l'emplacement.");
+      return;
+    }
+
+    const place = {
+      name: document.getElementById("place-name").value,
+      category: document.getElementById("place-category").value,
+      description: document.getElementById("place-description").value,
+      lat: pendingClick.lat,
+      lng: pendingClick.lng,
+      author: playerName
+    };
+
+    const success = await addMarker(place);
+
+    if (success) {
+      event.target.reset();
+      pendingClick = null;
+    }
+  });
+}
+
+document.querySelectorAll(".filter").forEach(input => {
+  input.addEventListener("change", renderMarkers);
 });
 
-renderMarkers();
+supabaseClient
+  .channel("markers-realtime")
+  .on(
+    "postgres_changes",
+    {
+      event: "*",
+      schema: "public",
+      table: "markers"
+    },
+    () => {
+      loadMarkers();
+    }
+  )
+  .subscribe();
+
+loadMarkers();

@@ -11,7 +11,8 @@
 <body>
   <aside id="sidebar">
     <h1>Carte RP GTA V</h1>
-    <p class="hint">Ajoutez votre image dans <code>assets/gta-v-map.jpg</code>.</p>
+    <p class="hint">Pseudo : <strong id="player-name"></strong></p>
+    <button id="change-name">Changer de pseudo</button>
 
     <div class="panel">
       <h2>Filtres</h2>
@@ -40,19 +41,14 @@
         <button type="submit">Ajouter le marqueur</button>
       </form>
     </div>
-
-    <div class="panel">
-      <h2>Sauvegarde</h2>
-      <button id="export-json">Exporter les lieux</button>
-      <p class="hint">Pour collaborer en ligne, branche ensuite Firebase ou Supabase.</p>
-    </div>
   </aside>
 
   <main id="map"></main>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
-  <script src="places.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
