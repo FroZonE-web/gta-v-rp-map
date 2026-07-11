@@ -926,7 +926,8 @@ button:disabled {
 .zone-toggle { margin-top: 12px; }
 .zone-tooltip { color: #fff; background: rgba(10,12,16,.85); border: 1px solid rgba(255,255,255,.35); border-radius: 6px; box-shadow: 0 3px 12px rgba(0,0,0,.45); font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
 .zone-tooltip::before { display: none; }
-.zone-admin-actions { grid-template-columns: 1fr; }
+.zone-admin-actions { grid-template-columns: 1fr 1fr; }
+.zone-admin-actions .zone-edit-button { background: var(--primary); }
 .leaflet-draw-toolbar a { background-color: #f5f5f5; }
 
 

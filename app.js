@@ -1,5 +1,7 @@
 "use strict";
 
+console.info("Atlas RP app.js v0.7.4 chargé");
+
 /* =========================================================
    CONFIGURATION DE LA CARTE
    ========================================================= */
@@ -1916,7 +1918,7 @@ function createZonePopup(zone) {
         </div>
       </header>
       <div class="popup-description">${description}</div>
-      ${isAdmin ? `<div class="popup-admin-actions zone-admin-actions"><button type="button" data-zone-edit="${zone.id}">Modifier</button><button type="button" class="danger-button" data-zone-delete="${zone.id}">Supprimer la zone</button></div>` : ""}
+      ${isAdmin ? `<div class="popup-admin-actions zone-admin-actions"><button type="button" class="zone-edit-button" data-zone-edit="${zone.id}">Modifier la zone</button><button type="button" class="danger-button" data-zone-delete="${zone.id}">Supprimer la zone</button></div>` : ""}
       <footer class="marker-popup-footer"><span>Ajoutée par <strong>${escapeHtml(zone.author || "Inconnu")}</strong></span></footer>
     </article>`;
 }
