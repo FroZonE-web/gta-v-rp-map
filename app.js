@@ -285,63 +285,6 @@ L.imageOverlay(
 
 map.fitBounds(MAP_BOUNDS);
 
-/* =========================================================
-   MINI-MAP v0.8.3
-   ========================================================= */
-
-const miniMapShell = document.getElementById("minimap-shell");
-const miniMapToggle = document.getElementById("minimap-toggle");
-
-const miniMap = L.map("minimap", {
-  crs: L.CRS.Simple,
-  minZoom: -6,
-  maxZoom: -1,
-  zoomControl: false,
-  attributionControl: false,
-  dragging: false,
-  scrollWheelZoom: false,
-  doubleClickZoom: false,
-  boxZoom: false,
-  keyboard: false,
-  tap: false
-});
-
-L.imageOverlay(MAP_IMAGE_URL, MAP_BOUNDS, { interactive: false }).addTo(miniMap);
-miniMap.fitBounds(MAP_BOUNDS);
-
-const miniMapViewport = L.rectangle(map.getBounds(), {
-  color: "#4fc3f7",
-  weight: 2,
-  opacity: 1,
-  fillColor: "#4fc3f7",
-  fillOpacity: 0.12,
-  interactive: false
-}).addTo(miniMap);
-
-function updateMiniMapViewport() {
-  miniMapViewport.setBounds(map.getBounds());
-}
-
-map.on("move zoom resize", updateMiniMapViewport);
-
-miniMap.on("click", (event) => {
-  map.panTo(event.latlng, { animate: true });
-});
-
-miniMapToggle?.addEventListener("click", () => {
-  const collapsed = miniMapShell.classList.toggle("is-collapsed");
-  miniMapToggle.textContent = collapsed ? "+" : "−";
-  miniMapToggle.setAttribute("aria-expanded", String(!collapsed));
-
-  if (!collapsed) {
-    window.setTimeout(() => {
-      miniMap.invalidateSize();
-      miniMap.fitBounds(MAP_BOUNDS);
-      updateMiniMapViewport();
-    }, 220);
-  }
-});
-
 const markersLayer = L.layerGroup().addTo(map);
 
 const zonesLayer = L.layerGroup().addTo(map);
@@ -3134,9 +3077,6 @@ async function initializeApplication() {
    * des marqueurs depuis Supabase.
    */
   synchronizeSearchFromInput();
-  miniMap.invalidateSize();
-  miniMap.fitBounds(MAP_BOUNDS);
-  updateMiniMapViewport();
 }
 
 initializeApplication();
