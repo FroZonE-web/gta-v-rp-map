@@ -901,20 +901,23 @@ function focusMarker(identifier) {
   }
 }
 
-placeSearchInput.addEventListener(
-  "input",
-  () => {
-    currentSearch =
-      normalizeText(
-        placeSearchInput.value
-      );
+function synchronizeSearchFromInput() {
+  currentSearch = normalizeText(placeSearchInput.value);
+  clearSearchButton.hidden = !currentSearch;
+  refreshInterface();
+}
 
-    clearSearchButton.hidden =
-      !currentSearch;
-
-    refreshInterface();
-  }
-);
+/*
+ * Plusieurs événements sont écoutés volontairement :
+ * certains navigateurs restaurent automatiquement la valeur
+ * d'un champ après un rechargement sans déclencher "input".
+ */
+["input", "keyup", "change", "search"].forEach((eventName) => {
+  placeSearchInput.addEventListener(
+    eventName,
+    synchronizeSearchFromInput
+  );
+});
 
 clearSearchButton.addEventListener(
   "click",
@@ -1353,7 +1356,20 @@ async function initializeApplication() {
   createCategoryOptions();
   createFilters();
 
+  /*
+   * Prend immédiatement en compte une valeur de recherche
+   * éventuellement restaurée par le navigateur.
+   */
+  currentSearch = normalizeText(placeSearchInput.value);
+  clearSearchButton.hidden = !currentSearch;
+
   await loadMarkers();
+
+  /*
+   * Force une synchronisation finale après le chargement
+   * des marqueurs depuis Supabase.
+   */
+  synchronizeSearchFromInput();
 }
 
 initializeApplication();
