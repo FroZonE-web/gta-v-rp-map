@@ -175,8 +175,14 @@ const adminEmailInput = document.getElementById("admin-email");
 const adminPasswordInput = document.getElementById("admin-password");
 const adminLoginButton = document.getElementById("admin-login-button");
 const adminSession = document.getElementById("admin-session");
-const adminEmailDisplay = document.getElementById("admin-email-display");
 const adminLogoutButton = document.getElementById("admin-logout-button");
+const adminDrawer = document.getElementById("admin-drawer");
+const adminDrawerToggle = document.getElementById("admin-drawer-toggle");
+const adminDrawerClose = document.getElementById("admin-drawer-close");
+const adminModeInput = document.getElementById("admin-mode");
+const visitorModeInput = document.getElementById("visitor-mode");
+const visitorModeBadge = document.getElementById("visitor-mode-badge");
+const showHistoryInput = document.getElementById("show-history");
 
 const zoneForm = document.getElementById("zone-form");
 const zoneNameInput = document.getElementById("zone-name");
@@ -223,6 +229,9 @@ let currentSearch = "";
 let favoriteIds = new Set();
 let adminUser = null;
 let isAdmin = false;
+let visitorMode = false;
+let adminDrawerOpen = false;
+let showHistories = false;
 let movingMarkerId = null;
 let zones = [];
 let pendingZoneLayer = null;
@@ -515,7 +524,7 @@ function openMediaModal(entityType, entityId) {
   activeMediaEntity = { entityType, entityId: String(entityId), entity };
   mediaDialogTitle.textContent = entityType === "marker" ? "Images du lieu" : "Images de la zone";
   mediaEntityLabel.textContent = entity.name || "Fiche sans nom";
-  mediaUploadBlock.hidden = !isAdmin;
+  mediaUploadBlock.hidden = !adminToolsEnabled();
   mediaModal.hidden = false;
   renderMediaGallery();
 }
@@ -556,7 +565,7 @@ function renderMediaGallery() {
 
     card.append(imageButton, info);
 
-    if (isAdmin) {
+    if (adminToolsEnabled()) {
       const actions = document.createElement("div");
       actions.className = "media-card-actions";
       if (!media.is_primary) {
@@ -628,7 +637,7 @@ async function compressImage(file) {
 }
 
 async function setPrimaryMedia(media) {
-  if (!isAdmin) return;
+  if (!adminToolsEnabled()) return;
   await supabaseClient
     .from("atlas_media")
     .update({ is_primary: false })
@@ -649,7 +658,7 @@ async function setPrimaryMedia(media) {
 }
 
 async function deleteMedia(media) {
-  if (!isAdmin || !window.confirm("Supprimer définitivement cette image ?")) return;
+  if (!adminToolsEnabled() || !window.confirm("Supprimer définitivement cette image ?")) return;
   const { error: storageError } = await supabaseClient.storage.from("atlas-media").remove([media.storage_path]);
   if (storageError) {
     showNotification(`Suppression du fichier impossible : ${storageError.message}`, "error");
@@ -678,7 +687,7 @@ mediaFileInput.addEventListener("change", () => {
 });
 
 mediaUploadButton.addEventListener("click", async () => {
-  if (!isAdmin || !activeMediaEntity) return;
+  if (!adminToolsEnabled() || !activeMediaEntity) return;
   const file = mediaFileInput.files?.[0];
   if (!file) {
     showNotification("Choisis d’abord une image.", "error");
@@ -841,25 +850,74 @@ changeNameButton.addEventListener("click", () => {
   );
 });
 
+function adminToolsEnabled() {
+  return isAdmin && !visitorMode;
+}
+
+function setAdminDrawer(open) {
+  adminDrawerOpen = Boolean(open);
+  adminDrawer.classList.toggle("is-open", adminDrawerOpen);
+  adminDrawerToggle.classList.toggle("is-hidden", adminDrawerOpen);
+  adminDrawerToggle.setAttribute("aria-expanded", String(adminDrawerOpen));
+}
+
+function setVisitorMode(enabled, { collapse = true } = {}) {
+  visitorMode = isAdmin && Boolean(enabled);
+  adminModeInput.checked = !visitorMode;
+  visitorModeInput.checked = visitorMode;
+  visitorModeBadge.hidden = !visitorMode;
+  document.body.classList.toggle("visitor-mode-active", visitorMode);
+
+  if (visitorMode && collapse) {
+    setAdminDrawer(false);
+  }
+
+  refreshInterface();
+  renderZones();
+  renderMediaGallery();
+}
+
+adminDrawerToggle.addEventListener("click", () => setAdminDrawer(true));
+adminDrawerClose.addEventListener("click", () => setAdminDrawer(false));
+adminModeInput.addEventListener("change", () => {
+  if (adminModeInput.checked) setVisitorMode(false, { collapse: false });
+});
+visitorModeInput.addEventListener("change", () => {
+  if (visitorModeInput.checked) setVisitorMode(true);
+});
+showHistoryInput.addEventListener("change", () => {
+  showHistories = showHistoryInput.checked;
+  sessionStorage.setItem("atlas_show_histories", String(showHistories));
+  document.body.classList.toggle("show-admin-histories", adminToolsEnabled() && showHistories);
+  refreshInterface();
+  renderZones();
+});
+
 /* =========================================================
    ADMINISTRATION
    ========================================================= */
 
 function updateAdminInterface() {
-  if (!isAdmin && editingZoneId) {
-    cancelPendingZone();
-  }
-
-  if (!isAdmin && geometryEditingZoneId) {
-    cancelZoneGeometryEdit();
-  }
-
   adminLoginForm.hidden = isAdmin;
   adminSession.hidden = !isAdmin;
   adminBadge.textContent = isAdmin ? "Admin connecté" : "Déconnecté";
   adminBadge.classList.toggle("is-connected", isAdmin);
-  adminEmailDisplay.textContent = adminUser?.email || "";
+
+  if (!isAdmin) {
+    visitorMode = false;
+    adminModeInput.checked = true;
+    visitorModeInput.checked = false;
+    visitorModeBadge.hidden = true;
+    document.body.classList.remove("visitor-mode-active", "show-admin-histories");
+  } else {
+    visitorModeBadge.hidden = !visitorMode;
+    document.body.classList.toggle("visitor-mode-active", visitorMode);
+    document.body.classList.toggle("show-admin-histories", adminToolsEnabled() && showHistories);
+  }
+
   refreshInterface();
+  renderZones();
+  renderMediaGallery();
 }
 
 async function checkAdminSession() {
@@ -910,6 +968,7 @@ adminLoginForm.addEventListener("submit", async (event) => {
   }
 
   isAdmin = true;
+  visitorMode = false;
   adminPasswordInput.value = "";
   updateAdminInterface();
   showNotification("Connexion administrateur réussie.");
@@ -919,6 +978,7 @@ adminLogoutButton.addEventListener("click", async () => {
   await supabaseClient.auth.signOut();
   adminUser = null;
   isAdmin = false;
+  visitorMode = false;
   movingMarkerId = null;
   updateAdminInterface();
   showNotification("Administrateur déconnecté.");
@@ -950,7 +1010,7 @@ async function updateMarkerRecord(id, changes) {
 }
 
 async function editMarker(identifier) {
-  if (!isAdmin) return;
+  if (!adminToolsEnabled()) return;
   const place = findPlaceByIdentifier(identifier);
   if (!place) return;
 
@@ -1001,7 +1061,7 @@ async function editMarker(identifier) {
 }
 
 function startMovingMarker(identifier) {
-  if (!isAdmin) return;
+  if (!adminToolsEnabled()) return;
   const place = findPlaceByIdentifier(identifier);
   if (!place) return;
   movingMarkerId = place.id;
@@ -1012,7 +1072,7 @@ function startMovingMarker(identifier) {
 }
 
 async function deleteMarker(identifier) {
-  if (!isAdmin) return;
+  if (!adminToolsEnabled()) return;
   const place = findPlaceByIdentifier(identifier);
   if (!place) return;
 
@@ -1807,7 +1867,7 @@ function createPopupContent(place, identifier, favorite) {
         ${description}
       </div>
 
-      ${isAdmin ? `
+      ${adminToolsEnabled() ? `
         <div class="popup-admin-actions">
           <button type="button" data-admin-edit="${escapeHtml(identifier)}">Modifier</button>
           <button type="button" data-admin-move="${escapeHtml(identifier)}">Déplacer</button>
@@ -2239,8 +2299,8 @@ function cancelPendingZone(resetForm = true) {
     liveZoneStatus.classList.remove("location-selected");
   }
 
-  editSelectedZoneButton.hidden = !(isAdmin && selectedZoneId);
-  deleteSelectedZoneButton.hidden = !(isAdmin && selectedZoneId);
+  editSelectedZoneButton.hidden = !(adminToolsEnabled() && selectedZoneId);
+  deleteSelectedZoneButton.hidden = !(adminToolsEnabled() && selectedZoneId);
   updateZoneGeometryControls();
 }
 
@@ -2267,7 +2327,7 @@ function createZonePopup(zone) {
       </header>
       ${createPopupMedia("zone", zone.id)}
       <div class="popup-description">${description}</div>
-      ${isAdmin ? `<div class="popup-admin-actions zone-admin-actions"><button type="button" class="zone-edit-button" data-zone-edit="${zone.id}">Modifier les infos</button><button type="button" class="zone-shape-button" data-zone-shape-edit="${zone.id}">Modifier la forme</button><button type="button" data-media-open="zone" data-media-entity-id="${zone.id}">Images</button><button type="button" class="danger-button" data-zone-delete="${zone.id}">Supprimer la zone</button></div>` : ""}
+      ${adminToolsEnabled() ? `<div class="popup-admin-actions zone-admin-actions"><button type="button" class="zone-edit-button" data-zone-edit="${zone.id}">Modifier les infos</button><button type="button" class="zone-shape-button" data-zone-shape-edit="${zone.id}">Modifier la forme</button><button type="button" data-media-open="zone" data-media-entity-id="${zone.id}">Images</button><button type="button" class="danger-button" data-zone-delete="${zone.id}">Supprimer la zone</button></div>` : ""}
       <footer class="marker-popup-footer"><span>Ajoutée par <strong>${escapeHtml(zone.author || "Inconnu")}</strong></span></footer>
     </article>`;
 }
@@ -2311,7 +2371,7 @@ function showZoneForm() {
 }
 
 function enterZoneEditMode(zone, scrollToForm = false) {
-  if (!isAdmin || !zone) return;
+  if (!adminToolsEnabled() || !zone) return;
 
   if (pendingZoneLayer) {
     temporaryZoneLayer.removeLayer(pendingZoneLayer);
@@ -2368,18 +2428,18 @@ function selectZone(zoneId, openPopup = true) {
     if (openPopup) layer.openPopup();
   }
 
-  editSelectedZoneButton.hidden = !(isAdmin && selectedZoneId);
-  deleteSelectedZoneButton.hidden = !(isAdmin && selectedZoneId);
+  editSelectedZoneButton.hidden = !(adminToolsEnabled() && selectedZoneId);
+  deleteSelectedZoneButton.hidden = !(adminToolsEnabled() && selectedZoneId);
   updateZoneGeometryControls();
 
-  if (isAdmin && !pendingZoneLayer && !geometryEditingZoneId) {
+  if (adminToolsEnabled() && !pendingZoneLayer && !geometryEditingZoneId) {
     const selectedZone = zones.find((item) => String(item.id) === selectedZoneId);
     if (selectedZone) enterZoneEditMode(selectedZone, false);
   }
 }
 
 function updateZoneGeometryControls() {
-  const hasSelection = Boolean(isAdmin && selectedZoneId);
+  const hasSelection = Boolean(adminToolsEnabled() && selectedZoneId);
   const isEditingShape = Boolean(geometryEditingZoneId);
 
   editZoneShapeButton.hidden = !hasSelection || isEditingShape;
@@ -2390,7 +2450,7 @@ function updateZoneGeometryControls() {
 }
 
 function startZoneGeometryEdit(zoneId) {
-  if (!isAdmin) {
+  if (!adminToolsEnabled()) {
     showNotification("La modification de forme est réservée aux administrateurs.", "error");
     return;
   }
@@ -2431,7 +2491,7 @@ function startZoneGeometryEdit(zoneId) {
 }
 
 async function saveZoneGeometryEdit() {
-  if (!isAdmin || !geometryEditingZoneId || !geometryEditingLayer) return;
+  if (!adminToolsEnabled() || !geometryEditingZoneId || !geometryEditingLayer) return;
 
   const coordinates = serializeZoneCoordinates(geometryEditingLayer);
 
@@ -2551,8 +2611,8 @@ function renderZoneList() {
     zoneListElement.appendChild(button);
   });
 
-  editSelectedZoneButton.hidden = !(isAdmin && selectedZoneId);
-  deleteSelectedZoneButton.hidden = !(isAdmin && selectedZoneId);
+  editSelectedZoneButton.hidden = !(adminToolsEnabled() && selectedZoneId);
+  deleteSelectedZoneButton.hidden = !(adminToolsEnabled() && selectedZoneId);
 }
 
 function renderZones() {
@@ -2710,7 +2770,7 @@ zoneForm.addEventListener("submit", async (event) => {
 });
 
 async function deleteZone(id) {
-  if (!isAdmin) return;
+  if (!adminToolsEnabled()) return;
   if (geometryEditingZoneId) {
     showNotification("Enregistre ou annule d'abord la modification de forme.", "error");
     return;
@@ -2845,6 +2905,9 @@ supabaseClient
 async function initializeApplication() {
   initializePlayerName();
   loadFavorites();
+  showHistories = sessionStorage.getItem("atlas_show_histories") === "true";
+  showHistoryInput.checked = showHistories;
+  setAdminDrawer(false);
   await checkAdminSession();
   createCategoryOptions();
   createFilters();

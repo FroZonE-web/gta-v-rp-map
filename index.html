@@ -8,7 +8,7 @@
     content="width=device-width, initial-scale=1"
   >
 
-  <title>Atlas RP v0.8.0 — Carte GTA V</title>
+  <title>Atlas RP v0.8.1 — Carte GTA V</title>
 
   <link
     rel="stylesheet"
@@ -20,7 +20,7 @@
     href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css"
   >
 
-  <link rel="stylesheet" href="style.css?v=0.8.0">
+  <link rel="stylesheet" href="style.css?v=0.8.1">
 </head>
 
 <body>
@@ -28,7 +28,7 @@
     <header class="sidebar-header">
       <div>
         <h1>Atlas RP</h1>
-        <p class="subtitle">Carte collaborative GTA V · v0.8.0</p>
+        <p class="subtitle">Carte collaborative GTA V · v0.8.1</p>
       </div>
 
       <div class="player-box">
@@ -45,37 +45,6 @@
       </div>
     </header>
 
-
-    <section class="panel admin-panel">
-      <div class="panel-title-row">
-        <h2>Administration</h2>
-        <span id="admin-badge" class="admin-badge">Déconnecté</span>
-      </div>
-
-      <form id="admin-login-form">
-        <label class="field-label" for="admin-email">Email admin</label>
-        <input id="admin-email" type="email" autocomplete="username" required>
-
-        <label class="field-label" for="admin-password">Mot de passe</label>
-        <input id="admin-password" type="password" autocomplete="current-password" required>
-
-        <button id="admin-login-button" class="primary-button" type="submit">
-          Se connecter
-        </button>
-      </form>
-
-      <div id="admin-session" hidden>
-        <p class="admin-session-text">
-          Connecté : <strong id="admin-email-display"></strong>
-        </p>
-        <p class="panel-description">
-          Ouvre un marqueur pour le modifier, le déplacer ou le supprimer.
-        </p>
-        <button id="admin-logout-button" class="secondary-button" type="button">
-          Se déconnecter
-        </button>
-      </div>
-    </section>
 
     <section class="panel search-panel">
       <div class="panel-title-row">
@@ -364,6 +333,73 @@
     ></div>
   </aside>
 
+
+  <button
+    id="admin-drawer-toggle"
+    class="admin-drawer-toggle"
+    type="button"
+    aria-controls="admin-drawer"
+    aria-expanded="false"
+  >
+    <span class="admin-drawer-arrow">◀</span>
+    <span>Administration</span>
+  </button>
+
+  <aside id="admin-drawer" class="admin-drawer" aria-label="Panneau d’administration">
+    <header class="admin-drawer-header">
+      <div>
+        <h2>Administration</h2>
+        <span id="admin-badge" class="admin-badge">Déconnecté</span>
+      </div>
+      <button id="admin-drawer-close" class="admin-drawer-close" type="button" aria-label="Réduire le panneau">▶</button>
+    </header>
+
+    <div class="admin-drawer-content">
+      <form id="admin-login-form" class="admin-login-card">
+        <p class="panel-description">Connecte-toi avec ton compte administrateur Supabase.</p>
+
+        <label class="field-label" for="admin-email">Email admin</label>
+        <input id="admin-email" type="email" autocomplete="username" required>
+
+        <label class="field-label" for="admin-password">Mot de passe</label>
+        <input id="admin-password" type="password" autocomplete="current-password" required>
+
+        <button id="admin-login-button" class="primary-button" type="submit">Se connecter</button>
+      </form>
+
+      <div id="admin-session" hidden>
+        <div class="admin-connected-card">
+          <strong>Administrateur connecté</strong>
+          <span>Session sécurisée active</span>
+        </div>
+
+        <section class="admin-control-group">
+          <h3>Mode d’affichage</h3>
+          <label class="admin-mode-option">
+            <input id="admin-mode" name="atlas-mode" type="radio" value="admin" checked>
+            <span><strong>Administrateur</strong><small>Afficher les outils de gestion.</small></span>
+          </label>
+          <label class="admin-mode-option">
+            <input id="visitor-mode" name="atlas-mode" type="radio" value="visitor">
+            <span><strong>Visiteur</strong><small>Voir exactement l’interface d’un joueur.</small></span>
+          </label>
+        </section>
+
+        <section class="admin-control-group">
+          <h3>Affichage des fiches</h3>
+          <label class="admin-switch-row">
+            <input id="show-history" type="checkbox">
+            <span>Afficher les historiques dans les fiches</span>
+          </label>
+          <p class="admin-help">L’historique restera masqué par défaut. Cette option est prête pour la future timeline.</p>
+        </section>
+
+        <button id="admin-logout-button" class="secondary-button" type="button">Se déconnecter</button>
+      </div>
+    </div>
+  </aside>
+
+  <div id="visitor-mode-badge" class="visitor-mode-badge" hidden>👁 Mode visiteur</div>
   <main
     id="map"
     aria-label="Carte GTA V interactive"
@@ -376,6 +412,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script src="config.js"></script>
-  <script src="app.js?v=0.8.0"></script>
+  <script src="app.js?v=0.8.1"></script>
 </body>
 </html>
