@@ -8,7 +8,7 @@
     content="width=device-width, initial-scale=1"
   >
 
-  <title>Atlas RP v0.4.1 — Carte GTA V</title>
+  <title>Atlas RP v0.5 — Carte GTA V</title>
 
   <link
     rel="stylesheet"
@@ -28,7 +28,7 @@
     <header class="sidebar-header">
       <div>
         <h1>Atlas RP</h1>
-        <p class="subtitle">Carte collaborative GTA V · v0.4.1</p>
+        <p class="subtitle">Carte collaborative GTA V · v0.5</p>
       </div>
 
       <div class="player-box">
@@ -44,6 +44,38 @@
         </button>
       </div>
     </header>
+
+    <section class="panel admin-panel">
+      <div class="panel-title-row">
+        <h2>Administration</h2>
+        <span id="admin-status-badge" class="admin-status-badge">Hors ligne</span>
+      </div>
+
+      <p id="admin-status-text" class="panel-description">
+        Connecte-toi avec ton compte administrateur Supabase pour modifier, déplacer ou supprimer des lieux.
+      </p>
+
+      <form id="admin-login-form" class="admin-login-form">
+        <label class="field-label" for="admin-email">Email administrateur</label>
+        <input id="admin-email" type="email" autocomplete="username" required>
+
+        <label class="field-label" for="admin-password">Mot de passe</label>
+        <input id="admin-password" type="password" autocomplete="current-password" required>
+
+        <button id="admin-login-button" class="admin-button" type="submit">
+          Connexion administrateur
+        </button>
+      </form>
+
+      <div id="admin-connected-actions" hidden>
+        <p class="admin-connected-message">
+          ✅ Administrateur connecté
+        </p>
+        <button id="admin-logout-button" class="secondary-button" type="button">
+          Déconnexion
+        </button>
+      </div>
+    </section>
 
     <section class="panel search-panel">
       <div class="panel-title-row">
@@ -191,6 +223,42 @@
     id="map"
     aria-label="Carte GTA V interactive"
   ></main>
+
+
+  <div id="edit-marker-modal" class="modal-backdrop" hidden>
+    <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
+      <div class="modal-header">
+        <div>
+          <h2 id="edit-modal-title">Modifier le lieu</h2>
+          <p>Les changements seront enregistrés dans Supabase.</p>
+        </div>
+        <button id="edit-modal-close" class="modal-close-button" type="button" aria-label="Fermer">×</button>
+      </div>
+
+      <form id="edit-marker-form">
+        <input id="edit-marker-id" type="hidden">
+
+        <label class="field-label" for="edit-place-name">Nom du lieu</label>
+        <input id="edit-place-name" type="text" maxlength="100" required>
+
+        <label class="field-label" for="edit-place-category">Catégorie</label>
+        <select id="edit-place-category" required></select>
+
+        <div id="edit-subcategory-field" hidden>
+          <label class="field-label" for="edit-place-subcategory">Sous-catégorie</label>
+          <select id="edit-place-subcategory"></select>
+        </div>
+
+        <label class="field-label" for="edit-place-description">Description RP</label>
+        <textarea id="edit-place-description" maxlength="1000"></textarea>
+
+        <div class="modal-actions">
+          <button id="edit-modal-cancel" class="secondary-button" type="button">Annuler</button>
+          <button id="edit-modal-save" class="primary-button" type="submit">Enregistrer</button>
+        </div>
+      </form>
+    </section>
+  </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 

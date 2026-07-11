@@ -148,6 +148,63 @@ const favoritesOnlyCheckbox =
 const favoritesListContainer =
   document.getElementById("favorites-list");
 
+const adminStatusBadge =
+  document.getElementById("admin-status-badge");
+
+const adminStatusText =
+  document.getElementById("admin-status-text");
+
+const adminLoginForm =
+  document.getElementById("admin-login-form");
+
+const adminEmailInput =
+  document.getElementById("admin-email");
+
+const adminPasswordInput =
+  document.getElementById("admin-password");
+
+const adminLoginButton =
+  document.getElementById("admin-login-button");
+
+const adminConnectedActions =
+  document.getElementById("admin-connected-actions");
+
+const adminLogoutButton =
+  document.getElementById("admin-logout-button");
+
+const editMarkerModal =
+  document.getElementById("edit-marker-modal");
+
+const editMarkerForm =
+  document.getElementById("edit-marker-form");
+
+const editMarkerIdInput =
+  document.getElementById("edit-marker-id");
+
+const editPlaceNameInput =
+  document.getElementById("edit-place-name");
+
+const editPlaceCategorySelect =
+  document.getElementById("edit-place-category");
+
+const editSubcategoryField =
+  document.getElementById("edit-subcategory-field");
+
+const editPlaceSubcategorySelect =
+  document.getElementById("edit-place-subcategory");
+
+const editPlaceDescriptionInput =
+  document.getElementById("edit-place-description");
+
+const editModalCloseButton =
+  document.getElementById("edit-modal-close");
+
+const editModalCancelButton =
+  document.getElementById("edit-modal-cancel");
+
+const editModalSaveButton =
+  document.getElementById("edit-modal-save");
+
 /* =========================================================
    ÉTAT DE L’APPLICATION
    ========================================================= */
@@ -157,6 +214,9 @@ let pendingClick = null;
 let playerName = "";
 let currentSearch = "";
 let favoriteIds = new Set();
+let currentAdminUser = null;
+let isAdmin = false;
+let movingMarkerId = null;
 
 const markerInstances = new Map();
 
@@ -326,6 +386,262 @@ function showNotification(
   notificationTimeout = window.setTimeout(() => {
     notificationElement.hidden = true;
   }, 4000);
+}
+
+/* =========================================================
+   ADMINISTRATION SUPABASE
+   ========================================================= */
+
+function updateAdminInterface() {
+  adminLoginForm.hidden = isAdmin;
+  adminConnectedActions.hidden = !isAdmin;
+
+  adminStatusBadge.textContent = isAdmin ? "Admin" : "Hors ligne";
+  adminStatusBadge.classList.toggle("is-connected", isAdmin);
+
+  adminStatusText.textContent = isAdmin
+    ? `Compte connecté : ${currentAdminUser?.email || "administrateur"}`
+    : "Connecte-toi avec ton compte administrateur Supabase pour modifier, déplacer ou supprimer des lieux.";
+
+  refreshInterface();
+}
+
+async function verifyAdminStatus(user) {
+  currentAdminUser = user || null;
+  isAdmin = false;
+
+  if (user) {
+    const { data, error } = await supabaseClient.rpc("is_admin");
+
+    if (error) {
+      console.error("Vérification administrateur impossible :", error);
+      showNotification(`Vérification admin impossible : ${error.message}`, "error");
+    } else {
+      isAdmin = data === true;
+
+      if (!isAdmin) {
+        showNotification("Ce compte est connecté, mais il n'est pas déclaré administrateur.", "error");
+      }
+    }
+  }
+
+  updateAdminInterface();
+}
+
+async function initializeAdminAuthentication() {
+  const { data, error } = await supabaseClient.auth.getSession();
+
+  if (error) {
+    console.error("Lecture de la session admin impossible :", error);
+  }
+
+  await verifyAdminStatus(data?.session?.user || null);
+
+  supabaseClient.auth.onAuthStateChange((_event, session) => {
+    window.setTimeout(() => {
+      verifyAdminStatus(session?.user || null);
+    }, 0);
+  });
+}
+
+adminLoginForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  adminLoginButton.disabled = true;
+  adminLoginButton.textContent = "Connexion...";
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
+    email: adminEmailInput.value.trim(),
+    password: adminPasswordInput.value
+  });
+
+  adminLoginButton.disabled = false;
+  adminLoginButton.textContent = "Connexion administrateur";
+
+  if (error) {
+    showNotification(`Connexion impossible : ${error.message}`, "error");
+    return;
+  }
+
+  adminPasswordInput.value = "";
+  await verifyAdminStatus(data.user);
+
+  if (isAdmin) {
+    showNotification("Connexion administrateur réussie.");
+  }
+});
+
+adminLogoutButton.addEventListener("click", async () => {
+  const { error } = await supabaseClient.auth.signOut();
+
+  if (error) {
+    showNotification(`Déconnexion impossible : ${error.message}`, "error");
+    return;
+  }
+
+  currentAdminUser = null;
+  isAdmin = false;
+  movingMarkerId = null;
+  updateAdminInterface();
+  showNotification("Administrateur déconnecté.");
+});
+
+function populateEditCategoryOptions(selectedCategory) {
+  editPlaceCategorySelect.innerHTML = "";
+
+  for (const [categoryKey, categoryData] of Object.entries(CATEGORIES)) {
+    const option = document.createElement("option");
+    option.value = categoryKey;
+    option.textContent = `${categoryData.icon} ${categoryData.label}`;
+    option.selected = categoryKey === selectedCategory;
+    editPlaceCategorySelect.appendChild(option);
+  }
+}
+
+function updateEditSubcategoryOptions(selectedSubcategory = "") {
+  const categoryData = CATEGORIES[editPlaceCategorySelect.value];
+  editPlaceSubcategorySelect.innerHTML = "";
+
+  if (!categoryData || categoryData.subcategories.length === 0) {
+    editSubcategoryField.hidden = true;
+    editPlaceSubcategorySelect.required = false;
+    return;
+  }
+
+  editSubcategoryField.hidden = false;
+  editPlaceSubcategorySelect.required = true;
+
+  for (const subcategory of categoryData.subcategories) {
+    const option = document.createElement("option");
+    option.value = subcategory;
+    option.textContent = subcategory;
+    option.selected = subcategory === selectedSubcategory;
+    editPlaceSubcategorySelect.appendChild(option);
+  }
+}
+
+function openEditMarkerModal(markerId) {
+  if (!isAdmin) return;
+
+  const place = places.find((item) => String(item.id) === String(markerId));
+  if (!place) {
+    showNotification("Lieu introuvable.", "error");
+    return;
+  }
+
+  editMarkerIdInput.value = place.id;
+  editPlaceNameInput.value = place.name || "";
+  editPlaceDescriptionInput.value = place.description || "";
+  populateEditCategoryOptions(place.category);
+  updateEditSubcategoryOptions(place.subcategory || "");
+  editMarkerModal.hidden = false;
+  editPlaceNameInput.focus();
+}
+
+function closeEditMarkerModal() {
+  editMarkerModal.hidden = true;
+  editMarkerForm.reset();
+}
+
+editPlaceCategorySelect.addEventListener("change", () => {
+  updateEditSubcategoryOptions();
+});
+
+editModalCloseButton.addEventListener("click", closeEditMarkerModal);
+editModalCancelButton.addEventListener("click", closeEditMarkerModal);
+editMarkerModal.addEventListener("click", (event) => {
+  if (event.target === editMarkerModal) closeEditMarkerModal();
+});
+
+editMarkerForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (!isAdmin) return;
+
+  const category = editPlaceCategorySelect.value;
+  const categoryData = CATEGORIES[category];
+  const subcategory = categoryData?.subcategories.length
+    ? editPlaceSubcategorySelect.value
+    : null;
+
+  editModalSaveButton.disabled = true;
+  editModalSaveButton.textContent = "Enregistrement...";
+
+  const { error } = await supabaseClient
+    .from("markers")
+    .update({
+      name: editPlaceNameInput.value.trim(),
+      category,
+      subcategory,
+      description: editPlaceDescriptionInput.value.trim()
+    })
+    .eq("id", editMarkerIdInput.value);
+
+  editModalSaveButton.disabled = false;
+  editModalSaveButton.textContent = "Enregistrer";
+
+  if (error) {
+    showNotification(`Modification impossible : ${error.message}`, "error");
+    return;
+  }
+
+  closeEditMarkerModal();
+  await loadMarkers();
+  showNotification("Lieu modifié.");
+});
+
+async function deleteMarker(markerId) {
+  if (!isAdmin) return;
+
+  const place = places.find((item) => String(item.id) === String(markerId));
+  const confirmed = window.confirm(`Supprimer définitivement « ${place?.name || "ce lieu"} » ?`);
+  if (!confirmed) return;
+
+  const { error } = await supabaseClient
+    .from("markers")
+    .delete()
+    .eq("id", markerId);
+
+  if (error) {
+    showNotification(`Suppression impossible : ${error.message}`, "error");
+    return;
+  }
+
+  favoriteIds.delete(String(markerId));
+  saveFavorites();
+  map.closePopup();
+  await loadMarkers();
+  showNotification("Lieu supprimé.");
+}
+
+function startMovingMarker(markerId) {
+  if (!isAdmin) return;
+
+  movingMarkerId = String(markerId);
+  map.closePopup();
+  locationStatus.textContent = "Mode déplacement admin : clique sur le nouvel emplacement du marqueur.";
+  locationStatus.classList.add("location-selected", "admin-moving");
+  showNotification("Clique maintenant sur la nouvelle position du marqueur.");
+}
+
+async function finishMovingMarker(latlng) {
+  const markerId = movingMarkerId;
+  movingMarkerId = null;
+
+  const { error } = await supabaseClient
+    .from("markers")
+    .update({ lat: latlng.lat, lng: latlng.lng })
+    .eq("id", markerId);
+
+  locationStatus.textContent = "Clique sur la carte pour choisir un emplacement.";
+  locationStatus.classList.remove("location-selected", "admin-moving");
+
+  if (error) {
+    showNotification(`Déplacement impossible : ${error.message}`, "error");
+    return;
+  }
+
+  await loadMarkers();
+  showNotification("Marqueur déplacé.");
 }
 
 /* =========================================================
@@ -1122,6 +1438,16 @@ function createPopupContent(place, identifier, favorite) {
         ).toLocaleString("fr-FR")
       : "Date inconnue";
 
+  const adminActions = isAdmin
+    ? `
+      <div class="popup-admin-actions">
+        <button type="button" class="popup-admin-button" data-admin-action="edit" data-marker-id="${escapeHtml(identifier)}">Modifier</button>
+        <button type="button" class="popup-admin-button" data-admin-action="move" data-marker-id="${escapeHtml(identifier)}">Déplacer</button>
+        <button type="button" class="popup-admin-button danger" data-admin-action="delete" data-marker-id="${escapeHtml(identifier)}">Supprimer</button>
+      </div>
+    `
+    : "";
+
   return `
     <article class="marker-popup">
       <header class="marker-popup-header">
@@ -1155,6 +1481,8 @@ function createPopupContent(place, identifier, favorite) {
       <div class="popup-description">
         ${description}
       </div>
+
+      ${adminActions}
 
       <footer class="marker-popup-footer">
         <span>
@@ -1234,17 +1562,26 @@ function renderMarkers() {
 }
 
 map.on("popupopen", (event) => {
-  const button = event.popup
-    .getElement()
-    ?.querySelector("[data-favorite-id]");
+  const popupElement = event.popup.getElement();
+  if (!popupElement) return;
 
-  if (!button) {
-    return;
+  const favoriteButton = popupElement.querySelector("[data-favorite-id]");
+  if (favoriteButton) {
+    favoriteButton.addEventListener("click", () => {
+      toggleFavorite(favoriteButton.dataset.favoriteId);
+      map.closePopup();
+    });
   }
 
-  button.addEventListener("click", () => {
-    toggleFavorite(button.dataset.favoriteId);
-    map.closePopup();
+  popupElement.querySelectorAll("[data-admin-action]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const markerId = button.dataset.markerId;
+      const action = button.dataset.adminAction;
+
+      if (action === "edit") openEditMarkerModal(markerId);
+      if (action === "move") startMovingMarker(markerId);
+      if (action === "delete") deleteMarker(markerId);
+    });
   });
 });
 
@@ -1332,7 +1669,12 @@ async function addMarker(place) {
    SÉLECTION DE L’EMPLACEMENT
    ========================================================= */
 
-map.on("click", (event) => {
+map.on("click", async (event) => {
+  if (movingMarkerId) {
+    await finishMovingMarker(event.latlng);
+    return;
+  }
+
   pendingClick = event.latlng;
 
   locationStatus.textContent =
@@ -1539,6 +1881,7 @@ async function initializeApplication() {
   clearSearchButton.hidden = !currentSearch;
 
   await loadMarkers();
+  await initializeAdminAuthentication();
 
   /*
    * Force une synchronisation finale après le chargement
