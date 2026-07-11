@@ -56,12 +56,12 @@ const CATEGORIES = {
     label: "Gang",
     icon: "👥",
     subcategories: [
-      "B2MC",
-      "Mirrage",
       "Obsidian",
       "Glory",
+      "B2MC",
+      "G7",
       "88ers",
-      "G7"
+      "Mirrage"
     ]
   },
 
@@ -82,6 +82,25 @@ const CATEGORIES = {
     icon: "📍",
     subcategories: []
   }
+};
+
+const ZONE_COLORS = {
+  gang: {
+    Obsidian: "#111111",
+    Glory: "#FFFFFF",
+    B2MC: "#6F4E37",
+    G7: "#4FC3F7",
+    "88ers": "#39FF14",
+    Mirrage: "#D50000"
+  },
+  production: {
+    Zeed: "#228B22",
+    Viande: "#8A0303",
+    Champignons: "#0F6A73"
+  },
+  habitation: { default: "#C792EA" },
+  zone_interdite: { default: "#FF8C00" },
+  autre: { default: "#708090" }
 };
 
 /* =========================================================
@@ -157,6 +176,19 @@ const adminSession = document.getElementById("admin-session");
 const adminEmailDisplay = document.getElementById("admin-email-display");
 const adminLogoutButton = document.getElementById("admin-logout-button");
 
+const zoneForm = document.getElementById("zone-form");
+const zoneNameInput = document.getElementById("zone-name");
+const zoneCategorySelect = document.getElementById("zone-category");
+const zoneSubcategoryField = document.getElementById("zone-subcategory-field");
+const zoneSubcategorySelect = document.getElementById("zone-subcategory");
+const zoneDescriptionInput = document.getElementById("zone-description");
+const zoneStatus = document.getElementById("zone-status");
+const zoneColorPreview = document.getElementById("zone-color-preview");
+const saveZoneButton = document.getElementById("save-zone-button");
+const cancelZoneButton = document.getElementById("cancel-zone-button");
+const showZonesCheckbox = document.getElementById("show-zones");
+const zoneCountElement = document.getElementById("zone-count");
+
 /* =========================================================
    ÉTAT DE L’APPLICATION
    ========================================================= */
@@ -169,8 +201,12 @@ let favoriteIds = new Set();
 let adminUser = null;
 let isAdmin = false;
 let movingMarkerId = null;
+let zones = [];
+let pendingZoneLayer = null;
+let isDrawingZone = false;
 
 const markerInstances = new Map();
+const zoneInstances = new Map();
 
 /* =========================================================
    CRÉATION DE LA CARTE
@@ -193,28 +229,40 @@ map.fitBounds(MAP_BOUNDS);
 
 const markersLayer = L.layerGroup().addTo(map);
 
-const drawnItems = new L.FeatureGroup();
-map.addLayer(drawnItems);
+const zonesLayer = L.layerGroup().addTo(map);
+const temporaryZoneLayer = L.layerGroup().addTo(map);
 
 const drawControl = new L.Control.Draw({
   draw: {
     marker: false,
     circle: false,
     circlemarker: false,
-    polyline: true,
-    polygon: true,
-    rectangle: true
+    polyline: false,
+    polygon: {
+      allowIntersection: false,
+      showArea: true,
+      shapeOptions: { color: "#3273ea", weight: 3, fillOpacity: 0.22 }
+    },
+    rectangle: {
+      shapeOptions: { color: "#3273ea", weight: 3, fillOpacity: 0.22 }
+    }
   },
-
-  edit: {
-    featureGroup: drawnItems
-  }
+  edit: false
 });
 
 map.addControl(drawControl);
-
+map.on(L.Draw.Event.DRAWSTART, () => { isDrawingZone = true; });
+map.on(L.Draw.Event.DRAWSTOP, () => { window.setTimeout(() => { isDrawingZone = false; }, 100); });
 map.on(L.Draw.Event.CREATED, (event) => {
-  drawnItems.addLayer(event.layer);
+  cancelPendingZone(false);
+  pendingZoneLayer = event.layer;
+  temporaryZoneLayer.addLayer(pendingZoneLayer);
+  zoneForm.hidden = false;
+  zoneStatus.textContent = "Forme prête : complète les informations puis enregistre.";
+  zoneStatus.classList.add("location-selected");
+  updateZoneSubcategorySelect();
+  applyPendingZoneStyle();
+  zoneNameInput.focus();
 });
 
 /* =========================================================
@@ -1458,6 +1506,10 @@ map.on("popupopen", (event) => {
   popupElement?.querySelector("[data-admin-delete]")?.addEventListener("click", (e) => {
     deleteMarker(e.currentTarget.dataset.adminDelete);
   });
+
+  popupElement?.querySelector("[data-zone-delete]")?.addEventListener("click", (e) => {
+    deleteZone(e.currentTarget.dataset.zoneDelete);
+  });
 });
 
 function refreshInterface() {
@@ -1545,6 +1597,8 @@ async function addMarker(place) {
    ========================================================= */
 
 map.on("click", async (event) => {
+  if (isDrawingZone || pendingZoneLayer) return;
+
   if (movingMarkerId !== null) {
     const markerId = movingMarkerId;
     movingMarkerId = null;
@@ -1669,6 +1723,190 @@ placeForm.addEventListener(
 );
 
 /* =========================================================
+   POLYZONES PERSISTANTES
+   ========================================================= */
+
+function getZoneSubcategories(category) {
+  if (category === "gang") return CATEGORIES.gang.subcategories;
+  if (category === "production") return CATEGORIES.production.subcategories;
+  return [];
+}
+
+function getZoneColor(category, subcategory) {
+  const palette = ZONE_COLORS[category] || ZONE_COLORS.autre;
+  return palette[subcategory] || palette.default || "#708090";
+}
+
+function updateZoneSubcategorySelect() {
+  const values = getZoneSubcategories(zoneCategorySelect.value);
+  zoneSubcategorySelect.innerHTML = "";
+
+  if (values.length === 0) {
+    zoneSubcategoryField.hidden = true;
+    zoneSubcategorySelect.required = false;
+  } else {
+    zoneSubcategoryField.hidden = false;
+    zoneSubcategorySelect.required = true;
+    values.forEach((value) => {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = value;
+      zoneSubcategorySelect.appendChild(option);
+    });
+  }
+
+  updateZoneColorPreview();
+  applyPendingZoneStyle();
+}
+
+function updateZoneColorPreview() {
+  const color = getZoneColor(zoneCategorySelect.value, zoneSubcategorySelect.value);
+  zoneColorPreview.style.backgroundColor = color;
+  zoneColorPreview.style.borderColor = color.toUpperCase() === "#FFFFFF" ? "#7b8491" : color;
+}
+
+function zoneStyle(zone) {
+  return {
+    color: zone.color || getZoneColor(zone.category, zone.subcategory),
+    weight: 3,
+    opacity: 0.95,
+    fillColor: zone.color || getZoneColor(zone.category, zone.subcategory),
+    fillOpacity: 0.24
+  };
+}
+
+function applyPendingZoneStyle() {
+  if (!pendingZoneLayer?.setStyle) return;
+  pendingZoneLayer.setStyle(zoneStyle({
+    category: zoneCategorySelect.value,
+    subcategory: zoneSubcategorySelect.value,
+    color: getZoneColor(zoneCategorySelect.value, zoneSubcategorySelect.value)
+  }));
+}
+
+function cancelPendingZone(resetForm = true) {
+  if (pendingZoneLayer) temporaryZoneLayer.removeLayer(pendingZoneLayer);
+  pendingZoneLayer = null;
+  zoneForm.hidden = true;
+  zoneStatus.textContent = "Dessine une forme avec la barre d’outils de la carte.";
+  zoneStatus.classList.remove("location-selected");
+  if (resetForm) zoneForm.reset();
+}
+
+function serializeZoneCoordinates(layer) {
+  const latLngs = layer.getLatLngs();
+  const ring = Array.isArray(latLngs[0]) ? latLngs[0] : latLngs;
+  return ring.map((point) => [Number(point.lat), Number(point.lng)]);
+}
+
+function createZonePopup(zone) {
+  const category = getCategoryData(zone.category);
+  const description = zone.description
+    ? escapeHtml(zone.description).replaceAll("\n", "<br>")
+    : "Aucune description.";
+
+  return `
+    <article class="marker-popup zone-popup">
+      <header class="marker-popup-header" style="border-left: 6px solid ${escapeHtml(zone.color)}">
+        <span class="marker-popup-icon">${category.icon}</span>
+        <div class="marker-popup-title">
+          <h3>${escapeHtml(zone.name)}</h3>
+          <p>${escapeHtml(category.label)}${zone.subcategory ? ` · ${escapeHtml(zone.subcategory)}` : ""}</p>
+        </div>
+      </header>
+      <div class="popup-description">${description}</div>
+      ${isAdmin ? `<div class="popup-admin-actions zone-admin-actions"><button type="button" class="danger-button" data-zone-delete="${zone.id}">Supprimer la zone</button></div>` : ""}
+      <footer class="marker-popup-footer"><span>Ajoutée par <strong>${escapeHtml(zone.author || "Inconnu")}</strong></span></footer>
+    </article>`;
+}
+
+function renderZones() {
+  zonesLayer.clearLayers();
+  zoneInstances.clear();
+  zoneCountElement.textContent = `${zones.length} zone${zones.length > 1 ? "s" : ""}`;
+  if (!showZonesCheckbox.checked) return;
+
+  zones.forEach((zone) => {
+    if (!Array.isArray(zone.coordinates) || zone.coordinates.length < 3) return;
+    const polygon = L.polygon(zone.coordinates, zoneStyle(zone));
+    polygon.bindPopup(createZonePopup(zone), { maxWidth: 340 });
+    polygon.bindTooltip(escapeHtml(zone.name), { permanent: false, direction: "center", className: "zone-tooltip" });
+    polygon.addTo(zonesLayer);
+    zoneInstances.set(String(zone.id), polygon);
+  });
+}
+
+async function loadZones() {
+  const { data, error } = await supabaseClient.from("zones").select("*").order("created_at", { ascending: true });
+  if (error) {
+    console.error("Erreur chargement zones :", error);
+    showNotification(`Impossible de charger les zones : ${error.message}`, "error");
+    return;
+  }
+  zones = Array.isArray(data) ? data : [];
+  renderZones();
+}
+
+zoneCategorySelect.addEventListener("change", updateZoneSubcategorySelect);
+zoneSubcategorySelect.addEventListener("change", () => {
+  updateZoneColorPreview();
+  applyPendingZoneStyle();
+});
+showZonesCheckbox.addEventListener("change", renderZones);
+cancelZoneButton.addEventListener("click", () => cancelPendingZone());
+
+zoneForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (!pendingZoneLayer) {
+    showNotification("Dessine d’abord une zone sur la carte.", "error");
+    return;
+  }
+
+  const category = zoneCategorySelect.value;
+  const subcategory = zoneSubcategoryField.hidden ? null : zoneSubcategorySelect.value;
+  const payload = {
+    name: zoneNameInput.value.trim(),
+    description: zoneDescriptionInput.value.trim(),
+    category,
+    subcategory,
+    color: getZoneColor(category, subcategory),
+    coordinates: serializeZoneCoordinates(pendingZoneLayer),
+    author: playerName,
+    created_by: adminUser?.id || null
+  };
+
+  saveZoneButton.disabled = true;
+  saveZoneButton.textContent = "Enregistrement...";
+  const { error } = await supabaseClient.from("zones").insert([payload]);
+  saveZoneButton.disabled = false;
+  saveZoneButton.textContent = "Enregistrer la zone";
+
+  if (error) {
+    console.error("Erreur ajout zone :", error);
+    showNotification(`Impossible d’ajouter la zone : ${error.message}`, "error");
+    return;
+  }
+
+  cancelPendingZone();
+  showNotification(`La zone « ${payload.name} » a été ajoutée.`);
+  await loadZones();
+});
+
+async function deleteZone(id) {
+  if (!isAdmin) return;
+  const zone = zones.find((item) => String(item.id) === String(id));
+  if (!zone || !window.confirm(`Supprimer définitivement la zone « ${zone.name} » ?`)) return;
+  const { error } = await supabaseClient.from("zones").delete().eq("id", zone.id);
+  if (error) {
+    showNotification(`Suppression impossible : ${error.message}`, "error");
+    return;
+  }
+  map.closePopup();
+  showNotification("Zone supprimée.");
+  await loadZones();
+}
+
+/* =========================================================
    EXPORT JSON
    ========================================================= */
 
@@ -1749,6 +1987,15 @@ supabaseClient
     );
   });
 
+supabaseClient
+  .channel("zones-realtime")
+  .on(
+    "postgres_changes",
+    { event: "*", schema: "public", table: "zones" },
+    () => loadZones()
+  )
+  .subscribe((status) => console.log("Statut zones Realtime :", status));
+
 /* =========================================================
    DÉMARRAGE
    ========================================================= */
@@ -1759,6 +2006,7 @@ async function initializeApplication() {
   await checkAdminSession();
   createCategoryOptions();
   createFilters();
+  updateZoneSubcategorySelect();
 
   /*
    * Prend immédiatement en compte une valeur de recherche
@@ -1767,7 +2015,7 @@ async function initializeApplication() {
   currentSearch = normalizeText(placeSearchInput.value);
   clearSearchButton.hidden = !currentSearch;
 
-  await loadMarkers();
+  await Promise.all([loadMarkers(), loadZones()]);
 
   /*
    * Force une synchronisation finale après le chargement

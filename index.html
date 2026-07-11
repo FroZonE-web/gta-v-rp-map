@@ -8,7 +8,7 @@
     content="width=device-width, initial-scale=1"
   >
 
-  <title>Atlas RP v0.5 — Carte GTA V</title>
+  <title>Atlas RP v0.7 — Carte GTA V</title>
 
   <link
     rel="stylesheet"
@@ -28,7 +28,7 @@
     <header class="sidebar-header">
       <div>
         <h1>Atlas RP</h1>
-        <p class="subtitle">Carte collaborative GTA V · v0.5</p>
+        <p class="subtitle">Carte collaborative GTA V · v0.7</p>
       </div>
 
       <div class="player-box">
@@ -194,6 +194,59 @@
           Ajouter le marqueur
         </button>
       </form>
+    </section>
+
+
+    <section class="panel zone-panel">
+      <div class="panel-title-row">
+        <h2>Polyzones</h2>
+        <span id="zone-count" class="marker-count">0 zone</span>
+      </div>
+
+      <p class="panel-description">
+        Utilise l’outil polygone ou rectangle sur la carte, puis complète le formulaire. Tout le monde peut créer une zone ; seuls les admins peuvent la supprimer.
+      </p>
+
+      <p id="zone-status" class="location-status">
+        Dessine une forme avec la barre d’outils de la carte.
+      </p>
+
+      <form id="zone-form" hidden>
+        <label class="field-label" for="zone-name">Nom de la zone</label>
+        <input id="zone-name" type="text" maxlength="100" placeholder="Exemple : Territoire Obsidian" required>
+
+        <label class="field-label" for="zone-category">Catégorie</label>
+        <select id="zone-category" required>
+          <option value="gang">👥 Gang</option>
+          <option value="production">🌱 Production</option>
+          <option value="habitation">🏠 Habitation</option>
+          <option value="zone_interdite">⛔ Zone interdite</option>
+          <option value="autre">📍 Autre</option>
+        </select>
+
+        <div id="zone-subcategory-field">
+          <label class="field-label" for="zone-subcategory">Sous-catégorie</label>
+          <select id="zone-subcategory" required></select>
+        </div>
+
+        <label class="field-label" for="zone-description">Description</label>
+        <textarea id="zone-description" maxlength="1000" placeholder="Informations utiles sur cette zone..."></textarea>
+
+        <div class="zone-preview-row">
+          <span>Aperçu couleur</span>
+          <span id="zone-color-preview" class="zone-color-preview"></span>
+        </div>
+
+        <div class="zone-form-actions">
+          <button id="save-zone-button" class="primary-button" type="submit">Enregistrer la zone</button>
+          <button id="cancel-zone-button" class="secondary-button" type="button">Annuler</button>
+        </div>
+      </form>
+
+      <label class="favorite-only-toggle zone-toggle">
+        <input id="show-zones" type="checkbox" checked>
+        <span>Afficher les polyzones</span>
+      </label>
     </section>
 
     <section class="panel">
