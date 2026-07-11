@@ -189,6 +189,7 @@ const cancelZoneButton = document.getElementById("cancel-zone-button");
 const showZonesCheckbox = document.getElementById("show-zones");
 const zoneCountElement = document.getElementById("zone-count");
 const zoneListElement = document.getElementById("zone-list");
+const editSelectedZoneButton = document.getElementById("edit-selected-zone");
 const deleteSelectedZoneButton = document.getElementById("delete-selected-zone");
 
 /* =========================================================
@@ -207,6 +208,7 @@ let zones = [];
 let pendingZoneLayer = null;
 let isDrawingZone = false;
 let selectedZoneId = null;
+let editingZoneId = null;
 
 const markerInstances = new Map();
 const zoneInstances = new Map();
@@ -518,6 +520,10 @@ changeNameButton.addEventListener("click", () => {
    ========================================================= */
 
 function updateAdminInterface() {
+  if (!isAdmin && editingZoneId) {
+    cancelPendingZone();
+  }
+
   adminLoginForm.hidden = isAdmin;
   adminSession.hidden = !isAdmin;
   adminBadge.textContent = isAdmin ? "Admin connecté" : "Déconnecté";
@@ -1575,6 +1581,11 @@ map.on("popupopen", (event) => {
     deleteMarker(e.currentTarget.dataset.adminDelete);
   });
 
+  popupElement?.querySelector("[data-zone-edit]")?.addEventListener("click", (e) => {
+    const zone = zones.find((item) => String(item.id) === String(e.currentTarget.dataset.zoneEdit));
+    if (zone) enterZoneEditMode(zone, true);
+  });
+
   popupElement?.querySelector("[data-zone-delete]")?.addEventListener("click", (e) => {
     deleteZone(e.currentTarget.dataset.zoneDelete);
   });
@@ -1585,6 +1596,7 @@ function refreshInterface() {
   renderSearchResults();
   renderFavorites();
   updateVisibleMarkerCount();
+  renderZones();
 }
 
 /* =========================================================
@@ -1877,6 +1889,9 @@ function cancelPendingZone(resetForm = true) {
       "Dessine une forme avec la barre d’outils de la carte.";
     liveZoneStatus.classList.remove("location-selected");
   }
+
+  editSelectedZoneButton.hidden = !(isAdmin && selectedZoneId);
+  deleteSelectedZoneButton.hidden = !(isAdmin && selectedZoneId);
 }
 
 function serializeZoneCoordinates(layer) {
@@ -1901,9 +1916,83 @@ function createZonePopup(zone) {
         </div>
       </header>
       <div class="popup-description">${description}</div>
-      ${isAdmin ? `<div class="popup-admin-actions zone-admin-actions"><button type="button" class="danger-button" data-zone-delete="${zone.id}">Supprimer la zone</button></div>` : ""}
+      ${isAdmin ? `<div class="popup-admin-actions zone-admin-actions"><button type="button" data-zone-edit="${zone.id}">Modifier</button><button type="button" class="danger-button" data-zone-delete="${zone.id}">Supprimer la zone</button></div>` : ""}
       <footer class="marker-popup-footer"><span>Ajoutée par <strong>${escapeHtml(zone.author || "Inconnu")}</strong></span></footer>
     </article>`;
+}
+
+function passesZoneFilters(zone) {
+  const categoryCheckbox = document.querySelector(
+    `.category-filter[value="${zone.category}"]`
+  );
+
+  if (!categoryCheckbox || !categoryCheckbox.checked) {
+    return false;
+  }
+
+  const categoryData = CATEGORIES[zone.category];
+
+  if (!categoryData || categoryData.subcategories.length === 0) {
+    return true;
+  }
+
+  if (!zone.subcategory) {
+    return true;
+  }
+
+  const subcategoryCheckbox = Array.from(
+    document.querySelectorAll(
+      `.subcategory-filter[data-category="${zone.category}"]`
+    )
+  ).find((checkbox) => checkbox.value === zone.subcategory);
+
+  return !subcategoryCheckbox || subcategoryCheckbox.checked;
+}
+
+function getVisibleZones() {
+  return zones.filter(passesZoneFilters);
+}
+
+function showZoneForm() {
+  zoneForm.hidden = false;
+  zoneForm.removeAttribute("hidden");
+  zoneForm.style.display = "block";
+}
+
+function enterZoneEditMode(zone, scrollToForm = false) {
+  if (!isAdmin || !zone) return;
+
+  if (pendingZoneLayer) {
+    temporaryZoneLayer.removeLayer(pendingZoneLayer);
+    pendingZoneLayer = null;
+  }
+
+  editingZoneId = String(zone.id);
+  selectedZoneId = String(zone.id);
+
+  zoneNameInput.value = zone.name || "";
+  zoneCategorySelect.value = zone.category || "autre";
+  updateZoneSubcategorySelect();
+
+  if (zone.subcategory) {
+    zoneSubcategorySelect.value = zone.subcategory;
+  }
+
+  zoneDescriptionInput.value = zone.description || "";
+  updateZoneColorPreview();
+
+  showZoneForm();
+  saveZoneButton.textContent = "Enregistrer les modifications";
+  zoneStatus.textContent = `Modification de « ${zone.name || "Zone"} ».`;
+  zoneStatus.classList.add("location-selected");
+
+  editSelectedZoneButton.hidden = true;
+  deleteSelectedZoneButton.hidden = false;
+
+  if (scrollToForm) {
+    zoneForm.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    window.setTimeout(() => zoneNameInput.focus(), 200);
+  }
 }
 
 function selectZone(zoneId, openPopup = true) {
@@ -1928,22 +2017,33 @@ function selectZone(zoneId, openPopup = true) {
     if (openPopup) layer.openPopup();
   }
 
-  deleteSelectedZoneButton.hidden = !isAdmin;
+  editSelectedZoneButton.hidden = !(isAdmin && selectedZoneId);
+  deleteSelectedZoneButton.hidden = !(isAdmin && selectedZoneId);
+
+  if (isAdmin && !pendingZoneLayer) {
+    const selectedZone = zones.find((item) => String(item.id) === selectedZoneId);
+    if (selectedZone) enterZoneEditMode(selectedZone, false);
+  }
 }
 
 function renderZoneList() {
   zoneListElement.innerHTML = "";
 
-  if (zones.length === 0) {
+  const visibleZones = getVisibleZones();
+
+  if (visibleZones.length === 0) {
     const empty = document.createElement("p");
     empty.className = "empty-results";
-    empty.textContent = "Aucune zone enregistrée.";
+    empty.textContent = zones.length === 0
+      ? "Aucune zone enregistrée."
+      : "Aucune zone ne correspond aux filtres sélectionnés.";
     zoneListElement.appendChild(empty);
+    editSelectedZoneButton.hidden = true;
     deleteSelectedZoneButton.hidden = true;
     return;
   }
 
-  zones.forEach((zone) => {
+  visibleZones.forEach((zone) => {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "zone-list-item";
@@ -1981,20 +2081,25 @@ function renderZoneList() {
     zoneListElement.appendChild(button);
   });
 
+  editSelectedZoneButton.hidden = !(isAdmin && selectedZoneId);
   deleteSelectedZoneButton.hidden = !(isAdmin && selectedZoneId);
 }
 
 function renderZones() {
   zonesLayer.clearLayers();
   zoneInstances.clear();
-  zoneCountElement.textContent = `${zones.length} zone${zones.length > 1 ? "s" : ""}`;
+
+  const visibleZones = getVisibleZones();
+  zoneCountElement.textContent = visibleZones.length === zones.length
+    ? `${zones.length} zone${zones.length > 1 ? "s" : ""}`
+    : `${visibleZones.length} / ${zones.length}`;
 
   if (!showZonesCheckbox.checked) {
     renderZoneList();
     return;
   }
 
-  zones.forEach((zone) => {
+  visibleZones.forEach((zone) => {
     if (!Array.isArray(zone.coordinates) || zone.coordinates.length < 3) return;
 
     const polygon = L.polygon(zone.coordinates, zoneStyle(zone));
@@ -2015,8 +2120,11 @@ function renderZones() {
 
   if (selectedZoneId && zoneInstances.has(String(selectedZoneId))) {
     selectZone(selectedZoneId, false);
-  } else {
+  } else if (selectedZoneId) {
     selectedZoneId = null;
+    editingZoneId = null;
+    editSelectedZoneButton.hidden = true;
+    deleteSelectedZoneButton.hidden = true;
   }
 
   renderZoneList();
@@ -2039,6 +2147,15 @@ zoneSubcategorySelect.addEventListener("change", () => {
   applyPendingZoneStyle();
 });
 showZonesCheckbox.addEventListener("change", renderZones);
+
+editSelectedZoneButton.addEventListener("click", () => {
+  const zone = zones.find((item) => String(item.id) === String(selectedZoneId));
+  if (!zone) {
+    showNotification("Sélectionne d’abord une zone enregistrée.", "error");
+    return;
+  }
+  enterZoneEditMode(zone, true);
+});
 cancelZoneButton.addEventListener("click", () => cancelPendingZone());
 
 deleteSelectedZoneButton.addEventListener("click", () => {
@@ -2051,38 +2168,62 @@ deleteSelectedZoneButton.addEventListener("click", () => {
 
 zoneForm.addEventListener("submit", async (event) => {
   event.preventDefault();
-  if (!pendingZoneLayer) {
-    showNotification("Dessine d’abord une zone sur la carte.", "error");
-    return;
-  }
 
   const category = zoneCategorySelect.value;
   const subcategory = zoneSubcategoryField.hidden ? null : zoneSubcategorySelect.value;
-  const payload = {
+  const basePayload = {
     name: zoneNameInput.value.trim(),
     description: zoneDescriptionInput.value.trim(),
     category,
     subcategory,
-    color: getZoneColor(category, subcategory),
-    coordinates: serializeZoneCoordinates(pendingZoneLayer),
-    author: playerName,
-    created_by: adminUser?.id || null
+    color: getZoneColor(category, subcategory)
   };
 
   saveZoneButton.disabled = true;
-  saveZoneButton.textContent = "Enregistrement...";
-  const { error } = await supabaseClient.from("zones").insert([payload]);
+  saveZoneButton.textContent = editingZoneId ? "Mise à jour..." : "Enregistrement...";
+
+  let error = null;
+
+  if (editingZoneId) {
+    const result = await supabaseClient
+      .from("zones")
+      .update({ ...basePayload, updated_at: new Date().toISOString() })
+      .eq("id", editingZoneId);
+    error = result.error;
+  } else {
+    if (!pendingZoneLayer) {
+      saveZoneButton.disabled = false;
+      saveZoneButton.textContent = "Enregistrer la zone";
+      showNotification("Dessine d’abord une zone sur la carte.", "error");
+      return;
+    }
+
+    const payload = {
+      ...basePayload,
+      coordinates: serializeZoneCoordinates(pendingZoneLayer),
+      author: playerName,
+      created_by: adminUser?.id || null
+    };
+
+    const result = await supabaseClient.from("zones").insert([payload]);
+    error = result.error;
+  }
+
   saveZoneButton.disabled = false;
   saveZoneButton.textContent = "Enregistrer la zone";
 
   if (error) {
-    console.error("Erreur ajout zone :", error);
-    showNotification(`Impossible d’ajouter la zone : ${error.message}`, "error");
+    console.error("Erreur sauvegarde zone :", error);
+    showNotification(`Impossible d’enregistrer la zone : ${error.message}`, "error");
     return;
   }
 
+  const message = editingZoneId
+    ? `La zone « ${basePayload.name} » a été modifiée.`
+    : `La zone « ${basePayload.name} » a été ajoutée.`;
+
   cancelPendingZone();
-  showNotification(`La zone « ${payload.name} » a été ajoutée.`);
+  showNotification(message);
   await loadZones();
 });
 
@@ -2097,6 +2238,8 @@ async function deleteZone(id) {
   }
   map.closePopup();
   selectedZoneId = null;
+  editingZoneId = null;
+  editSelectedZoneButton.hidden = true;
   deleteSelectedZoneButton.hidden = true;
   showNotification("Zone supprimée.");
   await loadZones();
@@ -2117,7 +2260,13 @@ exportButton.addEventListener(
         places.length,
 
       markers:
-        places
+        places,
+
+      zone_count:
+        zones.length,
+
+      zones:
+        zones
     };
 
     const blob = new Blob(

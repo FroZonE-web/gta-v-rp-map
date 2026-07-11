@@ -8,7 +8,7 @@
     content="width=device-width, initial-scale=1"
   >
 
-  <title>Atlas RP v0.7.2 — Carte GTA V</title>
+  <title>Atlas RP v0.7.3 — Carte GTA V</title>
 
   <link
     rel="stylesheet"
@@ -28,7 +28,7 @@
     <header class="sidebar-header">
       <div>
         <h1>Atlas RP</h1>
-        <p class="subtitle">Carte collaborative GTA V · v0.7.2</p>
+        <p class="subtitle">Carte collaborative GTA V · v0.7.3</p>
       </div>
 
       <div class="player-box">
@@ -254,7 +254,17 @@
           <p class="empty-results">Aucune zone enregistrée.</p>
         </div>
 
-        <button
+        <div class="zone-selection-actions">
+          <button
+            id="edit-selected-zone"
+            class="secondary-button"
+            type="button"
+            hidden
+          >
+            Modifier la zone sélectionnée
+          </button>
+
+          <button
           id="delete-selected-zone"
           class="danger-button"
           type="button"
@@ -262,6 +272,7 @@
         >
           Supprimer la zone sélectionnée
         </button>
+        </div>
       </div>
     </section>
 

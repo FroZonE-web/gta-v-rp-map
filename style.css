@@ -1008,3 +1008,20 @@ button:disabled {
 #delete-selected-zone {
   margin-top: 6px;
 }
+
+/* Atlas RP v0.7.3 — actions de zone */
+.zone-selection-actions {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+#edit-selected-zone,
+#delete-selected-zone {
+  margin-top: 0;
+}
+
+.zone-list-item-selected {
+  outline: 2px solid rgba(50, 115, 234, 0.75);
+  outline-offset: 1px;
+}
