@@ -139,6 +139,15 @@ const searchResultsContainer =
 const visibleMarkerCountElement =
   document.getElementById("visible-marker-count");
 
+const favoriteCountElement =
+  document.getElementById("favorite-count");
+
+const favoritesOnlyCheckbox =
+  document.getElementById("favorites-only");
+
+const favoritesListContainer =
+  document.getElementById("favorites-list");
+
 /* =========================================================
    ÉTAT DE L’APPLICATION
    ========================================================= */
@@ -147,6 +156,7 @@ let places = [];
 let pendingClick = null;
 let playerName = "";
 let currentSearch = "";
+let favoriteIds = new Set();
 
 const markerInstances = new Map();
 
@@ -245,6 +255,49 @@ function getCategoryLabel(categoryKey) {
 
 function getCategoryIcon(categoryKey) {
   return getCategoryData(categoryKey).icon;
+}
+
+function loadFavorites() {
+  try {
+    const savedFavorites = JSON.parse(
+      localStorage.getItem("atlas_rp_favorites") || "[]"
+    );
+
+    favoriteIds = new Set(
+      Array.isArray(savedFavorites)
+        ? savedFavorites.map(String)
+        : []
+    );
+  } catch (error) {
+    console.warn("Favoris invalides dans le navigateur :", error);
+    favoriteIds = new Set();
+  }
+}
+
+function saveFavorites() {
+  localStorage.setItem(
+    "atlas_rp_favorites",
+    JSON.stringify(Array.from(favoriteIds))
+  );
+}
+
+function isFavorite(place, index = 0) {
+  return favoriteIds.has(getPlaceIdentifier(place, index));
+}
+
+function toggleFavorite(identifier) {
+  const id = String(identifier);
+
+  if (favoriteIds.has(id)) {
+    favoriteIds.delete(id);
+    showNotification("Lieu retiré des favoris.");
+  } else {
+    favoriteIds.add(id);
+    showNotification("Lieu ajouté aux favoris.");
+  }
+
+  saveFavorites();
+  refreshInterface();
 }
 
 /* =========================================================
@@ -685,15 +738,22 @@ function passesSearch(place) {
     .includes(currentSearch);
 }
 
-function isPlaceVisible(place) {
+function isPlaceVisible(place, index = 0) {
+  const passesFavoriteFilter =
+    !favoritesOnlyCheckbox.checked ||
+    isFavorite(place, index);
+
   return (
     passesCategoryFilters(place) &&
-    passesSearch(place)
+    passesSearch(place) &&
+    passesFavoriteFilter
   );
 }
 
 function getVisiblePlaces() {
-  return places.filter(isPlaceVisible);
+  return places.filter((place, index) =>
+    isPlaceVisible(place, index)
+  );
 }
 
 function updateVisibleMarkerCount() {
@@ -933,6 +993,90 @@ clearSearchButton.addEventListener(
 );
 
 /* =========================================================
+   FAVORIS
+   ========================================================= */
+
+function createFavoriteItem(place, index) {
+  const identifier = getPlaceIdentifier(place, index);
+  const categoryData = getCategoryData(place.category);
+
+  const row = document.createElement("div");
+  row.className = "favorite-item";
+
+  const focusButton = document.createElement("button");
+  focusButton.type = "button";
+  focusButton.className = "favorite-focus-button";
+
+  const icon = document.createElement("span");
+  icon.className = "favorite-item-icon";
+  icon.textContent = categoryData.icon;
+
+  const info = document.createElement("span");
+  info.className = "favorite-item-information";
+
+  const name = document.createElement("strong");
+  name.textContent = place.name || "Lieu sans nom";
+
+  const details = document.createElement("small");
+  details.textContent = [
+    categoryData.label,
+    place.subcategory
+  ].filter(Boolean).join(" · ");
+
+  info.appendChild(name);
+  info.appendChild(details);
+  focusButton.appendChild(icon);
+  focusButton.appendChild(info);
+
+  focusButton.addEventListener("click", () => {
+    focusMarker(identifier);
+  });
+
+  const removeButton = document.createElement("button");
+  removeButton.type = "button";
+  removeButton.className = "favorite-remove-button";
+  removeButton.title = "Retirer des favoris";
+  removeButton.setAttribute("aria-label", "Retirer des favoris");
+  removeButton.textContent = "★";
+
+  removeButton.addEventListener("click", () => {
+    toggleFavorite(identifier);
+  });
+
+  row.appendChild(focusButton);
+  row.appendChild(removeButton);
+
+  return row;
+}
+
+function renderFavorites() {
+  favoritesListContainer.innerHTML = "";
+
+  const favorites = places
+    .map((place, index) => ({ place, index }))
+    .filter(({ place, index }) => isFavorite(place, index));
+
+  favoriteCountElement.textContent =
+    `${favorites.length} favori${favorites.length > 1 ? "s" : ""}`;
+
+  if (favorites.length === 0) {
+    const message = document.createElement("p");
+    message.className = "empty-results";
+    message.textContent = "Aucun lieu favori pour le moment.";
+    favoritesListContainer.appendChild(message);
+    return;
+  }
+
+  favorites.forEach(({ place, index }) => {
+    favoritesListContainer.appendChild(
+      createFavoriteItem(place, index)
+    );
+  });
+}
+
+favoritesOnlyCheckbox.addEventListener("change", refreshInterface);
+
+/* =========================================================
    MARQUEURS
    ========================================================= */
 
@@ -949,7 +1093,7 @@ function makeMarkerIcon(categoryKey) {
   });
 }
 
-function createPopupContent(place) {
+function createPopupContent(place, identifier, favorite) {
   const categoryData =
     getCategoryData(place.category);
 
@@ -1002,6 +1146,16 @@ function createPopupContent(place) {
         ${description}
       </div>
 
+      <div class="popup-actions">
+        <button
+          type="button"
+          class="popup-favorite-button${favorite ? " is-favorite" : ""}"
+          data-favorite-id="${escapeHtml(identifier)}"
+        >
+          ${favorite ? "★ Retirer des favoris" : "☆ Ajouter aux favoris"}
+        </button>
+      </div>
+
       <footer class="marker-popup-footer">
         <span>
           Ajouté par
@@ -1025,7 +1179,7 @@ function renderMarkers() {
   markerInstances.clear();
 
   places.forEach((place, index) => {
-    if (!isPlaceVisible(place)) {
+    if (!isPlaceVisible(place, index)) {
       return;
     }
 
@@ -1060,7 +1214,11 @@ function renderMarkers() {
     );
 
     marker.bindPopup(
-      createPopupContent(place),
+      createPopupContent(
+        place,
+        identifier,
+        isFavorite(place, index)
+      ),
       {
         maxWidth: 340
       }
@@ -1075,9 +1233,25 @@ function renderMarkers() {
   });
 }
 
+map.on("popupopen", (event) => {
+  const button = event.popup
+    .getElement()
+    ?.querySelector("[data-favorite-id]");
+
+  if (!button) {
+    return;
+  }
+
+  button.addEventListener("click", () => {
+    toggleFavorite(button.dataset.favoriteId);
+    map.closePopup();
+  });
+});
+
 function refreshInterface() {
   renderMarkers();
   renderSearchResults();
+  renderFavorites();
   updateVisibleMarkerCount();
 }
 
@@ -1353,6 +1527,7 @@ supabaseClient
 
 async function initializeApplication() {
   initializePlayerName();
+  loadFavorites();
   createCategoryOptions();
   createFilters();
 

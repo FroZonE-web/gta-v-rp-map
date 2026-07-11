@@ -723,3 +723,115 @@ button:disabled {
     max-height: 200px;
   }
 }
+
+/* =========================================================
+   FAVORIS
+   ========================================================= */
+
+.favorite-only-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 11px;
+  user-select: none;
+}
+
+.favorite-only-toggle input {
+  width: auto;
+  margin: 0;
+  accent-color: #f2c94c;
+}
+
+.favorites-list {
+  display: grid;
+  gap: 5px;
+  max-height: 250px;
+  overflow-y: auto;
+  padding-right: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: #394151 transparent;
+}
+
+.favorite-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 34px;
+  gap: 6px;
+}
+
+.favorite-focus-button {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  padding: 8px;
+  color: var(--text);
+  background: #12161d;
+  border: 1px solid #2d3440;
+  text-align: left;
+}
+
+.favorite-focus-button:hover {
+  background: var(--panel-hover);
+  border-color: #465064;
+}
+
+.favorite-item-icon {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  background: #0b0e13;
+  border: 1px solid #343d49;
+  border-radius: 50%;
+  font-size: 14px;
+}
+
+.favorite-item-information {
+  min-width: 0;
+}
+
+.favorite-item-information strong,
+.favorite-item-information small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.favorite-item-information strong {
+  font-size: 11px;
+}
+
+.favorite-item-information small {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.favorite-remove-button {
+  padding: 0;
+  color: #f2c94c;
+  background: #282716;
+  border: 1px solid rgba(242, 201, 76, 0.35);
+  font-size: 16px;
+}
+
+.popup-actions {
+  padding: 0 15px 14px;
+}
+
+.popup-favorite-button {
+  padding: 8px 10px;
+  color: #f5d76e;
+  background: rgba(242, 201, 76, 0.08);
+  border: 1px solid rgba(242, 201, 76, 0.35);
+  font-size: 10px;
+}
+
+.popup-favorite-button.is-favorite {
+  color: #111;
+  background: #f2c94c;
+}
