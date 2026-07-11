@@ -8,7 +8,7 @@
     content="width=device-width, initial-scale=1"
   >
 
-  <title>Atlas RP v0.7.4 — Carte GTA V</title>
+  <title>Atlas RP v0.7.5 — Carte GTA V</title>
 
   <link
     rel="stylesheet"
@@ -20,7 +20,7 @@
     href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css"
   >
 
-  <link rel="stylesheet" href="style.css?v=0.7.4">
+  <link rel="stylesheet" href="style.css?v=0.7.5">
 </head>
 
 <body>
@@ -28,7 +28,7 @@
     <header class="sidebar-header">
       <div>
         <h1>Atlas RP</h1>
-        <p class="subtitle">Carte collaborative GTA V · v0.7.4</p>
+        <p class="subtitle">Carte collaborative GTA V · v0.7.5</p>
       </div>
 
       <div class="player-box">
@@ -261,7 +261,16 @@
             type="button"
             hidden
           >
-            Modifier la zone sélectionnée
+            Modifier les informations
+          </button>
+
+          <button
+            id="edit-zone-shape"
+            class="secondary-button"
+            type="button"
+            hidden
+          >
+            Modifier la forme
           </button>
 
           <button
@@ -272,6 +281,18 @@
         >
           Supprimer la zone sélectionnée
         </button>
+        </div>
+
+        <div id="zone-shape-edit-actions" class="zone-shape-edit-actions" hidden>
+          <p class="panel-description">
+            Les gros points sont les sommets existants. Tire un petit point intermédiaire pour créer un nouveau sommet et étendre la zone.
+          </p>
+          <button id="save-zone-shape" class="primary-button" type="button">
+            Enregistrer la forme
+          </button>
+          <button id="cancel-zone-shape" class="secondary-button" type="button">
+            Annuler la modification
+          </button>
         </div>
       </div>
     </section>
@@ -311,6 +332,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script src="config.js"></script>
-  <script src="app.js?v=0.7.4"></script>
+  <script src="app.js?v=0.7.5"></script>
 </body>
 </html>

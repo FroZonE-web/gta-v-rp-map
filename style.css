@@ -1026,3 +1026,48 @@ button:disabled {
   outline: 2px solid rgba(50, 115, 234, 0.75);
   outline-offset: 1px;
 }
+
+
+/* Atlas RP v0.7.5 — édition géométrique des polyzones */
+.zone-shape-edit-actions {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(50, 115, 234, 0.09);
+  border: 1px solid rgba(50, 115, 234, 0.35);
+  border-radius: 10px;
+}
+
+.zone-shape-edit-actions[hidden] {
+  display: none !important;
+}
+
+.zone-shape-edit-actions .primary-button,
+.zone-shape-edit-actions .secondary-button {
+  margin-top: 0;
+}
+
+.zone-admin-actions {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.zone-admin-actions .zone-shape-button {
+  background: #7c5ce7;
+}
+
+.leaflet-editing-icon {
+  width: 13px !important;
+  height: 13px !important;
+  margin-left: -7px !important;
+  margin-top: -7px !important;
+  border: 2px solid #ffffff !important;
+  border-radius: 50% !important;
+  background: #3273ea !important;
+  box-shadow: 0 0 0 3px rgba(50, 115, 234, 0.28), 0 3px 8px rgba(0,0,0,.45) !important;
+}
+
+.leaflet-editing-icon.leaflet-touch-icon {
+  width: 15px !important;
+  height: 15px !important;
+}

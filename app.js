@@ -193,6 +193,10 @@ const zoneCountElement = document.getElementById("zone-count");
 const zoneListElement = document.getElementById("zone-list");
 const editSelectedZoneButton = document.getElementById("edit-selected-zone");
 const deleteSelectedZoneButton = document.getElementById("delete-selected-zone");
+const editZoneShapeButton = document.getElementById("edit-zone-shape");
+const saveZoneShapeButton = document.getElementById("save-zone-shape");
+const cancelZoneShapeButton = document.getElementById("cancel-zone-shape");
+const zoneShapeEditActions = document.getElementById("zone-shape-edit-actions");
 
 /* =========================================================
    ÉTAT DE L’APPLICATION
@@ -211,6 +215,9 @@ let pendingZoneLayer = null;
 let isDrawingZone = false;
 let selectedZoneId = null;
 let editingZoneId = null;
+let geometryEditingZoneId = null;
+let geometryEditingLayer = null;
+let geometryOriginalCoordinates = null;
 
 const markerInstances = new Map();
 const zoneInstances = new Map();
@@ -524,6 +531,10 @@ changeNameButton.addEventListener("click", () => {
 function updateAdminInterface() {
   if (!isAdmin && editingZoneId) {
     cancelPendingZone();
+  }
+
+  if (!isAdmin && geometryEditingZoneId) {
+    cancelZoneGeometryEdit();
   }
 
   adminLoginForm.hidden = isAdmin;
@@ -1588,6 +1599,10 @@ map.on("popupopen", (event) => {
     if (zone) enterZoneEditMode(zone, true);
   });
 
+  popupElement?.querySelector("[data-zone-shape-edit]")?.addEventListener("click", (e) => {
+    startZoneGeometryEdit(e.currentTarget.dataset.zoneShapeEdit);
+  });
+
   popupElement?.querySelector("[data-zone-delete]")?.addEventListener("click", (e) => {
     deleteZone(e.currentTarget.dataset.zoneDelete);
   });
@@ -1598,7 +1613,11 @@ function refreshInterface() {
   renderSearchResults();
   renderFavorites();
   updateVisibleMarkerCount();
-  renderZones();
+
+  // Ne détruit pas la couche pendant que l'admin déplace/ajoute des sommets.
+  if (!geometryEditingZoneId) {
+    renderZones();
+  }
 }
 
 /* =========================================================
@@ -1872,6 +1891,8 @@ function cancelPendingZone(resetForm = true) {
   }
 
   pendingZoneLayer = null;
+  editingZoneId = null;
+  saveZoneButton.textContent = "Enregistrer la zone";
 
   const liveZoneForm = document.getElementById("zone-form");
   const liveZoneStatus = document.getElementById("zone-status");
@@ -1894,6 +1915,7 @@ function cancelPendingZone(resetForm = true) {
 
   editSelectedZoneButton.hidden = !(isAdmin && selectedZoneId);
   deleteSelectedZoneButton.hidden = !(isAdmin && selectedZoneId);
+  updateZoneGeometryControls();
 }
 
 function serializeZoneCoordinates(layer) {
@@ -1918,7 +1940,7 @@ function createZonePopup(zone) {
         </div>
       </header>
       <div class="popup-description">${description}</div>
-      ${isAdmin ? `<div class="popup-admin-actions zone-admin-actions"><button type="button" class="zone-edit-button" data-zone-edit="${zone.id}">Modifier la zone</button><button type="button" class="danger-button" data-zone-delete="${zone.id}">Supprimer la zone</button></div>` : ""}
+      ${isAdmin ? `<div class="popup-admin-actions zone-admin-actions"><button type="button" class="zone-edit-button" data-zone-edit="${zone.id}">Modifier les infos</button><button type="button" class="zone-shape-button" data-zone-shape-edit="${zone.id}">Modifier la forme</button><button type="button" class="danger-button" data-zone-delete="${zone.id}">Supprimer la zone</button></div>` : ""}
       <footer class="marker-popup-footer"><span>Ajoutée par <strong>${escapeHtml(zone.author || "Inconnu")}</strong></span></footer>
     </article>`;
 }
@@ -2021,11 +2043,130 @@ function selectZone(zoneId, openPopup = true) {
 
   editSelectedZoneButton.hidden = !(isAdmin && selectedZoneId);
   deleteSelectedZoneButton.hidden = !(isAdmin && selectedZoneId);
+  updateZoneGeometryControls();
 
-  if (isAdmin && !pendingZoneLayer) {
+  if (isAdmin && !pendingZoneLayer && !geometryEditingZoneId) {
     const selectedZone = zones.find((item) => String(item.id) === selectedZoneId);
     if (selectedZone) enterZoneEditMode(selectedZone, false);
   }
+}
+
+function updateZoneGeometryControls() {
+  const hasSelection = Boolean(isAdmin && selectedZoneId);
+  const isEditingShape = Boolean(geometryEditingZoneId);
+
+  editZoneShapeButton.hidden = !hasSelection || isEditingShape;
+  zoneShapeEditActions.hidden = !isEditingShape;
+
+  editSelectedZoneButton.disabled = isEditingShape;
+  deleteSelectedZoneButton.disabled = isEditingShape;
+}
+
+function startZoneGeometryEdit(zoneId) {
+  if (!isAdmin) {
+    showNotification("La modification de forme est réservée aux administrateurs.", "error");
+    return;
+  }
+
+  const id = String(zoneId || selectedZoneId || "");
+  const zone = zones.find((item) => String(item.id) === id);
+  const layer = zoneInstances.get(id);
+
+  if (!zone || !layer || !layer.editing) {
+    showNotification("Impossible d'éditer cette zone. Recharge la page puis réessaie.", "error");
+    return;
+  }
+
+  if (geometryEditingZoneId) {
+    cancelZoneGeometryEdit();
+  }
+
+  if (editingZoneId) {
+    cancelPendingZone();
+  }
+
+  selectedZoneId = id;
+  geometryEditingZoneId = id;
+  geometryEditingLayer = layer;
+  geometryOriginalCoordinates = zone.coordinates.map((point) => [Number(point[0]), Number(point[1])]);
+
+  map.closePopup();
+  layer.bringToFront?.();
+  layer.editing.enable();
+  layer.setStyle({ ...zoneStyle(zone), weight: 6, dashArray: "8 6" });
+
+  zoneStatus.textContent =
+    `Modification de la forme de « ${zone.name} » : déplace les sommets, tire un petit point intermédiaire pour en créer un nouveau, ou clique sur un sommet pour le retirer.`;
+  zoneStatus.classList.add("location-selected");
+
+  updateZoneGeometryControls();
+  showNotification("Mode édition activé : tu peux ajouter, déplacer ou supprimer des sommets.");
+}
+
+async function saveZoneGeometryEdit() {
+  if (!isAdmin || !geometryEditingZoneId || !geometryEditingLayer) return;
+
+  const coordinates = serializeZoneCoordinates(geometryEditingLayer);
+
+  if (coordinates.length < 3) {
+    showNotification("Une polyzone doit conserver au moins trois sommets.", "error");
+    return;
+  }
+
+  saveZoneShapeButton.disabled = true;
+  saveZoneShapeButton.textContent = "Enregistrement...";
+
+  const { error } = await supabaseClient
+    .from("zones")
+    .update({
+      coordinates,
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", geometryEditingZoneId);
+
+  saveZoneShapeButton.disabled = false;
+  saveZoneShapeButton.textContent = "Enregistrer la forme";
+
+  if (error) {
+    console.error("Erreur modification forme zone :", error);
+    showNotification(`Impossible d'enregistrer la forme : ${error.message}`, "error");
+    return;
+  }
+
+  geometryEditingLayer.editing.disable();
+  geometryEditingZoneId = null;
+  geometryEditingLayer = null;
+  geometryOriginalCoordinates = null;
+  zoneShapeEditActions.hidden = true;
+
+  zoneStatus.textContent = "Dessine une forme avec la barre d’outils de la carte.";
+  zoneStatus.classList.remove("location-selected");
+
+  showNotification("La nouvelle forme de la zone a été enregistrée.");
+  await loadZones();
+  updateZoneGeometryControls();
+}
+
+function cancelZoneGeometryEdit() {
+  if (!geometryEditingZoneId || !geometryEditingLayer) return;
+
+  geometryEditingLayer.editing?.disable();
+
+  if (geometryOriginalCoordinates) {
+    geometryEditingLayer.setLatLngs(geometryOriginalCoordinates);
+    geometryEditingLayer.redraw?.();
+  }
+
+  geometryEditingZoneId = null;
+  geometryEditingLayer = null;
+  geometryOriginalCoordinates = null;
+
+  zoneStatus.textContent = "Dessine une forme avec la barre d’outils de la carte.";
+  zoneStatus.classList.remove("location-selected");
+
+  renderZones();
+  updateZoneGeometryControls();
+  showNotification("Modification de la forme annulée.");
 }
 
 function renderZoneList() {
@@ -2088,6 +2229,11 @@ function renderZoneList() {
 }
 
 function renderZones() {
+  if (geometryEditingZoneId) {
+    updateZoneGeometryControls();
+    return;
+  }
+
   zonesLayer.clearLayers();
   zoneInstances.clear();
 
@@ -2158,6 +2304,13 @@ editSelectedZoneButton.addEventListener("click", () => {
   }
   enterZoneEditMode(zone, true);
 });
+
+editZoneShapeButton.addEventListener("click", () => {
+  startZoneGeometryEdit(selectedZoneId);
+});
+
+saveZoneShapeButton.addEventListener("click", saveZoneGeometryEdit);
+cancelZoneShapeButton.addEventListener("click", cancelZoneGeometryEdit);
 cancelZoneButton.addEventListener("click", () => cancelPendingZone());
 
 deleteSelectedZoneButton.addEventListener("click", () => {
@@ -2231,6 +2384,10 @@ zoneForm.addEventListener("submit", async (event) => {
 
 async function deleteZone(id) {
   if (!isAdmin) return;
+  if (geometryEditingZoneId) {
+    showNotification("Enregistre ou annule d'abord la modification de forme.", "error");
+    return;
+  }
   const zone = zones.find((item) => String(item.id) === String(id));
   if (!zone || !window.confirm(`Supprimer définitivement la zone « ${zone.name} » ?`)) return;
   const { error } = await supabaseClient.from("zones").delete().eq("id", zone.id);
