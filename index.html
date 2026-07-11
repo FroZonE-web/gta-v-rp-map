@@ -247,6 +247,22 @@
         <input id="show-zones" type="checkbox" checked>
         <span>Afficher les polyzones</span>
       </label>
+
+      <div class="zone-list-block">
+        <div class="zone-list-heading">Zones enregistrées</div>
+        <div id="zone-list" class="zone-list">
+          <p class="empty-results">Aucune zone enregistrée.</p>
+        </div>
+
+        <button
+          id="delete-selected-zone"
+          class="danger-button"
+          type="button"
+          hidden
+        >
+          Supprimer la zone sélectionnée
+        </button>
+      </div>
     </section>
 
     <section class="panel">

@@ -188,6 +188,8 @@ const saveZoneButton = document.getElementById("save-zone-button");
 const cancelZoneButton = document.getElementById("cancel-zone-button");
 const showZonesCheckbox = document.getElementById("show-zones");
 const zoneCountElement = document.getElementById("zone-count");
+const zoneListElement = document.getElementById("zone-list");
+const deleteSelectedZoneButton = document.getElementById("delete-selected-zone");
 
 /* =========================================================
    ÉTAT DE L’APPLICATION
@@ -204,6 +206,7 @@ let movingMarkerId = null;
 let zones = [];
 let pendingZoneLayer = null;
 let isDrawingZone = false;
+let selectedZoneId = null;
 
 const markerInstances = new Map();
 const zoneInstances = new Map();
@@ -255,6 +258,7 @@ map.on(L.Draw.Event.DRAWSTART, () => { isDrawingZone = true; });
 map.on(L.Draw.Event.DRAWSTOP, () => { window.setTimeout(() => { isDrawingZone = false; }, 100); });
 map.on(L.Draw.Event.CREATED, (event) => {
   cancelPendingZone(false);
+  selectedZoneId = null;
   pendingZoneLayer = event.layer;
   temporaryZoneLayer.addLayer(pendingZoneLayer);
   zoneForm.hidden = false;
@@ -262,7 +266,19 @@ map.on(L.Draw.Event.CREATED, (event) => {
   zoneStatus.classList.add("location-selected");
   updateZoneSubcategorySelect();
   applyPendingZoneStyle();
-  zoneNameInput.focus();
+
+  pendingZoneLayer.on("click", () => {
+    zoneForm.hidden = false;
+    zoneForm.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    zoneNameInput.focus();
+  });
+
+  window.setTimeout(() => {
+    zoneForm.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    zoneNameInput.focus();
+  }, 100);
+
+  showNotification("Forme créée : complète le formulaire Polyzones puis enregistre-la.");
 });
 
 /* =========================================================
@@ -1820,20 +1836,120 @@ function createZonePopup(zone) {
     </article>`;
 }
 
+function selectZone(zoneId, openPopup = true) {
+  selectedZoneId = String(zoneId);
+
+  zoneInstances.forEach((layer, id) => {
+    if (!layer?.setStyle) return;
+    const zone = zones.find((item) => String(item.id) === String(id));
+    if (!zone) return;
+    const style = zoneStyle(zone);
+    layer.setStyle({
+      ...style,
+      weight: String(id) === selectedZoneId ? 6 : style.weight
+    });
+  });
+
+  renderZoneList();
+
+  const layer = zoneInstances.get(selectedZoneId);
+  if (layer) {
+    layer.bringToFront?.();
+    if (openPopup) layer.openPopup();
+  }
+
+  deleteSelectedZoneButton.hidden = !isAdmin;
+}
+
+function renderZoneList() {
+  zoneListElement.innerHTML = "";
+
+  if (zones.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "empty-results";
+    empty.textContent = "Aucune zone enregistrée.";
+    zoneListElement.appendChild(empty);
+    deleteSelectedZoneButton.hidden = true;
+    return;
+  }
+
+  zones.forEach((zone) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "zone-list-item";
+    if (String(zone.id) === String(selectedZoneId)) {
+      button.classList.add("zone-list-item-selected");
+    }
+
+    const color = document.createElement("span");
+    color.className = "zone-list-color";
+    color.style.background = zone.color || "#3273ea";
+
+    const text = document.createElement("span");
+    text.className = "zone-list-text";
+
+    const name = document.createElement("strong");
+    name.textContent = zone.name || "Zone sans nom";
+
+    const detail = document.createElement("small");
+    const category = getCategoryData(zone.category);
+    detail.textContent = [category.label, zone.subcategory].filter(Boolean).join(" · ");
+
+    text.appendChild(name);
+    text.appendChild(detail);
+    button.appendChild(color);
+    button.appendChild(text);
+
+    button.addEventListener("click", () => {
+      selectZone(zone.id, true);
+      const layer = zoneInstances.get(String(zone.id));
+      if (layer) {
+        map.fitBounds(layer.getBounds(), { padding: [40, 40], maxZoom: 0 });
+      }
+    });
+
+    zoneListElement.appendChild(button);
+  });
+
+  deleteSelectedZoneButton.hidden = !(isAdmin && selectedZoneId);
+}
+
 function renderZones() {
   zonesLayer.clearLayers();
   zoneInstances.clear();
   zoneCountElement.textContent = `${zones.length} zone${zones.length > 1 ? "s" : ""}`;
-  if (!showZonesCheckbox.checked) return;
+
+  if (!showZonesCheckbox.checked) {
+    renderZoneList();
+    return;
+  }
 
   zones.forEach((zone) => {
     if (!Array.isArray(zone.coordinates) || zone.coordinates.length < 3) return;
+
     const polygon = L.polygon(zone.coordinates, zoneStyle(zone));
     polygon.bindPopup(createZonePopup(zone), { maxWidth: 340 });
-    polygon.bindTooltip(escapeHtml(zone.name), { permanent: false, direction: "center", className: "zone-tooltip" });
+    polygon.bindTooltip(escapeHtml(zone.name), {
+      permanent: false,
+      direction: "center",
+      className: "zone-tooltip"
+    });
+
+    polygon.on("click", () => {
+      selectZone(zone.id, false);
+    });
+
     polygon.addTo(zonesLayer);
     zoneInstances.set(String(zone.id), polygon);
   });
+
+  if (selectedZoneId && zoneInstances.has(String(selectedZoneId))) {
+    selectZone(selectedZoneId, false);
+  } else {
+    selectedZoneId = null;
+  }
+
+  renderZoneList();
 }
 
 async function loadZones() {
@@ -1854,6 +1970,14 @@ zoneSubcategorySelect.addEventListener("change", () => {
 });
 showZonesCheckbox.addEventListener("change", renderZones);
 cancelZoneButton.addEventListener("click", () => cancelPendingZone());
+
+deleteSelectedZoneButton.addEventListener("click", () => {
+  if (!selectedZoneId) {
+    showNotification("Sélectionne d’abord une zone enregistrée.", "error");
+    return;
+  }
+  deleteZone(selectedZoneId);
+});
 
 zoneForm.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -1902,6 +2026,8 @@ async function deleteZone(id) {
     return;
   }
   map.closePopup();
+  selectedZoneId = null;
+  deleteSelectedZoneButton.hidden = true;
   showNotification("Zone supprimée.");
   await loadZones();
 }
