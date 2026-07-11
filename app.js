@@ -1129,7 +1129,7 @@ function createPopupContent(place, identifier, favorite) {
           ${categoryData.icon}
         </span>
 
-        <div>
+        <div class="marker-popup-title">
           <h3>
             ${escapeHtml(place.name)}
           </h3>
@@ -1138,22 +1138,22 @@ function createPopupContent(place, identifier, favorite) {
             ${escapeHtml(categoryData.label)}
           </p>
         </div>
+
+        <button
+          type="button"
+          class="popup-star-button${favorite ? " is-favorite" : ""}"
+          data-favorite-id="${escapeHtml(identifier)}"
+          title="${favorite ? "Retirer des favoris" : "Ajouter aux favoris"}"
+          aria-label="${favorite ? "Retirer des favoris" : "Ajouter aux favoris"}"
+        >
+          ${favorite ? "★" : "☆"}
+        </button>
       </header>
 
       ${subcategoryLine}
 
       <div class="popup-description">
         ${description}
-      </div>
-
-      <div class="popup-actions">
-        <button
-          type="button"
-          class="popup-favorite-button${favorite ? " is-favorite" : ""}"
-          data-favorite-id="${escapeHtml(identifier)}"
-        >
-          ${favorite ? "★ Retirer des favoris" : "☆ Ajouter aux favoris"}
-        </button>
       </div>
 
       <footer class="marker-popup-footer">

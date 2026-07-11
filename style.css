@@ -835,3 +835,36 @@ button:disabled {
   color: #111;
   background: #f2c94c;
 }
+
+
+/* =========================================================
+   FAVORI DANS L'EN-TÊTE DE LA POPUP — v0.4.1
+   ========================================================= */
+
+.marker-popup-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.popup-star-button {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  padding: 0;
+  margin-left: auto;
+  color: #f5d76e;
+  background: rgba(242, 201, 76, 0.08);
+  border: 1px solid rgba(242, 201, 76, 0.38);
+  border-radius: 50%;
+  font-size: 21px;
+  line-height: 1;
+}
+
+.popup-star-button:hover {
+  background: rgba(242, 201, 76, 0.18);
+}
+
+.popup-star-button.is-favorite {
+  color: #111;
+  background: #f2c94c;
+}
