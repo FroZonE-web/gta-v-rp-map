@@ -8,7 +8,7 @@
     content="width=device-width, initial-scale=1"
   >
 
-  <title>Atlas RP v0.8.2 — Carte GTA V</title>
+  <title>Atlas RP v0.8.3 — Carte GTA V</title>
 
   <link
     rel="stylesheet"
@@ -28,7 +28,7 @@
     <header class="sidebar-header">
       <div>
         <h1>Atlas RP</h1>
-        <p class="subtitle">Carte collaborative GTA V · v0.8.2</p>
+        <p class="subtitle">Carte collaborative GTA V · v0.8.3</p>
       </div>
 
       <div class="player-box">
@@ -427,6 +427,12 @@
   </aside>
 
   <div id="visitor-mode-badge" class="visitor-mode-badge" hidden>👁 Mode visiteur</div>
+  <div id="minimap-shell" class="minimap-shell" aria-label="Mini-map">
+    <button id="minimap-toggle" class="minimap-toggle" type="button" aria-expanded="true" aria-controls="minimap">−</button>
+    <div class="minimap-title">Aperçu</div>
+    <div id="minimap" class="minimap"></div>
+  </div>
+
   <main
     id="map"
     aria-label="Carte GTA V interactive"
@@ -439,6 +445,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script src="config.js"></script>
-  <script src="app.js?v=0.8.2"></script>
+  <script src="app.js?v=0.8.3"></script>
 </body>
 </html>
