@@ -1,6 +1,6 @@
 "use strict";
 
-console.info("Atlas RP app.js v0.7.4 chargé");
+console.info("Atlas RP app.js v0.8.0 chargé");
 
 /* =========================================================
    CONFIGURATION DE LA CARTE
@@ -198,6 +198,20 @@ const saveZoneShapeButton = document.getElementById("save-zone-shape");
 const cancelZoneShapeButton = document.getElementById("cancel-zone-shape");
 const zoneShapeEditActions = document.getElementById("zone-shape-edit-actions");
 
+const mediaModal = document.getElementById("media-modal");
+const mediaDialogTitle = document.getElementById("media-dialog-title");
+const mediaEntityLabel = document.getElementById("media-entity-label");
+const mediaUploadBlock = document.getElementById("media-upload-block");
+const mediaFileInput = document.getElementById("media-file");
+const mediaTitleInput = document.getElementById("media-title");
+const mediaPrimaryInput = document.getElementById("media-primary");
+const mediaPreview = document.getElementById("media-preview");
+const mediaPreviewImage = document.getElementById("media-preview-image");
+const mediaUploadButton = document.getElementById("media-upload-button");
+const mediaGallery = document.getElementById("media-gallery");
+const mediaCountElement = document.getElementById("media-count");
+
+
 /* =========================================================
    ÉTAT DE L’APPLICATION
    ========================================================= */
@@ -221,6 +235,11 @@ let geometryOriginalCoordinates = null;
 
 const markerInstances = new Map();
 const zoneInstances = new Map();
+
+let mediaRecords = [];
+let activeMediaEntity = null;
+let pendingMediaObjectUrl = null;
+
 
 /* =========================================================
    CRÉATION DE LA CARTE
@@ -438,6 +457,304 @@ function toggleFavorite(identifier) {
   saveFavorites();
   refreshInterface();
 }
+
+
+/* =========================================================
+   MÉDIAS DES FICHES v0.8
+   ========================================================= */
+
+function getEntityMedia(entityType, entityId) {
+  return mediaRecords
+    .filter((media) => media.entity_type === entityType && String(media.entity_id) === String(entityId))
+    .sort((a, b) => Number(b.is_primary) - Number(a.is_primary) || new Date(a.created_at) - new Date(b.created_at));
+}
+
+function getPrimaryMedia(entityType, entityId) {
+  const list = getEntityMedia(entityType, entityId);
+  return list.find((media) => media.is_primary) || list[0] || null;
+}
+
+function createPopupMedia(entityType, entityId) {
+  const list = getEntityMedia(entityType, entityId);
+  const primary = list.find((media) => media.is_primary) || list[0];
+  const image = primary
+    ? `<button type="button" class="popup-media-image" data-media-open="${entityType}" data-media-entity-id="${escapeHtml(entityId)}"><img src="${escapeHtml(primary.public_url)}" alt="${escapeHtml(primary.title || "Image de la fiche")}" loading="lazy"></button>`
+    : "";
+  const label = list.length > 0 ? `${list.length} image${list.length > 1 ? "s" : ""}` : "Ajouter une image";
+  return `${image}<button type="button" class="popup-media-button" data-media-open="${entityType}" data-media-entity-id="${escapeHtml(entityId)}">📷 ${label}</button>`;
+}
+
+function findMediaEntity(entityType, entityId) {
+  if (entityType === "marker") {
+    return places.find((item) => String(item.id) === String(entityId));
+  }
+  if (entityType === "zone") {
+    return zones.find((item) => String(item.id) === String(entityId));
+  }
+  return null;
+}
+
+function closeMediaModal() {
+  mediaModal.hidden = true;
+  activeMediaEntity = null;
+  mediaFileInput.value = "";
+  mediaTitleInput.value = "";
+  mediaPrimaryInput.checked = false;
+  mediaPreview.hidden = true;
+  mediaPreviewImage.removeAttribute("src");
+  if (pendingMediaObjectUrl) URL.revokeObjectURL(pendingMediaObjectUrl);
+  pendingMediaObjectUrl = null;
+}
+
+function openMediaModal(entityType, entityId) {
+  const entity = findMediaEntity(entityType, entityId);
+  if (!entity) {
+    showNotification("Fiche introuvable.", "error");
+    return;
+  }
+  activeMediaEntity = { entityType, entityId: String(entityId), entity };
+  mediaDialogTitle.textContent = entityType === "marker" ? "Images du lieu" : "Images de la zone";
+  mediaEntityLabel.textContent = entity.name || "Fiche sans nom";
+  mediaUploadBlock.hidden = !isAdmin;
+  mediaModal.hidden = false;
+  renderMediaGallery();
+}
+
+function renderMediaGallery() {
+  if (!activeMediaEntity) return;
+  const { entityType, entityId } = activeMediaEntity;
+  const list = getEntityMedia(entityType, entityId);
+  mediaCountElement.textContent = `${list.length} image${list.length > 1 ? "s" : ""}`;
+  mediaGallery.innerHTML = "";
+
+  if (list.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "empty-results";
+    empty.textContent = "Aucune image pour cette fiche.";
+    mediaGallery.appendChild(empty);
+    return;
+  }
+
+  list.forEach((media) => {
+    const card = document.createElement("article");
+    card.className = "media-card";
+    if (media.is_primary) card.classList.add("is-primary");
+
+    const imageButton = document.createElement("button");
+    imageButton.type = "button";
+    imageButton.className = "media-card-image";
+    imageButton.innerHTML = `<img src="${escapeHtml(media.public_url)}" alt="${escapeHtml(media.title || "Image")}" loading="lazy">`;
+    imageButton.addEventListener("click", () => window.open(media.public_url, "_blank", "noopener,noreferrer"));
+
+    const info = document.createElement("div");
+    info.className = "media-card-info";
+    const title = document.createElement("strong");
+    title.textContent = media.title || (media.is_primary ? "Image principale" : "Image");
+    const meta = document.createElement("small");
+    meta.textContent = [media.is_primary ? "Principale" : null, media.author ? `par ${media.author}` : null].filter(Boolean).join(" · ");
+    info.append(title, meta);
+
+    card.append(imageButton, info);
+
+    if (isAdmin) {
+      const actions = document.createElement("div");
+      actions.className = "media-card-actions";
+      if (!media.is_primary) {
+        const primaryButton = document.createElement("button");
+        primaryButton.type = "button";
+        primaryButton.textContent = "Principale";
+        primaryButton.addEventListener("click", () => setPrimaryMedia(media));
+        actions.appendChild(primaryButton);
+      }
+      const deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.className = "danger-button";
+      deleteButton.textContent = "Supprimer";
+      deleteButton.addEventListener("click", () => deleteMedia(media));
+      actions.appendChild(deleteButton);
+      card.appendChild(actions);
+    }
+
+    mediaGallery.appendChild(card);
+  });
+}
+
+async function loadMedia() {
+  const { data, error } = await supabaseClient
+    .from("atlas_media")
+    .select("*")
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error("Erreur chargement médias :", error);
+    showNotification(`Impossible de charger les médias : ${error.message}`, "error");
+    return;
+  }
+
+  mediaRecords = Array.isArray(data) ? data : [];
+  refreshInterface();
+  if (activeMediaEntity) renderMediaGallery();
+}
+
+function getSafeFileName(value) {
+  return String(value || "image")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60) || "image";
+}
+
+async function compressImage(file) {
+  if (!file.type.startsWith("image/")) throw new Error("Le fichier choisi n’est pas une image.");
+  if (file.size > 5 * 1024 * 1024) throw new Error("L’image dépasse la limite de 5 Mo.");
+
+  const bitmap = await createImageBitmap(file);
+  const maxSize = 1800;
+  const scale = Math.min(1, maxSize / Math.max(bitmap.width, bitmap.height));
+  const width = Math.max(1, Math.round(bitmap.width * scale));
+  const height = Math.max(1, Math.round(bitmap.height * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d");
+  context.drawImage(bitmap, 0, 0, width, height);
+  bitmap.close?.();
+
+  const blob = await new Promise((resolve, reject) => {
+    canvas.toBlob((result) => result ? resolve(result) : reject(new Error("Compression impossible.")), "image/webp", 0.84);
+  });
+  return blob;
+}
+
+async function setPrimaryMedia(media) {
+  if (!isAdmin) return;
+  await supabaseClient
+    .from("atlas_media")
+    .update({ is_primary: false })
+    .eq("entity_type", media.entity_type)
+    .eq("entity_id", media.entity_id);
+
+  const { error } = await supabaseClient
+    .from("atlas_media")
+    .update({ is_primary: true })
+    .eq("id", media.id);
+
+  if (error) {
+    showNotification(`Modification impossible : ${error.message}`, "error");
+    return;
+  }
+  showNotification("Image principale mise à jour.");
+  await loadMedia();
+}
+
+async function deleteMedia(media) {
+  if (!isAdmin || !window.confirm("Supprimer définitivement cette image ?")) return;
+  const { error: storageError } = await supabaseClient.storage.from("atlas-media").remove([media.storage_path]);
+  if (storageError) {
+    showNotification(`Suppression du fichier impossible : ${storageError.message}`, "error");
+    return;
+  }
+  const { error } = await supabaseClient.from("atlas_media").delete().eq("id", media.id);
+  if (error) {
+    showNotification(`Suppression de la fiche média impossible : ${error.message}`, "error");
+    return;
+  }
+  showNotification("Image supprimée.");
+  await loadMedia();
+}
+
+mediaFileInput.addEventListener("change", () => {
+  const file = mediaFileInput.files?.[0];
+  if (pendingMediaObjectUrl) URL.revokeObjectURL(pendingMediaObjectUrl);
+  pendingMediaObjectUrl = null;
+  if (!file) {
+    mediaPreview.hidden = true;
+    return;
+  }
+  pendingMediaObjectUrl = URL.createObjectURL(file);
+  mediaPreviewImage.src = pendingMediaObjectUrl;
+  mediaPreview.hidden = false;
+});
+
+mediaUploadButton.addEventListener("click", async () => {
+  if (!isAdmin || !activeMediaEntity) return;
+  const file = mediaFileInput.files?.[0];
+  if (!file) {
+    showNotification("Choisis d’abord une image.", "error");
+    return;
+  }
+
+  mediaUploadButton.disabled = true;
+  mediaUploadButton.textContent = "Optimisation...";
+
+  try {
+    const blob = await compressImage(file);
+    const { entityType, entityId, entity } = activeMediaEntity;
+    const folder = entityType === "marker" ? "markers" : "zones";
+    const path = `${folder}/${entityId}/${Date.now()}-${getSafeFileName(file.name.replace(/\.[^.]+$/, ""))}.webp`;
+
+    mediaUploadButton.textContent = "Envoi...";
+    const { error: uploadError } = await supabaseClient.storage
+      .from("atlas-media")
+      .upload(path, blob, { contentType: "image/webp", upsert: false });
+    if (uploadError) throw uploadError;
+
+    const { data: publicData } = supabaseClient.storage.from("atlas-media").getPublicUrl(path);
+    const existing = getEntityMedia(entityType, entityId);
+    const shouldBePrimary = mediaPrimaryInput.checked || existing.length === 0;
+
+    if (shouldBePrimary && existing.length > 0) {
+      await supabaseClient
+        .from("atlas_media")
+        .update({ is_primary: false })
+        .eq("entity_type", entityType)
+        .eq("entity_id", entityId);
+    }
+
+    const { error: insertError } = await supabaseClient.from("atlas_media").insert([{
+      entity_type: entityType,
+      entity_id: Number(entityId),
+      storage_path: path,
+      public_url: publicData.publicUrl,
+      media_type: "image",
+      title: mediaTitleInput.value.trim() || null,
+      description: null,
+      is_primary: shouldBePrimary,
+      author: playerName,
+      uploaded_by: adminUser?.id || null
+    }]);
+
+    if (insertError) {
+      await supabaseClient.storage.from("atlas-media").remove([path]);
+      throw insertError;
+    }
+
+    mediaFileInput.value = "";
+    mediaTitleInput.value = "";
+    mediaPrimaryInput.checked = false;
+    mediaPreview.hidden = true;
+    mediaPreviewImage.removeAttribute("src");
+    if (pendingMediaObjectUrl) URL.revokeObjectURL(pendingMediaObjectUrl);
+    pendingMediaObjectUrl = null;
+    showNotification(`Image ajoutée à « ${entity.name || "la fiche"} ».`);
+    await loadMedia();
+  } catch (error) {
+    console.error("Erreur média :", error);
+    showNotification(`Envoi impossible : ${error.message}`, "error");
+  } finally {
+    mediaUploadButton.disabled = false;
+    mediaUploadButton.textContent = "Envoyer l’image";
+  }
+});
+
+document.querySelectorAll("[data-media-close]").forEach((button) => {
+  button.addEventListener("click", closeMediaModal);
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !mediaModal.hidden) closeMediaModal();
+});
 
 /* =========================================================
    NOTIFICATIONS
@@ -1484,6 +1801,8 @@ function createPopupContent(place, identifier, favorite) {
 
       ${subcategoryLine}
 
+      ${createPopupMedia("marker", place.id)}
+
       <div class="popup-description">
         ${description}
       </div>
@@ -1492,6 +1811,7 @@ function createPopupContent(place, identifier, favorite) {
         <div class="popup-admin-actions">
           <button type="button" data-admin-edit="${escapeHtml(identifier)}">Modifier</button>
           <button type="button" data-admin-move="${escapeHtml(identifier)}">Déplacer</button>
+          <button type="button" data-media-open="marker" data-media-entity-id="${escapeHtml(place.id)}">Images</button>
           <button type="button" class="danger-button" data-admin-delete="${escapeHtml(identifier)}">Supprimer</button>
         </div>
       ` : ""}
@@ -1580,6 +1900,12 @@ map.on("popupopen", (event) => {
   favoriteButton?.addEventListener("click", () => {
     toggleFavorite(favoriteButton.dataset.favoriteId);
     map.closePopup();
+  });
+
+  popupElement?.querySelectorAll("[data-media-open]").forEach((button) => {
+    button.addEventListener("click", () => {
+      openMediaModal(button.dataset.mediaOpen, button.dataset.mediaEntityId);
+    });
   });
 
   popupElement?.querySelector("[data-admin-edit]")?.addEventListener("click", (e) => {
@@ -1939,8 +2265,9 @@ function createZonePopup(zone) {
           <p>${escapeHtml(category.label)}${zone.subcategory ? ` · ${escapeHtml(zone.subcategory)}` : ""}</p>
         </div>
       </header>
+      ${createPopupMedia("zone", zone.id)}
       <div class="popup-description">${description}</div>
-      ${isAdmin ? `<div class="popup-admin-actions zone-admin-actions"><button type="button" class="zone-edit-button" data-zone-edit="${zone.id}">Modifier les infos</button><button type="button" class="zone-shape-button" data-zone-shape-edit="${zone.id}">Modifier la forme</button><button type="button" class="danger-button" data-zone-delete="${zone.id}">Supprimer la zone</button></div>` : ""}
+      ${isAdmin ? `<div class="popup-admin-actions zone-admin-actions"><button type="button" class="zone-edit-button" data-zone-edit="${zone.id}">Modifier les infos</button><button type="button" class="zone-shape-button" data-zone-shape-edit="${zone.id}">Modifier la forme</button><button type="button" data-media-open="zone" data-media-entity-id="${zone.id}">Images</button><button type="button" class="danger-button" data-zone-delete="${zone.id}">Supprimer la zone</button></div>` : ""}
       <footer class="marker-popup-footer"><span>Ajoutée par <strong>${escapeHtml(zone.author || "Inconnu")}</strong></span></footer>
     </article>`;
 }
@@ -2500,6 +2827,17 @@ supabaseClient
   )
   .subscribe((status) => console.log("Statut zones Realtime :", status));
 
+
+
+supabaseClient
+  .channel("atlas-media-realtime")
+  .on(
+    "postgres_changes",
+    { event: "*", schema: "public", table: "atlas_media" },
+    () => loadMedia()
+  )
+  .subscribe((status) => console.log("Statut médias Realtime :", status));
+
 /* =========================================================
    DÉMARRAGE
    ========================================================= */
@@ -2519,7 +2857,7 @@ async function initializeApplication() {
   currentSearch = normalizeText(placeSearchInput.value);
   clearSearchButton.hidden = !currentSearch;
 
-  await Promise.all([loadMarkers(), loadZones()]);
+  await Promise.all([loadMarkers(), loadZones(), loadMedia()]);
 
   /*
    * Force une synchronisation finale après le chargement

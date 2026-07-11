@@ -8,7 +8,7 @@
     content="width=device-width, initial-scale=1"
   >
 
-  <title>Atlas RP v0.7.5 — Carte GTA V</title>
+  <title>Atlas RP v0.8.0 — Carte GTA V</title>
 
   <link
     rel="stylesheet"
@@ -20,7 +20,7 @@
     href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css"
   >
 
-  <link rel="stylesheet" href="style.css?v=0.7.5">
+  <link rel="stylesheet" href="style.css?v=0.8.0">
 </head>
 
 <body>
@@ -28,7 +28,7 @@
     <header class="sidebar-header">
       <div>
         <h1>Atlas RP</h1>
-        <p class="subtitle">Carte collaborative GTA V · v0.7.5</p>
+        <p class="subtitle">Carte collaborative GTA V · v0.8.0</p>
       </div>
 
       <div class="player-box">
@@ -313,6 +313,50 @@
       </button>
     </section>
 
+
+    <div id="media-modal" class="media-modal" hidden>
+      <div class="media-modal-backdrop" data-media-close></div>
+      <section class="media-dialog" role="dialog" aria-modal="true" aria-labelledby="media-dialog-title">
+        <header class="media-dialog-header">
+          <div>
+            <h2 id="media-dialog-title">Médias de la fiche</h2>
+            <p id="media-entity-label" class="panel-description"></p>
+          </div>
+          <button type="button" class="media-close-button" data-media-close aria-label="Fermer">×</button>
+        </header>
+
+        <div id="media-upload-block" class="media-upload-block" hidden>
+          <label class="field-label" for="media-file">Ajouter une image</label>
+          <input id="media-file" type="file" accept="image/jpeg,image/png,image/webp">
+
+          <label class="field-label" for="media-title">Titre facultatif</label>
+          <input id="media-title" type="text" maxlength="100" placeholder="Exemple : Entrée principale">
+
+          <label class="media-primary-toggle">
+            <input id="media-primary" type="checkbox">
+            <span>Définir comme image principale</span>
+          </label>
+
+          <div id="media-preview" class="media-preview" hidden>
+            <img id="media-preview-image" alt="Aperçu de l’image">
+          </div>
+
+          <button id="media-upload-button" type="button" class="primary-button">
+            Envoyer l’image
+          </button>
+          <p class="panel-description media-help">JPEG, PNG ou WebP · 5 Mo maximum. L’image est optimisée avant l’envoi.</p>
+        </div>
+
+        <div class="media-gallery-heading">
+          <h3>Galerie</h3>
+          <span id="media-count" class="marker-count">0 image</span>
+        </div>
+        <div id="media-gallery" class="media-gallery">
+          <p class="empty-results">Aucune image pour cette fiche.</p>
+        </div>
+      </section>
+    </div>
+
     <div
       id="notification"
       class="notification"
@@ -332,6 +376,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script src="config.js"></script>
-  <script src="app.js?v=0.7.5"></script>
+  <script src="app.js?v=0.8.0"></script>
 </body>
 </html>
