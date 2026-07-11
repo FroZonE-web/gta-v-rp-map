@@ -254,32 +254,84 @@ const drawControl = new L.Control.Draw({
 });
 
 map.addControl(drawControl);
-map.on(L.Draw.Event.DRAWSTART, () => { isDrawingZone = true; });
-map.on(L.Draw.Event.DRAWSTOP, () => { window.setTimeout(() => { isDrawingZone = false; }, 100); });
-map.on(L.Draw.Event.CREATED, (event) => {
+
+function revealZoneForm() {
+  const liveZoneForm = document.getElementById("zone-form");
+  const liveZoneStatus = document.getElementById("zone-status");
+  const liveZoneNameInput = document.getElementById("zone-name");
+
+  if (!liveZoneForm || !liveZoneStatus || !liveZoneNameInput) {
+    console.error("Interface Polyzone introuvable dans index.html.", {
+      zoneForm: liveZoneForm,
+      zoneStatus: liveZoneStatus,
+      zoneNameInput: liveZoneNameInput
+    });
+    showNotification("Le formulaire Polyzone est introuvable.", "error");
+    return false;
+  }
+
+  // Double méthode volontaire : certains navigateurs ou anciennes feuilles
+  // de style peuvent conserver l'affichage masqué malgré hidden=false.
+  liveZoneForm.hidden = false;
+  liveZoneForm.removeAttribute("hidden");
+  liveZoneForm.style.display = "block";
+
+  liveZoneStatus.textContent =
+    "Forme prête : complète les informations puis enregistre.";
+  liveZoneStatus.classList.add("location-selected");
+
+  window.requestAnimationFrame(() => {
+    liveZoneForm.scrollIntoView({ behavior: "smooth", block: "center" });
+    liveZoneNameInput.focus({ preventScroll: true });
+  });
+
+  return true;
+}
+
+function handleZoneCreated(event) {
+  console.log("Polyzone créée", event);
+
   cancelPendingZone(false);
   selectedZoneId = null;
-  pendingZoneLayer = event.layer;
+  pendingZoneLayer = event?.layer || null;
+
+  if (!pendingZoneLayer) {
+    showNotification("La forme dessinée n'a pas pu être récupérée.", "error");
+    return;
+  }
+
   temporaryZoneLayer.addLayer(pendingZoneLayer);
-  zoneForm.hidden = false;
-  zoneStatus.textContent = "Forme prête : complète les informations puis enregistre.";
-  zoneStatus.classList.add("location-selected");
+
+  if (!revealZoneForm()) {
+    return;
+  }
+
   updateZoneSubcategorySelect();
   applyPendingZoneStyle();
 
   pendingZoneLayer.on("click", () => {
-    zoneForm.hidden = false;
-    zoneForm.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    zoneNameInput.focus();
+    revealZoneForm();
   });
 
-  window.setTimeout(() => {
-    zoneForm.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    zoneNameInput.focus();
-  }, 100);
+  showNotification(
+    "Forme créée : complète le formulaire Polyzones puis enregistre-la."
+  );
+}
 
-  showNotification("Forme créée : complète le formulaire Polyzones puis enregistre-la.");
+map.on(L.Draw.Event.DRAWSTART, () => {
+  isDrawingZone = true;
 });
+
+map.on(L.Draw.Event.DRAWSTOP, () => {
+  window.setTimeout(() => {
+    isDrawingZone = false;
+  }, 250);
+});
+
+// L'événement littéral et la constante correspondent tous deux à
+// « draw:created ». Un seul gestionnaire est enregistré pour éviter
+// les doubles insertions.
+map.on("draw:created", handleZoneCreated);
 
 /* =========================================================
    OUTILS
@@ -1801,12 +1853,30 @@ function applyPendingZoneStyle() {
 }
 
 function cancelPendingZone(resetForm = true) {
-  if (pendingZoneLayer) temporaryZoneLayer.removeLayer(pendingZoneLayer);
+  if (pendingZoneLayer) {
+    temporaryZoneLayer.removeLayer(pendingZoneLayer);
+  }
+
   pendingZoneLayer = null;
-  zoneForm.hidden = true;
-  zoneStatus.textContent = "Dessine une forme avec la barre d’outils de la carte.";
-  zoneStatus.classList.remove("location-selected");
-  if (resetForm) zoneForm.reset();
+
+  const liveZoneForm = document.getElementById("zone-form");
+  const liveZoneStatus = document.getElementById("zone-status");
+
+  if (liveZoneForm) {
+    liveZoneForm.hidden = true;
+    liveZoneForm.setAttribute("hidden", "");
+    liveZoneForm.style.display = "none";
+
+    if (resetForm) {
+      liveZoneForm.reset();
+    }
+  }
+
+  if (liveZoneStatus) {
+    liveZoneStatus.textContent =
+      "Dessine une forme avec la barre d’outils de la carte.";
+    liveZoneStatus.classList.remove("location-selected");
+  }
 }
 
 function serializeZoneCoordinates(layer) {
