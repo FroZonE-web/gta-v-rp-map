@@ -1,53 +1,136 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Carte RP GTA V</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Atlas RP — Carte GTA V</title>
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css"
+  >
+
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
   <aside id="sidebar">
-    <h1>Carte RP GTA V</h1>
-    <p class="hint">Pseudo : <strong id="player-name"></strong></p>
-    <button id="change-name">Changer de pseudo</button>
+    <header class="sidebar-header">
+      <div>
+        <h1>Atlas RP</h1>
+        <p class="subtitle">Carte collaborative GTA V</p>
+      </div>
 
-    <div class="panel">
+      <div class="player-box">
+        <span>Connecté en tant que</span>
+        <strong id="player-name">Chargement...</strong>
+
+        <button
+          id="change-name"
+          class="secondary-button"
+          type="button"
+        >
+          Changer de pseudo
+        </button>
+      </div>
+    </header>
+
+    <section class="panel">
       <h2>Filtres</h2>
-      <label><input type="checkbox" class="filter" value="police" checked> 🚓 Police / Justice</label>
-      <label><input type="checkbox" class="filter" value="ems" checked> 🚑 EMS</label>
-      <label><input type="checkbox" class="filter" value="entreprise" checked> 🏢 Entreprises</label>
-      <label><input type="checkbox" class="filter" value="gang" checked> 🔴 Gangs</label>
-      <label><input type="checkbox" class="filter" value="event" checked> 🎭 Événements</label>
-      <label><input type="checkbox" class="filter" value="autre" checked> 📍 Autres</label>
-    </div>
+      <p class="panel-description">
+        Affiche ou masque les différentes catégories.
+      </p>
 
-    <div class="panel">
+      <div id="filters-container"></div>
+    </section>
+
+    <section class="panel">
       <h2>Ajouter un point</h2>
-      <p>Clique sur la map, puis remplis le formulaire.</p>
+
+      <p id="location-status" class="location-status">
+        Clique sur la carte pour choisir un emplacement.
+      </p>
+
       <form id="place-form">
-        <input id="place-name" placeholder="Nom du lieu" required />
-        <select id="place-category">
-          <option value="police">🚓 Police / Justice</option>
-          <option value="ems">🚑 EMS</option>
-          <option value="entreprise">🏢 Entreprise</option>
-          <option value="gang">🔴 Gang</option>
-          <option value="event">🎭 Événement</option>
-          <option value="autre">📍 Autre</option>
-        </select>
-        <textarea id="place-description" placeholder="Description RP"></textarea>
-        <button type="submit">Ajouter le marqueur</button>
+        <label class="field-label" for="place-name">
+          Nom du lieu
+        </label>
+
+        <input
+          id="place-name"
+          type="text"
+          maxlength="100"
+          placeholder="Exemple : Maison de Mason"
+          required
+        >
+
+        <label class="field-label" for="place-category">
+          Catégorie
+        </label>
+
+        <select id="place-category" required></select>
+
+        <div id="subcategory-field" hidden>
+          <label class="field-label" for="place-subcategory">
+            Sous-catégorie
+          </label>
+
+          <select id="place-subcategory"></select>
+        </div>
+
+        <label class="field-label" for="place-description">
+          Description RP
+        </label>
+
+        <textarea
+          id="place-description"
+          maxlength="1000"
+          placeholder="Informations utiles sur ce lieu..."
+        ></textarea>
+
+        <button
+          id="add-marker-button"
+          class="primary-button"
+          type="submit"
+        >
+          Ajouter le marqueur
+        </button>
       </form>
-    </div>
+    </section>
+
+    <section class="panel">
+      <h2>Sauvegarde</h2>
+
+      <p class="panel-description">
+        Les marqueurs sont automatiquement enregistrés dans Supabase.
+      </p>
+
+      <button
+        id="export-json"
+        class="secondary-button"
+        type="button"
+      >
+        Exporter une copie JSON
+      </button>
+    </section>
+
+    <div id="notification" class="notification" hidden></div>
   </aside>
 
-  <main id="map"></main>
+  <main id="map" aria-label="Carte GTA V interactive"></main>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
   <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <script src="config.js"></script>
   <script src="app.js"></script>
 </body>
