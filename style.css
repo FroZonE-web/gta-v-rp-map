@@ -20,7 +20,7 @@
 
   --input: #0f1217;
 
-  --sidebar-width: 340px;
+  --sidebar-width: 360px;
 }
 
 html,
@@ -34,14 +34,14 @@ body {
   display: flex;
   overflow: hidden;
 
+  color: var(--text);
+  background: var(--background);
+
   font-family:
     Inter,
     Arial,
     Helvetica,
     sans-serif;
-
-  color: var(--text);
-  background: var(--background);
 }
 
 /* =========================================================
@@ -85,6 +85,7 @@ body {
   padding: 12px;
 
   background: var(--panel);
+
   border: 1px solid var(--border);
   border-radius: 10px;
 }
@@ -115,6 +116,7 @@ body {
   padding: 14px;
 
   background: var(--panel);
+
   border: 1px solid var(--border);
   border-radius: 12px;
 }
@@ -129,8 +131,191 @@ body {
   margin: 0 0 12px;
 
   color: var(--muted);
+
   font-size: 12px;
   line-height: 1.45;
+}
+
+.panel-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  margin-bottom: 10px;
+}
+
+.panel-title-row h2 {
+  margin: 0;
+}
+
+.marker-count {
+  padding: 4px 8px;
+
+  color: #cad7f5;
+  background: rgba(50, 115, 234, 0.15);
+
+  border: 1px solid rgba(50, 115, 234, 0.3);
+  border-radius: 999px;
+
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   RECHERCHE
+   ========================================================= */
+
+.search-panel {
+  position: relative;
+}
+
+.search-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 0 10px;
+
+  background: var(--input);
+
+  border: 1px solid #363e4b;
+  border-radius: 8px;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.search-field:focus-within {
+  border-color: var(--primary);
+
+  box-shadow:
+    0 0 0 3px rgba(50, 115, 234, 0.16);
+}
+
+.search-field span {
+  flex-shrink: 0;
+  font-size: 14px;
+}
+
+.search-field input {
+  padding-right: 0;
+  padding-left: 0;
+
+  border: none;
+  box-shadow: none;
+}
+
+.search-field input:focus {
+  border: none;
+  box-shadow: none;
+}
+
+.small-secondary-button {
+  width: auto;
+
+  margin-top: 8px;
+  padding: 6px 9px;
+
+  color: var(--muted);
+  background: #282e38;
+
+  font-size: 10px;
+}
+
+.search-results {
+  display: grid;
+  gap: 5px;
+
+  max-height: 280px;
+  overflow-y: auto;
+
+  margin-top: 10px;
+  padding-right: 2px;
+
+  scrollbar-width: thin;
+  scrollbar-color: #394151 transparent;
+}
+
+.empty-results,
+.remaining-results {
+  margin: 0;
+  padding: 12px 8px;
+
+  color: var(--muted);
+
+  font-size: 11px;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.search-result-item {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 15px;
+  align-items: center;
+  gap: 9px;
+
+  padding: 9px;
+
+  color: var(--text);
+  background: #12161d;
+
+  border: 1px solid #2d3440;
+  border-radius: 9px;
+
+  text-align: left;
+}
+
+.search-result-item:hover {
+  background: var(--panel-hover);
+  border-color: #465064;
+}
+
+.search-result-icon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+
+  background: #0b0e13;
+
+  border: 1px solid #343d49;
+  border-radius: 50%;
+
+  font-size: 15px;
+}
+
+.search-result-information {
+  display: block;
+  min-width: 0;
+}
+
+.search-result-information strong,
+.search-result-information small {
+  display: block;
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.search-result-information strong {
+  color: var(--text);
+  font-size: 12px;
+}
+
+.search-result-information small {
+  margin-top: 3px;
+
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.search-result-arrow {
+  color: #768093;
+  font-size: 21px;
 }
 
 /* =========================================================
@@ -139,7 +324,9 @@ body {
 
 .filter-group {
   padding: 7px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+
+  border-bottom:
+    1px solid rgba(255, 255, 255, 0.055);
 }
 
 .filter-group:last-child {
@@ -197,6 +384,7 @@ body {
   margin-bottom: 4px;
 
   color: #d6dbe3;
+
   font-size: 12px;
   font-weight: 600;
 }
@@ -206,7 +394,6 @@ select,
 textarea,
 button {
   width: 100%;
-
   font: inherit;
 }
 
@@ -251,6 +438,7 @@ button {
   border-radius: 8px;
 
   cursor: pointer;
+
   font-size: 12px;
   font-weight: 700;
 
@@ -417,6 +605,7 @@ button:disabled {
   font-size: 19px;
 
   background: #0e1116;
+
   border: 1px solid #343c48;
   border-radius: 50%;
 }
@@ -455,6 +644,7 @@ button:disabled {
   padding: 14px 15px;
 
   color: #dce1e8;
+
   font-size: 12px;
   line-height: 1.55;
 }
@@ -527,5 +717,9 @@ button:disabled {
     width: 100%;
     height: 52vh;
     min-height: 420px;
+  }
+
+  .search-results {
+    max-height: 200px;
   }
 }

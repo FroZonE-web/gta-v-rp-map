@@ -7,6 +7,7 @@
 const MAP_WIDTH = 8192;
 const MAP_HEIGHT = 8192;
 const MAP_IMAGE_URL = "assets/gta-v-map.jpg";
+
 const MAP_BOUNDS = [
   [0, 0],
   [MAP_HEIGHT, MAP_WIDTH]
@@ -14,8 +15,6 @@ const MAP_BOUNDS = [
 
 /* =========================================================
    CATÉGORIES
-   Pour ajouter une catégorie plus tard, il suffira
-   principalement de la déclarer ici.
    ========================================================= */
 
 const CATEGORIES = {
@@ -89,25 +88,56 @@ const CATEGORIES = {
    ÉLÉMENTS HTML
    ========================================================= */
 
-const playerNameElement = document.getElementById("player-name");
-const changeNameButton = document.getElementById("change-name");
+const playerNameElement =
+  document.getElementById("player-name");
 
-const filtersContainer = document.getElementById("filters-container");
+const changeNameButton =
+  document.getElementById("change-name");
 
-const placeForm = document.getElementById("place-form");
-const placeNameInput = document.getElementById("place-name");
-const placeCategorySelect = document.getElementById("place-category");
-const placeDescriptionInput = document.getElementById("place-description");
+const filtersContainer =
+  document.getElementById("filters-container");
 
-const subcategoryField = document.getElementById("subcategory-field");
+const placeForm =
+  document.getElementById("place-form");
+
+const placeNameInput =
+  document.getElementById("place-name");
+
+const placeCategorySelect =
+  document.getElementById("place-category");
+
+const placeDescriptionInput =
+  document.getElementById("place-description");
+
+const subcategoryField =
+  document.getElementById("subcategory-field");
+
 const placeSubcategorySelect =
   document.getElementById("place-subcategory");
 
-const locationStatus = document.getElementById("location-status");
-const addMarkerButton = document.getElementById("add-marker-button");
+const locationStatus =
+  document.getElementById("location-status");
 
-const exportButton = document.getElementById("export-json");
-const notificationElement = document.getElementById("notification");
+const addMarkerButton =
+  document.getElementById("add-marker-button");
+
+const exportButton =
+  document.getElementById("export-json");
+
+const notificationElement =
+  document.getElementById("notification");
+
+const placeSearchInput =
+  document.getElementById("place-search");
+
+const clearSearchButton =
+  document.getElementById("clear-search");
+
+const searchResultsContainer =
+  document.getElementById("search-results");
+
+const visibleMarkerCountElement =
+  document.getElementById("visible-marker-count");
 
 /* =========================================================
    ÉTAT DE L’APPLICATION
@@ -116,9 +146,12 @@ const notificationElement = document.getElementById("notification");
 let places = [];
 let pendingClick = null;
 let playerName = "";
+let currentSearch = "";
+
+const markerInstances = new Map();
 
 /* =========================================================
-   CRÉATION DE LA CARTE LEAFLET
+   CRÉATION DE LA CARTE
    ========================================================= */
 
 const map = L.map("map", {
@@ -129,7 +162,11 @@ const map = L.map("map", {
   attributionControl: false
 });
 
-L.imageOverlay(MAP_IMAGE_URL, MAP_BOUNDS).addTo(map);
+L.imageOverlay(
+  MAP_IMAGE_URL,
+  MAP_BOUNDS
+).addTo(map);
+
 map.fitBounds(MAP_BOUNDS);
 
 const markersLayer = L.layerGroup().addTo(map);
@@ -159,8 +196,7 @@ map.on(L.Draw.Event.CREATED, (event) => {
 });
 
 /* =========================================================
-   OUTILS DE SÉCURISATION DU TEXTE
-   Empêche du HTML indésirable dans les noms et descriptions.
+   OUTILS
    ========================================================= */
 
 function escapeHtml(value) {
@@ -174,13 +210,53 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
+function normalizeText(value) {
+  return String(value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+function getPlaceIdentifier(place, index = 0) {
+  if (place.id !== null && place.id !== undefined) {
+    return String(place.id);
+  }
+
+  return [
+    place.name,
+    place.lat,
+    place.lng,
+    index
+  ].join("-");
+}
+
+function getCategoryData(categoryKey) {
+  return CATEGORIES[categoryKey] || {
+    label: categoryKey || "Inconnue",
+    icon: "📍",
+    subcategories: []
+  };
+}
+
+function getCategoryLabel(categoryKey) {
+  return getCategoryData(categoryKey).label;
+}
+
+function getCategoryIcon(categoryKey) {
+  return getCategoryData(categoryKey).icon;
+}
+
 /* =========================================================
    NOTIFICATIONS
    ========================================================= */
 
 let notificationTimeout = null;
 
-function showNotification(message, type = "success") {
+function showNotification(
+  message,
+  type = "success"
+) {
   if (!notificationElement) {
     return;
   }
@@ -188,7 +264,10 @@ function showNotification(message, type = "success") {
   window.clearTimeout(notificationTimeout);
 
   notificationElement.textContent = message;
-  notificationElement.className = `notification notification-${type}`;
+
+  notificationElement.className =
+    `notification notification-${type}`;
+
   notificationElement.hidden = false;
 
   notificationTimeout = window.setTimeout(() => {
@@ -214,30 +293,43 @@ function askForPlayerName(defaultValue = "") {
 }
 
 function initializePlayerName() {
-  const savedName = localStorage.getItem("rp_player_name");
+  const savedName =
+    localStorage.getItem("rp_player_name");
 
   if (savedName && savedName.trim()) {
     playerName = savedName.trim();
   } else {
     playerName = askForPlayerName();
-    localStorage.setItem("rp_player_name", playerName);
+
+    localStorage.setItem(
+      "rp_player_name",
+      playerName
+    );
   }
 
   playerNameElement.textContent = playerName;
 }
 
 changeNameButton.addEventListener("click", () => {
-  const newName = askForPlayerName(playerName);
+  const newName =
+    askForPlayerName(playerName);
 
   if (!newName) {
     return;
   }
 
   playerName = newName;
-  localStorage.setItem("rp_player_name", playerName);
+
+  localStorage.setItem(
+    "rp_player_name",
+    playerName
+  );
+
   playerNameElement.textContent = playerName;
 
-  showNotification(`Pseudo modifié : ${playerName}`);
+  showNotification(
+    `Pseudo modifié : ${playerName}`
+  );
 });
 
 /* =========================================================
@@ -247,10 +339,15 @@ changeNameButton.addEventListener("click", () => {
 function createCategoryOptions() {
   placeCategorySelect.innerHTML = "";
 
-  for (const [categoryKey, categoryData] of Object.entries(CATEGORIES)) {
-    const option = document.createElement("option");
+  for (
+    const [categoryKey, categoryData]
+    of Object.entries(CATEGORIES)
+  ) {
+    const option =
+      document.createElement("option");
 
     option.value = categoryKey;
+
     option.textContent =
       `${categoryData.icon} ${categoryData.label}`;
 
@@ -261,8 +358,11 @@ function createCategoryOptions() {
 }
 
 function updateSubcategorySelect() {
-  const categoryKey = placeCategorySelect.value;
-  const categoryData = CATEGORIES[categoryKey];
+  const categoryKey =
+    placeCategorySelect.value;
+
+  const categoryData =
+    CATEGORIES[categoryKey];
 
   placeSubcategorySelect.innerHTML = "";
 
@@ -273,22 +373,34 @@ function updateSubcategorySelect() {
   ) {
     subcategoryField.hidden = true;
     placeSubcategorySelect.required = false;
+
     return;
   }
 
   subcategoryField.hidden = false;
   placeSubcategorySelect.required = true;
 
-  const emptyOption = document.createElement("option");
+  const emptyOption =
+    document.createElement("option");
+
   emptyOption.value = "";
-  emptyOption.textContent = "Choisir une sous-catégorie";
+
+  emptyOption.textContent =
+    "Choisir une sous-catégorie";
+
   emptyOption.disabled = true;
   emptyOption.selected = true;
 
-  placeSubcategorySelect.appendChild(emptyOption);
+  placeSubcategorySelect.appendChild(
+    emptyOption
+  );
 
-  for (const subcategory of categoryData.subcategories) {
-    const option = document.createElement("option");
+  for (
+    const subcategory
+    of categoryData.subcategories
+  ) {
+    const option =
+      document.createElement("option");
 
     option.value = subcategory;
     option.textContent = subcategory;
@@ -309,116 +421,206 @@ placeCategorySelect.addEventListener(
 function createFilters() {
   filtersContainer.innerHTML = "";
 
-  for (const [categoryKey, categoryData] of Object.entries(CATEGORIES)) {
-    const categoryBlock = document.createElement("div");
-    categoryBlock.className = "filter-group";
+  for (
+    const [categoryKey, categoryData]
+    of Object.entries(CATEGORIES)
+  ) {
+    const categoryBlock =
+      document.createElement("div");
 
-    const categoryLabel = document.createElement("label");
-    categoryLabel.className = "filter-category";
+    categoryBlock.className =
+      "filter-group";
 
-    const categoryCheckbox = document.createElement("input");
+    const categoryLabel =
+      document.createElement("label");
+
+    categoryLabel.className =
+      "filter-category";
+
+    const categoryCheckbox =
+      document.createElement("input");
+
     categoryCheckbox.type = "checkbox";
-    categoryCheckbox.className = "category-filter";
+
+    categoryCheckbox.className =
+      "category-filter";
+
     categoryCheckbox.value = categoryKey;
     categoryCheckbox.checked = true;
 
-    categoryLabel.appendChild(categoryCheckbox);
+    categoryLabel.appendChild(
+      categoryCheckbox
+    );
 
-    const categoryText = document.createElement("span");
+    const categoryText =
+      document.createElement("span");
+
     categoryText.textContent =
       `${categoryData.icon} ${categoryData.label}`;
 
-    categoryLabel.appendChild(categoryText);
-    categoryBlock.appendChild(categoryLabel);
+    categoryLabel.appendChild(
+      categoryText
+    );
 
-    if (categoryData.subcategories.length > 0) {
-      const childrenContainer = document.createElement("div");
-      childrenContainer.className = "subcategory-filters";
+    categoryBlock.appendChild(
+      categoryLabel
+    );
 
-      for (const subcategory of categoryData.subcategories) {
-        const childLabel = document.createElement("label");
-        childLabel.className = "filter-subcategory";
+    if (
+      categoryData.subcategories.length > 0
+    ) {
+      const childrenContainer =
+        document.createElement("div");
 
-        const childCheckbox = document.createElement("input");
+      childrenContainer.className =
+        "subcategory-filters";
+
+      for (
+        const subcategory
+        of categoryData.subcategories
+      ) {
+        const childLabel =
+          document.createElement("label");
+
+        childLabel.className =
+          "filter-subcategory";
+
+        const childCheckbox =
+          document.createElement("input");
+
         childCheckbox.type = "checkbox";
-        childCheckbox.className = "subcategory-filter";
-        childCheckbox.dataset.category = categoryKey;
-        childCheckbox.value = subcategory;
+
+        childCheckbox.className =
+          "subcategory-filter";
+
+        childCheckbox.dataset.category =
+          categoryKey;
+
+        childCheckbox.value =
+          subcategory;
+
         childCheckbox.checked = true;
 
-        childLabel.appendChild(childCheckbox);
+        childLabel.appendChild(
+          childCheckbox
+        );
 
-        const childText = document.createElement("span");
-        childText.textContent = subcategory;
+        const childText =
+          document.createElement("span");
 
-        childLabel.appendChild(childText);
-        childrenContainer.appendChild(childLabel);
+        childText.textContent =
+          subcategory;
+
+        childLabel.appendChild(
+          childText
+        );
+
+        childrenContainer.appendChild(
+          childLabel
+        );
       }
 
-      categoryBlock.appendChild(childrenContainer);
+      categoryBlock.appendChild(
+        childrenContainer
+      );
 
-      categoryCheckbox.addEventListener("change", () => {
-        const childCheckboxes =
-          childrenContainer.querySelectorAll(".subcategory-filter");
+      categoryCheckbox.addEventListener(
+        "change",
+        () => {
+          const childCheckboxes =
+            childrenContainer.querySelectorAll(
+              ".subcategory-filter"
+            );
 
-        childCheckboxes.forEach((checkbox) => {
-          checkbox.checked = categoryCheckbox.checked;
-        });
+          childCheckboxes.forEach(
+            (checkbox) => {
+              checkbox.checked =
+                categoryCheckbox.checked;
+            }
+          );
 
-        renderMarkers();
-      });
+          refreshInterface();
+        }
+      );
     } else {
-      categoryCheckbox.addEventListener("change", renderMarkers);
+      categoryCheckbox.addEventListener(
+        "change",
+        refreshInterface
+      );
     }
 
-    filtersContainer.appendChild(categoryBlock);
+    filtersContainer.appendChild(
+      categoryBlock
+    );
   }
 
   document
     .querySelectorAll(".subcategory-filter")
     .forEach((checkbox) => {
-      checkbox.addEventListener("change", () => {
-        synchronizeParentCategoryFilter(checkbox.dataset.category);
-        renderMarkers();
-      });
+      checkbox.addEventListener(
+        "change",
+        () => {
+          synchronizeParentCategoryFilter(
+            checkbox.dataset.category
+          );
+
+          refreshInterface();
+        }
+      );
     });
 }
 
-function synchronizeParentCategoryFilter(categoryKey) {
-  const parentCheckbox = document.querySelector(
-    `.category-filter[value="${categoryKey}"]`
-  );
+function synchronizeParentCategoryFilter(
+  categoryKey
+) {
+  const parentCheckbox =
+    document.querySelector(
+      `.category-filter[value="${categoryKey}"]`
+    );
 
-  const childCheckboxes = Array.from(
-    document.querySelectorAll(
-      `.subcategory-filter[data-category="${categoryKey}"]`
-    )
-  );
+  const childCheckboxes =
+    Array.from(
+      document.querySelectorAll(
+        `.subcategory-filter[data-category="${categoryKey}"]`
+      )
+    );
 
-  if (!parentCheckbox || childCheckboxes.length === 0) {
+  if (
+    !parentCheckbox ||
+    childCheckboxes.length === 0
+  ) {
     return;
   }
 
-  const selectedChildren = childCheckboxes.filter(
-    (checkbox) => checkbox.checked
-  );
+  const selectedChildren =
+    childCheckboxes.filter(
+      (checkbox) => checkbox.checked
+    );
 
-  parentCheckbox.checked = selectedChildren.length > 0;
+  parentCheckbox.checked =
+    selectedChildren.length > 0;
+
   parentCheckbox.indeterminate =
     selectedChildren.length > 0 &&
-    selectedChildren.length < childCheckboxes.length;
+    selectedChildren.length <
+      childCheckboxes.length;
 }
 
-function isPlaceVisible(place) {
-  const categoryCheckbox = document.querySelector(
-    `.category-filter[value="${place.category}"]`
-  );
+function passesCategoryFilters(place) {
+  const categoryCheckbox =
+    document.querySelector(
+      `.category-filter[value="${place.category}"]`
+    );
 
-  if (!categoryCheckbox || !categoryCheckbox.checked) {
+  if (
+    !categoryCheckbox ||
+    !categoryCheckbox.checked
+  ) {
     return false;
   }
 
-  const categoryData = CATEGORIES[place.category];
+  const categoryData =
+    CATEGORIES[place.category];
 
   if (
     !categoryData ||
@@ -428,23 +630,26 @@ function isPlaceVisible(place) {
   }
 
   /*
-   * Les anciens marqueurs Gang ont subcategory = NULL.
-   * Ils restent visibles dès que leur catégorie principale
-   * est activée.
+   * Les anciens marqueurs sans sous-catégorie
+   * restent visibles.
    */
   if (!place.subcategory) {
     return true;
   }
 
-  const subcategoryCheckbox = Array.from(
-    document.querySelectorAll(
-      `.subcategory-filter[data-category="${place.category}"]`
-    )
-  ).find((checkbox) => checkbox.value === place.subcategory);
+  const subcategoryCheckbox =
+    Array.from(
+      document.querySelectorAll(
+        `.subcategory-filter[data-category="${place.category}"]`
+      )
+    ).find(
+      (checkbox) =>
+        checkbox.value === place.subcategory
+    );
 
   /*
-   * Une sous-catégorie inconnue reste visible.
-   * Cela évite de perdre visuellement d’anciennes données.
+   * Une ancienne sous-catégorie inconnue
+   * reste également visible.
    */
   if (!subcategoryCheckbox) {
     return true;
@@ -454,12 +659,283 @@ function isPlaceVisible(place) {
 }
 
 /* =========================================================
+   RECHERCHE
+   ========================================================= */
+
+function buildSearchableText(place) {
+  const categoryLabel =
+    getCategoryLabel(place.category);
+
+  return normalizeText([
+    place.name,
+    place.description,
+    place.author,
+    place.category,
+    categoryLabel,
+    place.subcategory
+  ].join(" "));
+}
+
+function passesSearch(place) {
+  if (!currentSearch) {
+    return true;
+  }
+
+  return buildSearchableText(place)
+    .includes(currentSearch);
+}
+
+function isPlaceVisible(place) {
+  return (
+    passesCategoryFilters(place) &&
+    passesSearch(place)
+  );
+}
+
+function getVisiblePlaces() {
+  return places.filter(isPlaceVisible);
+}
+
+function updateVisibleMarkerCount() {
+  const visibleCount =
+    getVisiblePlaces().length;
+
+  const totalCount = places.length;
+
+  visibleMarkerCountElement.textContent =
+    currentSearch
+      ? `${visibleCount} / ${totalCount}`
+      : `${visibleCount} lieu${visibleCount > 1 ? "x" : ""}`;
+}
+
+function createSearchResultItem(
+  place,
+  index
+) {
+  const identifier =
+    getPlaceIdentifier(place, index);
+
+  const categoryData =
+    getCategoryData(place.category);
+
+  const button =
+    document.createElement("button");
+
+  button.type = "button";
+  button.className = "search-result-item";
+
+  const icon =
+    document.createElement("span");
+
+  icon.className =
+    "search-result-icon";
+
+  icon.textContent =
+    categoryData.icon;
+
+  const information =
+    document.createElement("span");
+
+  information.className =
+    "search-result-information";
+
+  const name =
+    document.createElement("strong");
+
+  name.textContent =
+    place.name || "Lieu sans nom";
+
+  const details =
+    document.createElement("small");
+
+  const detailParts = [
+    categoryData.label
+  ];
+
+  if (place.subcategory) {
+    detailParts.push(
+      place.subcategory
+    );
+  }
+
+  if (place.author) {
+    detailParts.push(
+      `par ${place.author}`
+    );
+  }
+
+  details.textContent =
+    detailParts.join(" · ");
+
+  information.appendChild(name);
+  information.appendChild(details);
+
+  const arrow =
+    document.createElement("span");
+
+  arrow.className =
+    "search-result-arrow";
+
+  arrow.textContent = "›";
+
+  button.appendChild(icon);
+  button.appendChild(information);
+  button.appendChild(arrow);
+
+  button.addEventListener("click", () => {
+    focusMarker(identifier);
+  });
+
+  return button;
+}
+
+function renderSearchResults() {
+  searchResultsContainer.innerHTML = "";
+
+  if (!currentSearch) {
+    const message =
+      document.createElement("p");
+
+    message.className =
+      "empty-results";
+
+    message.textContent =
+      "Saisis un mot pour rechercher un lieu.";
+
+    searchResultsContainer.appendChild(
+      message
+    );
+
+    return;
+  }
+
+  const results =
+    getVisiblePlaces();
+
+  if (results.length === 0) {
+    const message =
+      document.createElement("p");
+
+    message.className =
+      "empty-results";
+
+    message.textContent =
+      "Aucun lieu ne correspond à cette recherche et aux filtres sélectionnés.";
+
+    searchResultsContainer.appendChild(
+      message
+    );
+
+    return;
+  }
+
+  const resultLimit = 30;
+
+  results
+    .slice(0, resultLimit)
+    .forEach((place) => {
+      const originalIndex =
+        places.indexOf(place);
+
+      searchResultsContainer.appendChild(
+        createSearchResultItem(
+          place,
+          originalIndex
+        )
+      );
+    });
+
+  if (results.length > resultLimit) {
+    const remainingMessage =
+      document.createElement("p");
+
+    remainingMessage.className =
+      "remaining-results";
+
+    remainingMessage.textContent =
+      `${results.length - resultLimit} autre(s) résultat(s) non affiché(s).`;
+
+    searchResultsContainer.appendChild(
+      remainingMessage
+    );
+  }
+}
+
+function focusMarker(identifier) {
+  const marker =
+    markerInstances.get(
+      String(identifier)
+    );
+
+  if (!marker) {
+    showNotification(
+      "Ce marqueur est actuellement masqué par un filtre.",
+      "error"
+    );
+
+    return;
+  }
+
+  const position =
+    marker.getLatLng();
+
+  map.setView(
+    position,
+    Math.max(map.getZoom(), 0),
+    {
+      animate: true
+    }
+  );
+
+  window.setTimeout(() => {
+    marker.openPopup();
+  }, 300);
+
+  if (window.innerWidth <= 850) {
+    document
+      .getElementById("map")
+      .scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+  }
+}
+
+placeSearchInput.addEventListener(
+  "input",
+  () => {
+    currentSearch =
+      normalizeText(
+        placeSearchInput.value
+      );
+
+    clearSearchButton.hidden =
+      !currentSearch;
+
+    refreshInterface();
+  }
+);
+
+clearSearchButton.addEventListener(
+  "click",
+  () => {
+    placeSearchInput.value = "";
+    currentSearch = "";
+    clearSearchButton.hidden = true;
+
+    refreshInterface();
+
+    placeSearchInput.focus();
+  }
+);
+
+/* =========================================================
    MARQUEURS
    ========================================================= */
 
 function makeMarkerIcon(categoryKey) {
-  const categoryData = CATEGORIES[categoryKey];
-  const icon = categoryData?.icon || "📍";
+  const icon =
+    getCategoryIcon(categoryKey);
 
   return L.divIcon({
     className: "rp-marker",
@@ -470,41 +946,50 @@ function makeMarkerIcon(categoryKey) {
   });
 }
 
-function getCategoryLabel(categoryKey) {
-  return CATEGORIES[categoryKey]?.label || categoryKey || "Inconnue";
-}
-
 function createPopupContent(place) {
-  const categoryData = CATEGORIES[place.category];
+  const categoryData =
+    getCategoryData(place.category);
 
-  const icon = categoryData?.icon || "📍";
-  const categoryLabel = getCategoryLabel(place.category);
+  const subcategoryLine =
+    place.subcategory
+      ? `
+        <div class="popup-row">
+          <span>Sous-catégorie</span>
+          <strong>
+            ${escapeHtml(place.subcategory)}
+          </strong>
+        </div>
+      `
+      : "";
 
-  const subcategoryLine = place.subcategory
-    ? `
-      <div class="popup-row">
-        <span>Sous-catégorie</span>
-        <strong>${escapeHtml(place.subcategory)}</strong>
-      </div>
-    `
-    : "";
+  const description =
+    place.description
+      ? escapeHtml(place.description)
+          .replaceAll("\n", "<br>")
+      : "Aucune description.";
 
-  const description = place.description
-    ? escapeHtml(place.description).replaceAll("\n", "<br>")
-    : "Aucune description.";
-
-  const createdDate = place.created_at
-    ? new Date(place.created_at).toLocaleString("fr-FR")
-    : "Date inconnue";
+  const createdDate =
+    place.created_at
+      ? new Date(
+          place.created_at
+        ).toLocaleString("fr-FR")
+      : "Date inconnue";
 
   return `
     <article class="marker-popup">
       <header class="marker-popup-header">
-        <span class="marker-popup-icon">${icon}</span>
+        <span class="marker-popup-icon">
+          ${categoryData.icon}
+        </span>
 
         <div>
-          <h3>${escapeHtml(place.name)}</h3>
-          <p>${escapeHtml(categoryLabel)}</p>
+          <h3>
+            ${escapeHtml(place.name)}
+          </h3>
+
+          <p>
+            ${escapeHtml(categoryData.label)}
+          </p>
         </div>
       </header>
 
@@ -517,10 +1002,16 @@ function createPopupContent(place) {
       <footer class="marker-popup-footer">
         <span>
           Ajouté par
-          <strong>${escapeHtml(place.author || "Inconnu")}</strong>
+          <strong>
+            ${escapeHtml(
+              place.author || "Inconnu"
+            )}
+          </strong>
         </span>
 
-        <span>${escapeHtml(createdDate)}</span>
+        <span>
+          ${escapeHtml(createdDate)}
+        </span>
       </footer>
     </article>
   `;
@@ -528,14 +1019,18 @@ function createPopupContent(place) {
 
 function renderMarkers() {
   markersLayer.clearLayers();
+  markerInstances.clear();
 
-  for (const place of places) {
+  places.forEach((place, index) => {
     if (!isPlaceVisible(place)) {
-      continue;
+      return;
     }
 
-    const latitude = Number(place.lat);
-    const longitude = Number(place.lng);
+    const latitude =
+      Number(place.lat);
+
+    const longitude =
+      Number(place.lng);
 
     if (
       !Number.isFinite(latitude) ||
@@ -546,13 +1041,18 @@ function renderMarkers() {
         place
       );
 
-      continue;
+      return;
     }
+
+    const identifier =
+      getPlaceIdentifier(place, index);
 
     const marker = L.marker(
       [latitude, longitude],
       {
-        icon: makeMarkerIcon(place.category)
+        icon: makeMarkerIcon(
+          place.category
+        )
       }
     );
 
@@ -564,7 +1064,18 @@ function renderMarkers() {
     );
 
     marker.addTo(markersLayer);
-  }
+
+    markerInstances.set(
+      identifier,
+      marker
+    );
+  });
+}
+
+function refreshInterface() {
+  renderMarkers();
+  renderSearchResults();
+  updateVisibleMarkerCount();
 }
 
 /* =========================================================
@@ -572,13 +1083,22 @@ function renderMarkers() {
    ========================================================= */
 
 async function loadMarkers() {
-  const { data, error } = await supabaseClient
-    .from("markers")
-    .select("*")
-    .order("created_at", { ascending: true });
+  const { data, error } =
+    await supabaseClient
+      .from("markers")
+      .select("*")
+      .order(
+        "created_at",
+        {
+          ascending: true
+        }
+      );
 
   if (error) {
-    console.error("Erreur de chargement Supabase :", error);
+    console.error(
+      "Erreur de chargement Supabase :",
+      error
+    );
 
     showNotification(
       `Impossible de charger les marqueurs : ${error.message}`,
@@ -588,25 +1108,37 @@ async function loadMarkers() {
     return;
   }
 
-  places = Array.isArray(data) ? data : [];
-  renderMarkers();
+  places =
+    Array.isArray(data)
+      ? data
+      : [];
+
+  refreshInterface();
 }
 
 async function addMarker(place) {
   addMarkerButton.disabled = true;
-  addMarkerButton.textContent = "Enregistrement...";
 
-  const { data, error } = await supabaseClient
-    .from("markers")
-    .insert([place])
-    .select()
-    .single();
+  addMarkerButton.textContent =
+    "Enregistrement...";
+
+  const { data, error } =
+    await supabaseClient
+      .from("markers")
+      .insert([place])
+      .select()
+      .single();
 
   addMarkerButton.disabled = false;
-  addMarkerButton.textContent = "Ajouter le marqueur";
+
+  addMarkerButton.textContent =
+    "Ajouter le marqueur";
 
   if (error) {
-    console.error("Erreur d’ajout Supabase :", error);
+    console.error(
+      "Erreur d’ajout Supabase :",
+      error
+    );
 
     showNotification(
       `Impossible d’ajouter le marqueur : ${error.message}`,
@@ -629,9 +1161,14 @@ map.on("click", (event) => {
   locationStatus.textContent =
     `Emplacement sélectionné — lat ${Math.round(
       pendingClick.lat
-    )}, lng ${Math.round(pendingClick.lng)}`;
+    )}, lng ${Math.round(
+      pendingClick.lng
+    )}`;
 
-  locationStatus.classList.add("location-selected");
+  locationStatus.classList.add(
+    "location-selected"
+  );
+
   placeNameInput.focus();
 });
 
@@ -639,116 +1176,149 @@ map.on("click", (event) => {
    AJOUT D’UN MARQUEUR
    ========================================================= */
 
-placeForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
+placeForm.addEventListener(
+  "submit",
+  async (event) => {
+    event.preventDefault();
 
-  if (!pendingClick) {
-    showNotification(
-      "Clique d’abord sur la carte pour choisir l’emplacement.",
-      "error"
-    );
-
-    return;
-  }
-
-  const name = placeNameInput.value.trim();
-  const category = placeCategorySelect.value;
-
-  const categoryData = CATEGORIES[category];
-
-  let subcategory = null;
-
-  if (
-    categoryData &&
-    categoryData.subcategories.length > 0
-  ) {
-    subcategory = placeSubcategorySelect.value || null;
-
-    if (!subcategory) {
+    if (!pendingClick) {
       showNotification(
-        "Choisis une sous-catégorie.",
+        "Clique d’abord sur la carte pour choisir l’emplacement.",
         "error"
       );
 
       return;
     }
+
+    const name =
+      placeNameInput.value.trim();
+
+    const category =
+      placeCategorySelect.value;
+
+    const categoryData =
+      CATEGORIES[category];
+
+    let subcategory = null;
+
+    if (
+      categoryData &&
+      categoryData.subcategories.length > 0
+    ) {
+      subcategory =
+        placeSubcategorySelect.value ||
+        null;
+
+      if (!subcategory) {
+        showNotification(
+          "Choisis une sous-catégorie.",
+          "error"
+        );
+
+        return;
+      }
+    }
+
+    const place = {
+      name,
+      category,
+      subcategory,
+
+      description:
+        placeDescriptionInput
+          .value
+          .trim(),
+
+      lat: pendingClick.lat,
+      lng: pendingClick.lng,
+      author: playerName
+    };
+
+    const insertedPlace =
+      await addMarker(place);
+
+    if (!insertedPlace) {
+      return;
+    }
+
+    places.push(insertedPlace);
+
+    refreshInterface();
+
+    placeForm.reset();
+    createCategoryOptions();
+
+    pendingClick = null;
+
+    locationStatus.textContent =
+      "Clique sur la carte pour choisir un emplacement.";
+
+    locationStatus.classList.remove(
+      "location-selected"
+    );
+
+    showNotification(
+      `Le marqueur « ${insertedPlace.name} » a été ajouté.`
+    );
   }
-
-  const place = {
-    name,
-    category,
-    subcategory,
-    description: placeDescriptionInput.value.trim(),
-    lat: pendingClick.lat,
-    lng: pendingClick.lng,
-    author: playerName
-  };
-
-  const insertedPlace = await addMarker(place);
-
-  if (!insertedPlace) {
-    return;
-  }
-
-  /*
-   * On ajoute immédiatement le résultat à l’écran.
-   * Le temps réel actualisera ensuite la liste complète.
-   */
-  places.push(insertedPlace);
-  renderMarkers();
-
-  placeForm.reset();
-  createCategoryOptions();
-
-  pendingClick = null;
-
-  locationStatus.textContent =
-    "Clique sur la carte pour choisir un emplacement.";
-
-  locationStatus.classList.remove("location-selected");
-
-  showNotification(
-    `Le marqueur « ${insertedPlace.name} » a été ajouté.`
-  );
-});
+);
 
 /* =========================================================
-   EXPORT JSON DE SÉCURITÉ
+   EXPORT JSON
    ========================================================= */
 
-exportButton.addEventListener("click", () => {
-  const exportData = {
-    exported_at: new Date().toISOString(),
-    marker_count: places.length,
-    markers: places
-  };
+exportButton.addEventListener(
+  "click",
+  () => {
+    const exportData = {
+      exported_at:
+        new Date().toISOString(),
 
-  const blob = new Blob(
-    [JSON.stringify(exportData, null, 2)],
-    {
-      type: "application/json"
-    }
-  );
+      marker_count:
+        places.length,
 
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
+      markers:
+        places
+    };
 
-  link.href = url;
-  link.download =
-    `atlas-rp-markers-${new Date()
-      .toISOString()
-      .slice(0, 10)}.json`;
+    const blob = new Blob(
+      [
+        JSON.stringify(
+          exportData,
+          null,
+          2
+        )
+      ],
+      {
+        type: "application/json"
+      }
+    );
 
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
+    const url =
+      URL.createObjectURL(blob);
 
-  URL.revokeObjectURL(url);
+    const link =
+      document.createElement("a");
 
-  showNotification(
-    `${places.length} marqueur(s) exporté(s).`
-  );
-});
+    link.href = url;
+
+    link.download =
+      `atlas-rp-markers-${new Date()
+        .toISOString()
+        .slice(0, 10)}.json`;
+
+    document.body.appendChild(link);
+
+    link.click();
+    link.remove();
+
+    URL.revokeObjectURL(url);
+
+    showNotification(
+      `${places.length} marqueur(s) exporté(s).`
+    );
+  }
+);
 
 /* =========================================================
    TEMPS RÉEL
@@ -768,7 +1338,10 @@ supabaseClient
     }
   )
   .subscribe((status) => {
-    console.log("Statut Supabase Realtime :", status);
+    console.log(
+      "Statut Supabase Realtime :",
+      status
+    );
   });
 
 /* =========================================================
@@ -779,6 +1352,7 @@ async function initializeApplication() {
   initializePlayerName();
   createCategoryOptions();
   createFilters();
+
   await loadMarkers();
 }
 

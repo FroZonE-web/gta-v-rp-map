@@ -2,7 +2,11 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
 
   <title>Atlas RP — Carte GTA V</title>
 
@@ -41,8 +45,45 @@
       </div>
     </header>
 
+    <section class="panel search-panel">
+      <div class="panel-title-row">
+        <h2>Rechercher un lieu</h2>
+
+        <span id="visible-marker-count" class="marker-count">
+          0 lieu
+        </span>
+      </div>
+
+      <label class="search-field" for="place-search">
+        <span aria-hidden="true">🔎</span>
+
+        <input
+          id="place-search"
+          type="search"
+          placeholder="Nom, auteur, catégorie..."
+          autocomplete="off"
+        >
+      </label>
+
+      <button
+        id="clear-search"
+        class="small-secondary-button"
+        type="button"
+        hidden
+      >
+        Effacer la recherche
+      </button>
+
+      <div id="search-results" class="search-results">
+        <p class="empty-results">
+          Saisis un mot pour rechercher un lieu.
+        </p>
+      </div>
+    </section>
+
     <section class="panel">
       <h2>Filtres</h2>
+
       <p class="panel-description">
         Affiche ou masque les différentes catégories.
       </p>
@@ -120,10 +161,17 @@
       </button>
     </section>
 
-    <div id="notification" class="notification" hidden></div>
+    <div
+      id="notification"
+      class="notification"
+      hidden
+    ></div>
   </aside>
 
-  <main id="map" aria-label="Carte GTA V interactive"></main>
+  <main
+    id="map"
+    aria-label="Carte GTA V interactive"
+  ></main>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
