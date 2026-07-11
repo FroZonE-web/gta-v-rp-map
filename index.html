@@ -8,7 +8,7 @@
     content="width=device-width, initial-scale=1"
   >
 
-  <title>Atlas RP v0.8.1 — Carte GTA V</title>
+  <title>Atlas RP v0.8.2 — Carte GTA V</title>
 
   <link
     rel="stylesheet"
@@ -28,7 +28,7 @@
     <header class="sidebar-header">
       <div>
         <h1>Atlas RP</h1>
-        <p class="subtitle">Carte collaborative GTA V · v0.8.1</p>
+        <p class="subtitle">Carte collaborative GTA V · v0.8.2</p>
       </div>
 
       <div class="player-box">
@@ -99,6 +99,33 @@
           Aucun lieu favori pour le moment.
         </p>
       </div>
+    </section>
+
+
+    <section class="panel layers-panel">
+      <div class="panel-title-row">
+        <h2>Calques</h2>
+        <button id="reset-layers" class="small-secondary-button" type="button">Réinitialiser</button>
+      </div>
+
+      <p class="panel-description">
+        Choisis les groupes visibles. Tes préférences sont conservées sur cet appareil.
+      </p>
+
+      <div class="layer-master-list">
+        <label class="layer-switch-row">
+          <input id="layer-markers" type="checkbox" checked>
+          <span>📍 Marqueurs</span>
+        </label>
+
+        <label class="layer-switch-row">
+          <input id="layer-zones" type="checkbox" checked>
+          <span>⬛ Polyzones</span>
+        </label>
+      </div>
+
+      <div class="layer-divider"></div>
+      <div id="layer-category-list" class="layer-category-list"></div>
     </section>
 
     <section class="panel">
@@ -412,6 +439,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script src="config.js"></script>
-  <script src="app.js?v=0.8.1"></script>
+  <script src="app.js?v=0.8.2"></script>
 </body>
 </html>

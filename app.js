@@ -118,6 +118,11 @@ const changeNameButton =
 const filtersContainer =
   document.getElementById("filters-container");
 
+const layerMarkersCheckbox = document.getElementById("layer-markers");
+const layerZonesCheckbox = document.getElementById("layer-zones");
+const layerCategoryList = document.getElementById("layer-category-list");
+const resetLayersButton = document.getElementById("reset-layers");
+
 const placeForm =
   document.getElementById("place-form");
 
@@ -241,6 +246,17 @@ let editingZoneId = null;
 let geometryEditingZoneId = null;
 let geometryEditingLayer = null;
 let geometryOriginalCoordinates = null;
+
+
+const DEFAULT_LAYER_SETTINGS = {
+  markers: true,
+  zones: true,
+  categories: Object.fromEntries(
+    Object.keys(CATEGORIES).map((key) => [key, true])
+  )
+};
+
+let layerSettings = JSON.parse(JSON.stringify(DEFAULT_LAYER_SETTINGS));
 
 const markerInstances = new Map();
 const zoneInstances = new Map();
@@ -1176,6 +1192,115 @@ placeCategorySelect.addEventListener(
   updateSubcategorySelect
 );
 
+
+/* =========================================================
+   CALQUES PERSONNALISÉS
+   ========================================================= */
+
+function loadLayerSettings() {
+  try {
+    const saved = JSON.parse(localStorage.getItem("atlas_rp_layers") || "null");
+    if (saved && typeof saved === "object") {
+      layerSettings.markers = saved.markers !== false;
+      layerSettings.zones = saved.zones !== false;
+      Object.keys(CATEGORIES).forEach((key) => {
+        layerSettings.categories[key] = saved.categories?.[key] !== false;
+      });
+    }
+  } catch (error) {
+    console.warn("Préférences de calques invalides :", error);
+  }
+}
+
+function saveLayerSettings() {
+  localStorage.setItem("atlas_rp_layers", JSON.stringify(layerSettings));
+}
+
+function applyLayerSettingsToExistingFilters() {
+  Object.keys(CATEGORIES).forEach((categoryKey) => {
+    const enabled = layerSettings.categories[categoryKey] !== false;
+    const parent = document.querySelector(`.category-filter[value="${categoryKey}"]`);
+    if (parent) {
+      parent.checked = enabled;
+      parent.indeterminate = false;
+    }
+    document.querySelectorAll(`.subcategory-filter[data-category="${categoryKey}"]`).forEach((child) => {
+      child.checked = enabled;
+    });
+  });
+}
+
+function createLayerControls() {
+  layerMarkersCheckbox.checked = layerSettings.markers;
+  layerZonesCheckbox.checked = layerSettings.zones;
+  showZonesCheckbox.checked = layerSettings.zones;
+  layerCategoryList.innerHTML = "";
+
+  Object.entries(CATEGORIES).forEach(([categoryKey, categoryData]) => {
+    const label = document.createElement("label");
+    label.className = "layer-switch-row layer-category-row";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.dataset.layerCategory = categoryKey;
+    checkbox.checked = layerSettings.categories[categoryKey] !== false;
+
+    const text = document.createElement("span");
+    text.textContent = `${categoryData.icon} ${categoryData.label}`;
+
+    label.appendChild(checkbox);
+    label.appendChild(text);
+    layerCategoryList.appendChild(label);
+
+    checkbox.addEventListener("change", () => {
+      layerSettings.categories[categoryKey] = checkbox.checked;
+      const parent = document.querySelector(`.category-filter[value="${categoryKey}"]`);
+      if (parent) {
+        parent.checked = checkbox.checked;
+        parent.indeterminate = false;
+      }
+      document.querySelectorAll(`.subcategory-filter[data-category="${categoryKey}"]`).forEach((child) => {
+        child.checked = checkbox.checked;
+      });
+      saveLayerSettings();
+      refreshInterface();
+    });
+  });
+}
+
+function syncLayerCategoryFromFilters(categoryKey) {
+  const parent = document.querySelector(`.category-filter[value="${categoryKey}"]`);
+  if (!parent) return;
+  const enabled = parent.checked || parent.indeterminate;
+  layerSettings.categories[categoryKey] = enabled;
+  const layerCheckbox = document.querySelector(`[data-layer-category="${categoryKey}"]`);
+  if (layerCheckbox) layerCheckbox.checked = enabled;
+  saveLayerSettings();
+}
+
+layerMarkersCheckbox.addEventListener("change", () => {
+  layerSettings.markers = layerMarkersCheckbox.checked;
+  saveLayerSettings();
+  refreshInterface();
+});
+
+layerZonesCheckbox.addEventListener("change", () => {
+  layerSettings.zones = layerZonesCheckbox.checked;
+  showZonesCheckbox.checked = layerSettings.zones;
+  saveLayerSettings();
+  renderZones();
+});
+
+resetLayersButton.addEventListener("click", () => {
+  layerSettings = JSON.parse(JSON.stringify(DEFAULT_LAYER_SETTINGS));
+  saveLayerSettings();
+  createLayerControls();
+  applyLayerSettingsToExistingFilters();
+  refreshInterface();
+  showNotification("Affichage des calques réinitialisé.");
+});
+
+
 /* =========================================================
    FILTRES
    ========================================================= */
@@ -1301,13 +1426,17 @@ function createFilters() {
             }
           );
 
+          syncLayerCategoryFromFilters(categoryKey);
           refreshInterface();
         }
       );
     } else {
       categoryCheckbox.addEventListener(
         "change",
-        refreshInterface
+        () => {
+          syncLayerCategoryFromFilters(categoryKey);
+          refreshInterface();
+        }
       );
     }
 
@@ -1325,6 +1454,7 @@ function createFilters() {
           synchronizeParentCategoryFilter(
             checkbox.dataset.category
           );
+          syncLayerCategoryFromFilters(checkbox.dataset.category);
 
           refreshInterface();
         }
@@ -1369,6 +1499,10 @@ function synchronizeParentCategoryFilter(
 }
 
 function passesCategoryFilters(place) {
+  if (layerSettings.categories[place.category] === false) {
+    return false;
+  }
+
   const categoryCheckbox =
     document.querySelector(
       `.category-filter[value="${place.category}"]`
@@ -1467,7 +1601,7 @@ function getVisiblePlaces() {
 
 function updateVisibleMarkerCount() {
   const visibleCount =
-    getVisiblePlaces().length;
+    layerSettings.markers ? getVisiblePlaces().length : 0;
 
   const totalCount = places.length;
 
@@ -1897,6 +2031,10 @@ function createPopupContent(place, identifier, favorite) {
 function renderMarkers() {
   markersLayer.clearLayers();
   markerInstances.clear();
+
+  if (!layerSettings.markers) {
+    return;
+  }
 
   places.forEach((place, index) => {
     if (!isPlaceVisible(place, index)) {
@@ -2333,6 +2471,10 @@ function createZonePopup(zone) {
 }
 
 function passesZoneFilters(zone) {
+  if (layerSettings.categories[zone.category] === false) {
+    return false;
+  }
+
   const categoryCheckbox = document.querySelector(
     `.category-filter[value="${zone.category}"]`
   );
@@ -2629,7 +2771,7 @@ function renderZones() {
     ? `${zones.length} zone${zones.length > 1 ? "s" : ""}`
     : `${visibleZones.length} / ${zones.length}`;
 
-  if (!showZonesCheckbox.checked) {
+  if (!layerSettings.zones || !showZonesCheckbox.checked) {
     renderZoneList();
     return;
   }
@@ -2681,7 +2823,12 @@ zoneSubcategorySelect.addEventListener("change", () => {
   updateZoneColorPreview();
   applyPendingZoneStyle();
 });
-showZonesCheckbox.addEventListener("change", renderZones);
+showZonesCheckbox.addEventListener("change", () => {
+  layerSettings.zones = showZonesCheckbox.checked;
+  layerZonesCheckbox.checked = layerSettings.zones;
+  saveLayerSettings();
+  renderZones();
+});
 
 editSelectedZoneButton.addEventListener("click", () => {
   const zone = zones.find((item) => String(item.id) === String(selectedZoneId));
@@ -2905,12 +3052,15 @@ supabaseClient
 async function initializeApplication() {
   initializePlayerName();
   loadFavorites();
+  loadLayerSettings();
   showHistories = sessionStorage.getItem("atlas_show_histories") === "true";
   showHistoryInput.checked = showHistories;
   setAdminDrawer(false);
   await checkAdminSession();
   createCategoryOptions();
   createFilters();
+  applyLayerSettingsToExistingFilters();
+  createLayerControls();
   updateZoneSubcategorySelect();
 
   /*

@@ -1317,3 +1317,58 @@ button:disabled {
   .admin-drawer-toggle.is-hidden { transform: translateX(15px); }
   .admin-drawer { width: min(360px, 94vw); }
 }
+
+
+/* =========================================================
+   CALQUES v0.8.2
+   ========================================================= */
+
+.layer-master-list,
+.layer-category-list {
+  display: grid;
+  gap: 7px;
+}
+
+.layer-switch-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 30px;
+  padding: 7px 9px;
+  color: var(--text);
+  background: #11151b;
+  border: 1px solid #303744;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.layer-switch-row:hover {
+  background: var(--panel-hover);
+  border-color: #465064;
+}
+
+.layer-switch-row input {
+  width: auto;
+  margin: 0;
+  accent-color: var(--primary);
+}
+
+.layer-switch-row span {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.layer-category-row {
+  padding-left: 12px;
+}
+
+.layer-divider {
+  height: 1px;
+  margin: 11px 0;
+  background: var(--border);
+}
+
+.layers-panel .small-secondary-button {
+  margin-top: 0;
+}
