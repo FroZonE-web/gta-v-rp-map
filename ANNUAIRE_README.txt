@@ -22,3 +22,9 @@ CORRECTIF AJOUT PUBLIC
 Tout visiteur, connecté ou non, peut ajouter une fiche membre.
 La modification et la suppression restent réservées à l’administrateur.
 Pour une installation existante, exécuter ANNUAIRE_PUBLIC_INSERT_FIX.sql.
+
+CORRECTIF TRI AUTOMATIQUE
+------------------------
+Sur une installation existante, exécuter ANNUAIRE_AUTO_SORT_FIX.sql.
+Le champ d'ordre hiérarchique n'est plus demandé dans le formulaire.
+L'ordre affiché est calculé à partir du grade (N1, N2, N3...) puis de la date d'arrivée dans ce grade.

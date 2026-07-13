@@ -8,7 +8,8 @@ create extension if not exists pgcrypto;
 create table if not exists public.directory_members (
   id uuid primary key default gen_random_uuid(),
   grade_code text not null,
-  sort_order smallint not null check (sort_order between 1 and 16),
+  sort_order smallint check (sort_order between 1 and 16),
+  grade_assigned_at timestamptz not null default now(),
   first_name text not null,
   nickname text,
   last_name text not null,
@@ -25,6 +26,55 @@ create table if not exists public.directory_members (
 
 comment on table public.directory_members is
   'Annuaire interne du Ashen Wolves MC. Maximum 16 membres, triés par ordre hiérarchique.';
+
+create or replace function public.directory_members_assign_sort_order()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.sort_order is null then
+    select candidate into new.sort_order
+    from generate_series(1, 16) as candidate
+    where not exists (
+      select 1 from public.directory_members dm where dm.sort_order = candidate
+    )
+    order by candidate
+    limit 1;
+  end if;
+
+  if new.sort_order is null then
+    raise exception 'La limite de 16 membres actifs est atteinte.';
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists directory_members_assign_sort_order on public.directory_members;
+create trigger directory_members_assign_sort_order
+before insert on public.directory_members
+for each row execute function public.directory_members_assign_sort_order();
+
+create or replace function public.directory_members_track_grade()
+returns trigger
+language plpgsql
+security invoker
+set search_path = public
+as $$
+begin
+  if old.grade_code is distinct from new.grade_code then
+    new.grade_assigned_at = now();
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists directory_members_track_grade on public.directory_members;
+create trigger directory_members_track_grade
+before update on public.directory_members
+for each row execute function public.directory_members_track_grade();
 
 create or replace function public.directory_members_set_updated_at()
 returns trigger

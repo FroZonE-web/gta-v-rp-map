@@ -1,7 +1,6 @@
-ASHEN WOLVES HUB v1.2
+ASHEN WOLVES HUB v1.2 — Annuaire
 
-Correctif Annuaire :
-- consultation publique ;
-- ajout public, y compris sans compte Supabase ;
-- modification et suppression réservées à l’administrateur ;
-- limite de 16 membres conservée.
+Correctif : tri automatique des membres par grade.
+Les membres d'un même grade sont affichés dans leur ordre d'arrivée.
+Un changement de grade replace automatiquement le membre dans le bon groupe.
+Ajout d'un bouton Actualiser pour recharger les données depuis Supabase.

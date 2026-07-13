@@ -18,6 +18,7 @@
   const tableShell = document.getElementById("directory-table-shell");
   const state = document.getElementById("directory-state");
   const addButton = document.getElementById("directory-add-member");
+  const refreshButton = document.getElementById("directory-refresh");
   const modal = document.getElementById("directory-modal");
   const form = document.getElementById("directory-form");
   const closeButtons = [...route.querySelectorAll("[data-directory-close]")];
@@ -34,7 +35,6 @@
 
   const fields = {
     grade_code: document.getElementById("directory-grade-code"),
-    sort_order: document.getElementById("directory-sort-order"),
     first_name: document.getElementById("directory-first-name"),
     nickname: document.getElementById("directory-nickname"),
     last_name: document.getElementById("directory-last-name"),
@@ -45,6 +45,24 @@
     housing_type: document.getElementById("directory-housing-type"),
     district: document.getElementById("directory-district")
   };
+
+  function gradeRank(gradeCode) {
+    const match = String(gradeCode || "").toUpperCase().match(/N\s*(\d+)/);
+    return match ? Number(match[1]) : 999;
+  }
+
+  function sortMembersByGrade(list) {
+    return [...list].sort((a, b) => {
+      const gradeDifference = gradeRank(a.grade_code) - gradeRank(b.grade_code);
+      if (gradeDifference !== 0) return gradeDifference;
+
+      const aAssigned = Date.parse(a.grade_assigned_at || a.created_at || 0) || 0;
+      const bAssigned = Date.parse(b.grade_assigned_at || b.created_at || 0) || 0;
+      if (aAssigned !== bAssigned) return aAssigned - bAssigned;
+
+      return Number(a.sort_order || 0) - Number(b.sort_order || 0);
+    });
+  }
 
   function normalize(value) {
     return String(value || "")
@@ -203,9 +221,8 @@
     setState("loading", "Chargement", "Récupération de l'annuaire interne…");
     const { data, error } = await supabaseClient
       .from("directory_members")
-      .select("id, grade_code, sort_order, first_name, nickname, last_name, identity_name, rib, phone, address, housing_type, district, created_at, updated_at")
-      .order("sort_order", { ascending: true })
-      .order("last_name", { ascending: true });
+      .select("id, grade_code, sort_order, grade_assigned_at, first_name, nickname, last_name, identity_name, rib, phone, address, housing_type, district, created_at, updated_at")
+      .order("sort_order", { ascending: true });
 
     if (error) {
       console.error("Chargement annuaire impossible :", error);
@@ -213,7 +230,7 @@
       return;
     }
 
-    members = data || [];
+    members = sortMembersByGrade(data || []);
     loadedOnce = true;
     renderMembers();
   }
@@ -221,7 +238,6 @@
   function resetForm() {
     editingId = null;
     form.reset();
-    fields.sort_order.value = String(Math.min(members.length + 1, 16));
     formError.textContent = "";
     dialogTitle.textContent = "Ajouter un membre";
     submitButton.textContent = "Ajouter le membre";
@@ -268,7 +284,6 @@
     const lastName = fields.last_name.value.trim().toUpperCase();
     return {
       grade_code: fields.grade_code.value.trim().toUpperCase(),
-      sort_order: Number(fields.sort_order.value),
       first_name: firstName,
       nickname: fields.nickname.value.trim() || null,
       last_name: lastName,
@@ -290,10 +305,6 @@
       formError.textContent = "Le grade, le prénom, le nom et l'identité sont obligatoires.";
       return;
     }
-    if (!Number.isInteger(payload.sort_order) || payload.sort_order < 1 || payload.sort_order > 16) {
-      formError.textContent = "L'ordre hiérarchique doit être compris entre 1 et 16.";
-      return;
-    }
     if (!editingId && members.length >= 16) {
       formError.textContent = "La limite de 16 membres actifs est atteinte.";
       return;
@@ -312,9 +323,7 @@
     submitButton.textContent = editingId ? "Enregistrer les modifications" : "Ajouter le membre";
 
     if (error) {
-      formError.textContent = error.message.includes("directory_members_sort_order_key")
-        ? "Cet ordre hiérarchique est déjà utilisé par un autre membre."
-        : error.message;
+      formError.textContent = error.message;
       return;
     }
 
@@ -339,6 +348,16 @@
     await loadMembers({ force: true });
   }
 
+  async function refreshMembers() {
+    if (!refreshButton) return;
+    refreshButton.disabled = true;
+    refreshButton.textContent = "↻ Actualisation…";
+    loadedOnce = false;
+    await loadMembers({ force: true });
+    refreshButton.disabled = false;
+    refreshButton.textContent = "↻ Actualiser";
+  }
+
   function activateTab(tabName) {
     tabs.forEach((tab) => {
       const active = tab.dataset.directoryTab === tabName;
@@ -353,6 +372,7 @@
   tabs.forEach((tab) => tab.addEventListener("click", () => activateTab(tab.dataset.directoryTab)));
   searchInput.addEventListener("input", renderMembers);
   addButton.addEventListener("click", openAdd);
+  refreshButton?.addEventListener("click", refreshMembers);
   closeButtons.forEach((button) => button.addEventListener("click", closeModal));
   modal.addEventListener("click", (event) => { if (event.target === modal) closeModal(); });
   form.addEventListener("submit", saveMember);

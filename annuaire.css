@@ -399,3 +399,44 @@
   white-space: nowrap;
   border: 0;
 }
+
+.directory-toolbar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.directory-refresh {
+  min-height: 40px;
+  padding: 8px 13px;
+  color: #ddd6fe;
+  background: rgba(22, 27, 39, .92);
+  border: 1px solid rgba(139, 92, 246, .35);
+  border-radius: 10px;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.directory-refresh:hover {
+  color: #fff;
+  border-color: rgba(168, 85, 247, .7);
+  background: rgba(124, 58, 237, .16);
+}
+
+.directory-refresh:disabled {
+  opacity: .6;
+  cursor: wait;
+}
+
+@media (max-width: 720px) {
+  .directory-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .directory-toolbar-actions {
+    justify-content: space-between;
+  }
+}

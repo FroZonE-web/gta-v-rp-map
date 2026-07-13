@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="style.css?v=1.0.1">
   <link rel="stylesheet" href="hub.css?v=1.1.0">
   <link rel="stylesheet" href="reglement.css?v=1.1.1">
-  <link rel="stylesheet" href="annuaire.css?v=1.2.2">
+  <link rel="stylesheet" href="annuaire.css?v=1.2.3">
 </head>
 
 <body class="hub-dashboard-active">
@@ -841,7 +841,10 @@
           <span class="sr-only">Rechercher un membre</span>
           <input id="directory-search" type="search" placeholder="Rechercher par nom, surnom, grade, téléphone ou quartier…" autocomplete="off">
         </label>
-        <div id="directory-counter" class="directory-counter">Chargement…</div>
+        <div class="directory-toolbar-actions">
+          <div id="directory-counter" class="directory-counter">Chargement…</div>
+          <button id="directory-refresh" class="directory-refresh" type="button" aria-label="Actualiser l’annuaire" title="Actualiser l’annuaire">↻ Actualiser</button>
+        </div>
       </div>
 
       <div id="directory-state" class="directory-loading">
@@ -879,7 +882,6 @@
       <form id="directory-form" class="directory-form">
         <div class="directory-form-grid">
           <div class="directory-field"><label for="directory-grade-code">Grade *</label><input id="directory-grade-code" maxlength="20" required placeholder="N1"></div>
-          <div class="directory-field"><label for="directory-sort-order">Ordre hiérarchique *</label><input id="directory-sort-order" type="number" min="1" max="16" required></div>
           <div class="directory-field"><label for="directory-first-name">Prénom *</label><input id="directory-first-name" maxlength="80" required></div>
           <div class="directory-field"><label for="directory-nickname">Surnom</label><input id="directory-nickname" maxlength="80"></div>
           <div class="directory-field"><label for="directory-last-name">Nom *</label><input id="directory-last-name" maxlength="80" required></div>
@@ -890,7 +892,7 @@
           <div class="directory-field"><label for="directory-housing-type">Type de logement</label><input id="directory-housing-type" maxlength="160"></div>
           <div class="directory-field"><label for="directory-district">Quartier</label><input id="directory-district" maxlength="120"></div>
         </div>
-        <p class="directory-form-help">Les emplacements vacants ne doivent pas être créés. Utilisez l’ordre hiérarchique réel du membre ; l’affichage passera automatiquement au membre suivant.</p>
+        <p class="directory-form-help">Le membre sera automatiquement placé avec les membres de son grade. S’il existe déjà plusieurs membres de ce grade, il apparaîtra à leur suite.</p>
         <p id="directory-form-error" class="directory-error" aria-live="polite"></p>
         <div class="directory-form-actions">
           <button class="directory-action is-secondary" type="button" data-directory-close>Annuler</button>
@@ -1439,7 +1441,7 @@
   <script src="config.js"></script>
   <script src="app.js?v=1.0.1"></script>
   <script src="reglement.js?v=1.1.1"></script>
-  <script src="annuaire.js?v=1.2.2"></script>
+  <script src="annuaire.js?v=1.2.3"></script>
   <script src="hub.js?v=1.2.0"></script>
 </body>
 </html>
