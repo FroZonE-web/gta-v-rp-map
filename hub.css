@@ -4,7 +4,8 @@
 
 body.hub-dashboard-active,
 body.hub-placeholder-active,
-body.hub-regulation-active {
+body.hub-regulation-active,
+body.hub-directory-active {
   display: block;
   overflow: auto;
 }

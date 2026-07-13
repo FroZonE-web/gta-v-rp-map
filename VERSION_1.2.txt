@@ -1,0 +1,11 @@
+ASHEN WOLVES HUB v1.2 — ANNUAIRE
+
+- Le module Règlement est désormais indiqué comme disponible.
+- Ajout du module Annuaire et de ses trois espaces.
+- Première étape terminée : annuaire interne des membres du club.
+- Tri hiérarchique sans affichage des postes vacants.
+- Limite stricte de 16 membres.
+- Recherche instantanée et affichage responsive.
+- Consultation réservée aux comptes authentifiés.
+- Ajout, modification et suppression réservés à l'administrateur.
+- Les espaces Personnes rencontrées et Forces de l'ordre sont préparés pour les étapes suivantes.
