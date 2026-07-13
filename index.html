@@ -8,7 +8,7 @@
     content="width=device-width, initial-scale=1"
   >
 
-  <title>Ashen Wolves HUB — Carte RP</title>
+  <title>Ashen Wolves HUB</title>
 
   <link
     rel="stylesheet"
@@ -24,6 +24,52 @@
 </head>
 
 <body>
+  <section id="hub-dashboard" class="hub-route hub-dashboard" aria-labelledby="hub-dashboard-title">
+    <div class="hub-dashboard-shell">
+      <header class="hub-dashboard-header">
+        <div class="hub-brand-mark" aria-hidden="true">AW</div>
+        <div>
+          <p class="hub-eyebrow">ASHEN WOLVES</p>
+          <h1 id="hub-dashboard-title">ATLAS RP — HUB DU GROUPE</h1>
+          <p class="hub-dashboard-intro">Tous les outils du groupe, réunis dans un seul espace.</p>
+        </div>
+      </header>
+
+      <nav class="hub-module-grid" aria-label="Modules du HUB">
+        <a class="hub-module-card is-available" href="#/carte">
+          <span class="hub-module-icon" aria-hidden="true">🗺</span>
+          <span class="hub-module-copy"><strong>Carte</strong><small>Lieux, zones, médias et informations RP</small></span>
+          <span class="hub-module-status">Disponible</span>
+        </a>
+        <a class="hub-module-card" href="#/comptabilite"><span class="hub-module-icon">💰</span><span class="hub-module-copy"><strong>Comptabilité</strong><small>Entrées, sorties, soldes et justificatifs</small></span><span class="hub-module-status">À venir</span></a>
+        <a class="hub-module-card" href="#/stocks"><span class="hub-module-icon">📦</span><span class="hub-module-copy"><strong>Stocks</strong><small>Articles, quantités et mouvements</small></span><span class="hub-module-status">À venir</span></a>
+        <a class="hub-module-card" href="#/annuaire"><span class="hub-module-icon">👥</span><span class="hub-module-copy"><strong>Annuaire</strong><small>Membres, grades, rôles et contacts</small></span><span class="hub-module-status">À venir</span></a>
+        <a class="hub-module-card" href="#/plans-op"><span class="hub-module-icon">🎯</span><span class="hub-module-copy"><strong>Plans d’OP</strong><small>Préparation et comptes rendus d’opérations</small></span><span class="hub-module-status">À venir</span></a>
+        <a class="hub-module-card" href="#/agenda"><span class="hub-module-icon">📅</span><span class="hub-module-copy"><strong>Agenda</strong><small>Réunions, opérations et événements</small></span><span class="hub-module-status">À venir</span></a>
+        <a class="hub-module-card" href="#/reglement"><span class="hub-module-icon">📜</span><span class="hub-module-copy"><strong>Règlement</strong><small>Chapitres, recherche et mises à jour</small></span><span class="hub-module-status">À venir</span></a>
+        <a class="hub-module-card" href="#/calculatrice-craft"><span class="hub-module-icon">🧮</span><span class="hub-module-copy"><strong>Calculatrice de craft</strong><small>Recettes, ressources et coûts</small></span><span class="hub-module-status">À venir</span></a>
+        <a class="hub-module-card" href="#/notes-grades"><span class="hub-module-icon">🔒</span><span class="hub-module-copy"><strong>Notes des gradés</strong><small>Espace privé réservé aux grades autorisés</small></span><span class="hub-module-status">À venir</span></a>
+      </nav>
+
+      <footer class="hub-dashboard-footer">Ashen Wolves HUB <span>v1.0</span></footer>
+    </div>
+  </section>
+
+  <section id="hub-placeholder" class="hub-route hub-placeholder" hidden>
+    <div class="hub-placeholder-card">
+      <a class="hub-back-link" href="#/">← Retour au HUB</a>
+      <span id="hub-placeholder-icon" class="hub-placeholder-icon" aria-hidden="true"></span>
+      <p class="hub-eyebrow">ASHEN WOLVES HUB</p>
+      <h1 id="hub-placeholder-title"></h1>
+      <p id="hub-placeholder-description"></p>
+      <span class="hub-coming-soon">Module à venir</span>
+    </div>
+  </section>
+
+  <div id="map-module" class="hub-route hub-map-module" hidden>
+    <a class="hub-map-home" href="#/" aria-label="Retour au tableau de bord">
+      <span aria-hidden="true">⌂</span> HUB
+    </a>
   <aside id="sidebar">
     <header class="sidebar-header">
       <div>
@@ -536,6 +582,7 @@
     id="map"
     aria-label="Carte GTA V interactive"
   ></main>
+  </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -545,5 +592,6 @@
 
   <script src="config.js"></script>
   <script src="app.js?v=1.0-hub"></script>
+  <script src="hub.js?v=1.0-hub"></script>
 </body>
 </html>
