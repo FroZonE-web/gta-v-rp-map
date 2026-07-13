@@ -155,6 +155,10 @@ const adminTrashGroup = document.getElementById("admin-trash-group");
 const adminTrashList = document.getElementById("admin-trash-list");
 const adminTrashCount = document.getElementById("admin-trash-count");
 const adminTrashRefreshButton = document.getElementById("admin-trash-refresh");
+const adminDeletionRequestsGroup = document.getElementById("admin-deletion-requests-group");
+const adminDeletionRequestList = document.getElementById("admin-deletion-request-list");
+const adminDeletionRequestCount = document.getElementById("admin-deletion-request-count");
+const adminDeletionRequestRefreshButton = document.getElementById("admin-deletion-request-refresh");
 
 const notificationElement =
   document.getElementById("notification");
@@ -253,6 +257,7 @@ let movingMarkerId = null;
 let zones = [];
 let trashedMarkers = [];
 let trashedZones = [];
+let deletionRequests = [];
 let pendingZoneLayer = null;
 let isDrawingZone = false;
 let selectedZoneId = null;
@@ -1220,12 +1225,19 @@ function updateAdminInterface() {
     adminTrashGroup.hidden = !adminToolsEnabled();
   }
 
+  if (adminDeletionRequestsGroup) {
+    adminDeletionRequestsGroup.hidden = !adminToolsEnabled();
+  }
+
   if (adminToolsEnabled()) {
     loadTrash();
+    loadDeletionRequests();
   } else {
     trashedMarkers = [];
     trashedZones = [];
+    deletionRequests = [];
     renderTrash();
+    renderDeletionRequests();
   }
 
   refreshInterface();
@@ -2316,7 +2328,19 @@ function createPopupContent(place, identifier, favorite) {
           <button type="button" data-media-open="marker" data-media-entity-id="${escapeHtml(place.id)}">Images</button>
           <button type="button" class="danger-button" data-admin-delete="${escapeHtml(identifier)}">Supprimer</button>
         </div>
-      ` : ""}
+      ` : `
+        <div class="popup-user-actions">
+          <button
+            type="button"
+            class="request-deletion-button"
+            data-request-deletion-type="marker"
+            data-request-deletion-id="${escapeHtml(place.id)}"
+            data-request-deletion-name="${escapeHtml(place.name)}"
+          >
+            Demander la suppression
+          </button>
+        </div>
+      `}
 
       <footer class="marker-popup-footer">
         <span>
@@ -2438,6 +2462,17 @@ map.on("popupopen", (event) => {
   popupElement?.querySelector("[data-zone-delete]")?.addEventListener("click", (e) => {
     deleteZone(e.currentTarget.dataset.zoneDelete);
   });
+
+  popupElement
+    ?.querySelector("[data-request-deletion-type]")
+    ?.addEventListener("click", (e) => {
+      const button = e.currentTarget;
+      submitDeletionRequest(
+        button.dataset.requestDeletionType,
+        button.dataset.requestDeletionId,
+        button.dataset.requestDeletionName
+      );
+    });
 });
 
 function refreshInterface() {
@@ -2774,7 +2809,7 @@ function createZonePopup(zone) {
       </header>
       ${createPopupMedia("zone", zone.id)}
       <div class="popup-description">${description}</div>
-      ${adminToolsEnabled() ? `<div class="popup-admin-actions zone-admin-actions"><button type="button" class="zone-edit-button" data-zone-edit="${zone.id}">Modifier les infos</button><button type="button" class="zone-shape-button" data-zone-shape-edit="${zone.id}">Modifier la forme</button><button type="button" data-media-open="zone" data-media-entity-id="${zone.id}">Images</button><button type="button" class="danger-button" data-zone-delete="${zone.id}">Supprimer la zone</button></div>` : ""}
+      ${adminToolsEnabled() ? `<div class="popup-admin-actions zone-admin-actions"><button type="button" class="zone-edit-button" data-zone-edit="${zone.id}">Modifier les infos</button><button type="button" class="zone-shape-button" data-zone-shape-edit="${zone.id}">Modifier la forme</button><button type="button" data-media-open="zone" data-media-entity-id="${zone.id}">Images</button><button type="button" class="danger-button" data-zone-delete="${zone.id}">Supprimer la zone</button></div>` : `<div class="popup-user-actions"><button type="button" class="request-deletion-button" data-request-deletion-type="zone" data-request-deletion-id="${zone.id}" data-request-deletion-name="${escapeHtml(zone.name)}">Demander la suppression</button></div>`}
       <footer class="marker-popup-footer"><span>Ajoutée par <strong>${escapeHtml(zone.author || "Inconnu")}</strong></span></footer>
     </article>`;
 }
@@ -3280,6 +3315,252 @@ async function deleteZone(id) {
 }
 
 /* =========================================================
+   DEMANDES DE SUPPRESSION v0.8.6
+   ========================================================= */
+
+async function submitDeletionRequest(entityType, entityId, entityName) {
+  const reason = window.prompt(
+    `Pourquoi souhaites-tu demander la suppression de « ${entityName} » ?`
+  );
+
+  if (reason === null) return;
+
+  const cleanReason = reason.trim();
+
+  if (!cleanReason) {
+    showNotification("Indique une raison pour la demande.", "error");
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from("deletion_requests")
+    .insert([{
+      entity_type: entityType,
+      entity_id: Number(entityId),
+      entity_name: String(entityName || "Élément sans nom").slice(0, 150),
+      requester_name: String(playerName || "Anonyme").slice(0, 50),
+      reason: cleanReason.slice(0, 1000)
+    }]);
+
+  if (error) {
+    if (error.code === "23505") {
+      showNotification(
+        "Une demande de suppression est déjà en attente pour cet élément.",
+        "error"
+      );
+    } else {
+      showNotification(`Demande impossible : ${error.message}`, "error");
+    }
+    return;
+  }
+
+  map.closePopup();
+  showNotification("Demande de suppression envoyée à l’administrateur.");
+}
+
+function renderDeletionRequests() {
+  if (!adminDeletionRequestList || !adminDeletionRequestCount) return;
+
+  adminDeletionRequestCount.textContent =
+    `${deletionRequests.length} demande${deletionRequests.length > 1 ? "s" : ""}`;
+
+  adminDeletionRequestList.innerHTML = "";
+
+  if (!adminToolsEnabled()) {
+    const message = document.createElement("p");
+    message.className = "empty-results";
+    message.textContent = "Passe en mode Administrateur pour consulter les demandes.";
+    adminDeletionRequestList.appendChild(message);
+    return;
+  }
+
+  if (deletionRequests.length === 0) {
+    const message = document.createElement("p");
+    message.className = "empty-results";
+    message.textContent = "Aucune demande en attente.";
+    adminDeletionRequestList.appendChild(message);
+    return;
+  }
+
+  deletionRequests.forEach((request) => {
+    const card = document.createElement("article");
+    card.className = "admin-request-item";
+
+    const header = document.createElement("div");
+    header.className = "admin-request-item-header";
+
+    const titleBlock = document.createElement("div");
+
+    const title = document.createElement("strong");
+    title.textContent = request.entity_name || "Élément sans nom";
+
+    const type = document.createElement("small");
+    type.textContent = request.entity_type === "zone" ? "Polyzone" : "Marqueur";
+
+    titleBlock.append(title, type);
+
+    const date = document.createElement("time");
+    date.textContent = request.created_at
+      ? new Date(request.created_at).toLocaleString("fr-FR")
+      : "Date inconnue";
+
+    header.append(titleBlock, date);
+
+    const requester = document.createElement("p");
+    requester.className = "admin-request-meta";
+    requester.textContent =
+      `Demandé par ${request.requester_name || "Anonyme"}`;
+
+    const reason = document.createElement("p");
+    reason.className = "admin-request-reason";
+    reason.textContent = request.reason || "Aucune raison indiquée.";
+
+    const actions = document.createElement("div");
+    actions.className = "admin-request-actions";
+
+    const approveButton = document.createElement("button");
+    approveButton.type = "button";
+    approveButton.className = "danger-button";
+    approveButton.textContent = "Accepter";
+    approveButton.addEventListener("click", () => {
+      approveDeletionRequest(request);
+    });
+
+    const rejectButton = document.createElement("button");
+    rejectButton.type = "button";
+    rejectButton.className = "secondary-button";
+    rejectButton.textContent = "Refuser";
+    rejectButton.addEventListener("click", () => {
+      rejectDeletionRequest(request);
+    });
+
+    actions.append(approveButton, rejectButton);
+    card.append(header, requester, reason, actions);
+    adminDeletionRequestList.appendChild(card);
+  });
+}
+
+async function loadDeletionRequests() {
+  if (!isAdmin) {
+    deletionRequests = [];
+    renderDeletionRequests();
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("deletion_requests")
+    .select("*")
+    .eq("status", "pending")
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error("Chargement des demandes impossible :", error);
+    showNotification(`Demandes indisponibles : ${error.message}`, "error");
+    return;
+  }
+
+  deletionRequests = Array.isArray(data) ? data : [];
+  renderDeletionRequests();
+}
+
+async function setDeletionRequestStatus(requestId, status) {
+  return supabaseClient
+    .from("deletion_requests")
+    .update({
+      status,
+      reviewed_at: new Date().toISOString(),
+      reviewed_by: adminUser?.id || null,
+      reviewed_by_name: playerName || "Administrateur"
+    })
+    .eq("id", requestId);
+}
+
+async function approveDeletionRequest(request) {
+  if (!adminToolsEnabled()) return;
+
+  const confirmed = window.confirm(
+    `Accepter la demande et déplacer « ${request.entity_name} » dans la corbeille ?`
+  );
+
+  if (!confirmed) return;
+
+  const table = request.entity_type === "zone" ? "zones" : "markers";
+  const now = new Date().toISOString();
+
+  const changes = {
+    deleted_at: now,
+    deleted_by: adminUser?.id || null,
+    deleted_by_name: playerName || "Administrateur"
+  };
+
+  if (request.entity_type === "zone") {
+    changes.updated_at = now;
+  }
+
+  const { error: deletionError } = await supabaseClient
+    .from(table)
+    .update(changes)
+    .eq("id", request.entity_id)
+    .is("deleted_at", null);
+
+  if (deletionError) {
+    showNotification(
+      `Validation impossible : ${deletionError.message}`,
+      "error"
+    );
+    return;
+  }
+
+  const { error: requestError } = await setDeletionRequestStatus(
+    request.id,
+    "approved"
+  );
+
+  if (requestError) {
+    showNotification(
+      `Élément supprimé, mais la demande n’a pas pu être clôturée : ${requestError.message}`,
+      "error"
+    );
+  }
+
+  await Promise.all([
+    loadMarkers(),
+    loadZones(),
+    loadTrash(),
+    loadDeletionRequests()
+  ]);
+
+  showNotification("Demande acceptée : élément déplacé dans la corbeille.");
+}
+
+async function rejectDeletionRequest(request) {
+  if (!adminToolsEnabled()) return;
+
+  if (
+    !window.confirm(
+      `Refuser la demande de suppression de « ${request.entity_name} » ?`
+    )
+  ) {
+    return;
+  }
+
+  const { error } = await setDeletionRequestStatus(request.id, "rejected");
+
+  if (error) {
+    showNotification(`Refus impossible : ${error.message}`, "error");
+    return;
+  }
+
+  await loadDeletionRequests();
+  showNotification("Demande refusée.");
+}
+
+adminDeletionRequestRefreshButton?.addEventListener(
+  "click",
+  loadDeletionRequests
+);
+
+/* =========================================================
    CORBEILLE ADMIN v0.8.5
    ========================================================= */
 
@@ -3537,7 +3818,7 @@ adminTrashRefreshButton?.addEventListener("click", loadTrash);
    ========================================================= */
 
 const BACKUP_FORMAT_VERSION = "1.0";
-const ATLAS_VERSION = "0.8.5";
+const ATLAS_VERSION = "0.8.6";
 
 function setBackupStatus(message, type = "") {
   if (!adminBackupStatus) return;
@@ -3833,7 +4114,8 @@ adminImportFileInput.addEventListener("change", async () => {
     loadMarkers(),
     loadZones(),
     loadMedia(),
-    isAdmin ? loadTrash() : Promise.resolve()
+    isAdmin ? loadTrash() : Promise.resolve(),
+    isAdmin ? loadDeletionRequests() : Promise.resolve()
   ]);
 
     setBackupStatus(
@@ -3899,6 +4181,23 @@ supabaseClient
     () => loadMedia()
   )
   .subscribe((status) => console.log("Statut médias Realtime :", status));
+
+supabaseClient
+  .channel("deletion-requests-realtime")
+  .on(
+    "postgres_changes",
+    {
+      event: "*",
+      schema: "public",
+      table: "deletion_requests"
+    },
+    () => {
+      if (isAdmin) loadDeletionRequests();
+    }
+  )
+  .subscribe((status) =>
+    console.log("Statut demandes suppression Realtime :", status)
+  );
 
 /* =========================================================
    DÉMARRAGE

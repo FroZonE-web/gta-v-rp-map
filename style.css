@@ -1632,3 +1632,134 @@ button:disabled {
 
   font-size: 10px;
 }
+
+
+/* =========================================================
+   DEMANDES DE SUPPRESSION v0.8.6
+   ========================================================= */
+
+.popup-user-actions {
+  padding: 0 14px 13px;
+}
+
+.request-deletion-button {
+  background: #343b47;
+  color: #dbe1ea;
+  border: 1px solid #495363;
+}
+
+.request-deletion-button:hover {
+  background: #414a58;
+}
+
+.admin-deletion-requests-group[hidden] {
+  display: none !important;
+}
+
+.admin-request-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.admin-request-header h3 {
+  margin-bottom: 4px;
+}
+
+.admin-request-list {
+  display: grid;
+  gap: 9px;
+
+  max-height: 380px;
+  overflow-y: auto;
+
+  margin-top: 10px;
+  padding-right: 2px;
+
+  scrollbar-width: thin;
+  scrollbar-color: #394151 transparent;
+}
+
+.admin-request-item {
+  padding: 10px;
+
+  background: #12161d;
+  border: 1px solid #2d3440;
+  border-radius: 10px;
+}
+
+.admin-request-item-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.admin-request-item-header > div {
+  min-width: 0;
+}
+
+.admin-request-item-header strong,
+.admin-request-item-header small {
+  display: block;
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-request-item-header strong {
+  font-size: 12px;
+}
+
+.admin-request-item-header small {
+  margin-top: 3px;
+
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.admin-request-item-header time {
+  flex-shrink: 0;
+
+  color: var(--muted);
+  font-size: 8px;
+  text-align: right;
+}
+
+.admin-request-meta {
+  margin: 8px 0 0;
+
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.admin-request-reason {
+  margin: 8px 0 0;
+  padding: 8px;
+
+  color: #dce2ea;
+  background: #0d1117;
+
+  border-left: 3px solid #697486;
+  border-radius: 6px;
+
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.admin-request-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+
+  margin-top: 9px;
+}
+
+.admin-request-actions button {
+  margin: 0;
+  padding: 8px 9px;
+
+  font-size: 10px;
+}
