@@ -151,6 +151,10 @@ const adminExportAtlasButton = document.getElementById("admin-export-atlas");
 const adminImportFileInput = document.getElementById("admin-import-file");
 const adminImportAtlasButton = document.getElementById("admin-import-atlas");
 const adminBackupStatus = document.getElementById("admin-backup-status");
+const adminTrashGroup = document.getElementById("admin-trash-group");
+const adminTrashList = document.getElementById("admin-trash-list");
+const adminTrashCount = document.getElementById("admin-trash-count");
+const adminTrashRefreshButton = document.getElementById("admin-trash-refresh");
 
 const notificationElement =
   document.getElementById("notification");
@@ -247,6 +251,8 @@ let adminDrawerOpen = false;
 let showHistories = false;
 let movingMarkerId = null;
 let zones = [];
+let trashedMarkers = [];
+let trashedZones = [];
 let pendingZoneLayer = null;
 let isDrawingZone = false;
 let selectedZoneId = null;
@@ -1210,6 +1216,18 @@ function updateAdminInterface() {
     document.body.classList.toggle("show-admin-histories", adminToolsEnabled() && showHistories);
   }
 
+  if (adminTrashGroup) {
+    adminTrashGroup.hidden = !adminToolsEnabled();
+  }
+
+  if (adminToolsEnabled()) {
+    loadTrash();
+  } else {
+    trashedMarkers = [];
+    trashedZones = [];
+    renderTrash();
+  }
+
   refreshInterface();
   renderZones();
   renderMediaGallery();
@@ -1368,25 +1386,36 @@ function startMovingMarker(identifier) {
 
 async function deleteMarker(identifier) {
   if (!adminToolsEnabled()) return;
+
   const place = findPlaceByIdentifier(identifier);
   if (!place) return;
 
-  if (!window.confirm(`Supprimer définitivement « ${place.name} » ?`)) return;
-
-  const { error } = await supabaseClient
-    .from("markers")
-    .delete()
-    .eq("id", place.id);
-
-  if (error) {
-    showNotification(`Suppression impossible : ${error.message}`, "error");
+  if (!window.confirm(`Déplacer « ${place.name} » dans la corbeille ?`)) {
     return;
   }
 
-  favoriteIds.delete(String(place.id));
-  saveFavorites();
-  await loadMarkers();
-  showNotification("Marqueur supprimé.");
+  const deletedAt = new Date().toISOString();
+
+  const { error } = await supabaseClient
+    .from("markers")
+    .update({
+      deleted_at: deletedAt,
+      deleted_by: adminUser?.id || null,
+      deleted_by_name: playerName || "Administrateur"
+    })
+    .eq("id", place.id);
+
+  if (error) {
+    showNotification(
+      `Déplacement dans la corbeille impossible : ${error.message}`,
+      "error"
+    );
+    return;
+  }
+
+  map.closePopup();
+  await Promise.all([loadMarkers(), loadTrash()]);
+  showNotification("Marqueur déplacé dans la corbeille.");
 }
 
 /* =========================================================
@@ -2432,6 +2461,7 @@ async function loadMarkers() {
     await supabaseClient
       .from("markers")
       .select("*")
+      .is("deleted_at", null)
       .order(
         "created_at",
         {
@@ -3087,7 +3117,11 @@ function renderZones() {
 }
 
 async function loadZones() {
-  const { data, error } = await supabaseClient.from("zones").select("*").order("created_at", { ascending: true });
+  const { data, error } = await supabaseClient
+    .from("zones")
+    .select("*")
+    .is("deleted_at", null)
+    .order("created_at", { ascending: true });
   if (error) {
     console.error("Erreur chargement zones :", error);
     showNotification(`Impossible de charger les zones : ${error.message}`, "error");
@@ -3197,32 +3231,313 @@ zoneForm.addEventListener("submit", async (event) => {
 
 async function deleteZone(id) {
   if (!adminToolsEnabled()) return;
+
   if (geometryEditingZoneId) {
-    showNotification("Enregistre ou annule d'abord la modification de forme.", "error");
+    showNotification(
+      "Enregistre ou annule d'abord la modification de forme.",
+      "error"
+    );
     return;
   }
+
   const zone = zones.find((item) => String(item.id) === String(id));
-  if (!zone || !window.confirm(`Supprimer définitivement la zone « ${zone.name} » ?`)) return;
-  const { error } = await supabaseClient.from("zones").delete().eq("id", zone.id);
-  if (error) {
-    showNotification(`Suppression impossible : ${error.message}`, "error");
+
+  if (
+    !zone ||
+    !window.confirm(`Déplacer la zone « ${zone.name} » dans la corbeille ?`)
+  ) {
     return;
   }
+
+  const deletedAt = new Date().toISOString();
+
+  const { error } = await supabaseClient
+    .from("zones")
+    .update({
+      deleted_at: deletedAt,
+      deleted_by: adminUser?.id || null,
+      deleted_by_name: playerName || "Administrateur",
+      updated_at: deletedAt
+    })
+    .eq("id", zone.id);
+
+  if (error) {
+    showNotification(
+      `Déplacement dans la corbeille impossible : ${error.message}`,
+      "error"
+    );
+    return;
+  }
+
   map.closePopup();
   selectedZoneId = null;
   editingZoneId = null;
   editSelectedZoneButton.hidden = true;
   deleteSelectedZoneButton.hidden = true;
-  showNotification("Zone supprimée.");
-  await loadZones();
+
+  await Promise.all([loadZones(), loadTrash()]);
+  showNotification("Zone déplacée dans la corbeille.");
 }
+
+/* =========================================================
+   CORBEILLE ADMIN v0.8.5
+   ========================================================= */
+
+function getTrashEntries() {
+  return [
+    ...trashedMarkers.map((item) => ({
+      ...item,
+      trash_type: "marker",
+      trash_label: "Marqueur"
+    })),
+    ...trashedZones.map((item) => ({
+      ...item,
+      trash_type: "zone",
+      trash_label: "Polyzone"
+    }))
+  ].sort((a, b) =>
+    new Date(b.deleted_at || 0) - new Date(a.deleted_at || 0)
+  );
+}
+
+function renderTrash() {
+  if (!adminTrashList || !adminTrashCount) return;
+
+  const entries = getTrashEntries();
+
+  adminTrashCount.textContent =
+    `${entries.length} élément${entries.length > 1 ? "s" : ""}`;
+
+  adminTrashList.innerHTML = "";
+
+  if (!adminToolsEnabled()) {
+    const message = document.createElement("p");
+    message.className = "empty-results";
+    message.textContent = "Passe en mode Administrateur pour accéder à la corbeille.";
+    adminTrashList.appendChild(message);
+    return;
+  }
+
+  if (entries.length === 0) {
+    const message = document.createElement("p");
+    message.className = "empty-results";
+    message.textContent = "La corbeille est vide.";
+    adminTrashList.appendChild(message);
+    return;
+  }
+
+  entries.forEach((entry) => {
+    const card = document.createElement("article");
+    card.className = "admin-trash-item";
+
+    const header = document.createElement("div");
+    header.className = "admin-trash-item-header";
+
+    const titleBlock = document.createElement("div");
+
+    const title = document.createElement("strong");
+    title.textContent = entry.name || "Élément sans nom";
+
+    const type = document.createElement("small");
+    type.textContent = [
+      entry.trash_label,
+      getCategoryLabel(entry.category),
+      entry.subcategory || null
+    ].filter(Boolean).join(" · ");
+
+    titleBlock.append(title, type);
+
+    const date = document.createElement("time");
+    date.textContent = entry.deleted_at
+      ? new Date(entry.deleted_at).toLocaleString("fr-FR")
+      : "Date inconnue";
+
+    header.append(titleBlock, date);
+
+    const meta = document.createElement("p");
+    meta.className = "admin-trash-meta";
+    meta.textContent =
+      `Supprimé par ${entry.deleted_by_name || "Administrateur"}`;
+
+    const actions = document.createElement("div");
+    actions.className = "admin-trash-actions";
+
+    const restoreButton = document.createElement("button");
+    restoreButton.type = "button";
+    restoreButton.className = "primary-button";
+    restoreButton.textContent = "Restaurer";
+    restoreButton.addEventListener("click", () => {
+      restoreTrashEntry(entry.trash_type, entry.id);
+    });
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "danger-button";
+    deleteButton.textContent = "Supprimer définitivement";
+    deleteButton.addEventListener("click", () => {
+      permanentlyDeleteTrashEntry(entry.trash_type, entry.id);
+    });
+
+    actions.append(restoreButton, deleteButton);
+    card.append(header, meta, actions);
+    adminTrashList.appendChild(card);
+  });
+}
+
+async function loadTrash() {
+  if (!isAdmin) {
+    trashedMarkers = [];
+    trashedZones = [];
+    renderTrash();
+    return;
+  }
+
+  const [
+    { data: markerData, error: markerError },
+    { data: zoneData, error: zoneError }
+  ] = await Promise.all([
+    supabaseClient
+      .from("markers")
+      .select("*")
+      .not("deleted_at", "is", null)
+      .order("deleted_at", { ascending: false }),
+
+    supabaseClient
+      .from("zones")
+      .select("*")
+      .not("deleted_at", "is", null)
+      .order("deleted_at", { ascending: false })
+  ]);
+
+  if (markerError || zoneError) {
+    const message = markerError?.message || zoneError?.message;
+    console.error("Chargement de la corbeille impossible :", markerError, zoneError);
+    showNotification(`Corbeille indisponible : ${message}`, "error");
+    return;
+  }
+
+  trashedMarkers = Array.isArray(markerData) ? markerData : [];
+  trashedZones = Array.isArray(zoneData) ? zoneData : [];
+  renderTrash();
+}
+
+async function restoreTrashEntry(type, id) {
+  if (!adminToolsEnabled()) return;
+
+  const table = type === "zone" ? "zones" : "markers";
+
+  const changes = {
+    deleted_at: null,
+    deleted_by: null,
+    deleted_by_name: null
+  };
+
+  if (type === "zone") {
+    changes.updated_at = new Date().toISOString();
+  }
+
+  const { error } = await supabaseClient
+    .from(table)
+    .update(changes)
+    .eq("id", id);
+
+  if (error) {
+    showNotification(`Restauration impossible : ${error.message}`, "error");
+    return;
+  }
+
+  await Promise.all([loadMarkers(), loadZones(), loadTrash()]);
+  showNotification(type === "zone" ? "Zone restaurée." : "Marqueur restauré.");
+}
+
+async function removeEntityMedia(type, id) {
+  const entityType = type === "zone" ? "zone" : "marker";
+  const related = mediaRecords.filter((media) =>
+    media.entity_type === entityType &&
+    String(media.entity_id) === String(id)
+  );
+
+  const paths = related
+    .map((media) => media.storage_path)
+    .filter(Boolean);
+
+  if (paths.length > 0) {
+    const { error: storageError } = await supabaseClient.storage
+      .from("atlas-media")
+      .remove(paths);
+
+    if (storageError) {
+      throw new Error(`Suppression des fichiers impossible : ${storageError.message}`);
+    }
+  }
+
+  if (related.length > 0) {
+    const { error: mediaError } = await supabaseClient
+      .from("atlas_media")
+      .delete()
+      .eq("entity_type", entityType)
+      .eq("entity_id", id);
+
+    if (mediaError) {
+      throw new Error(`Suppression des médias impossible : ${mediaError.message}`);
+    }
+  }
+}
+
+async function permanentlyDeleteTrashEntry(type, id) {
+  if (!adminToolsEnabled()) return;
+
+  const collection = type === "zone" ? trashedZones : trashedMarkers;
+  const entry = collection.find((item) => String(item.id) === String(id));
+
+  if (!entry) return;
+
+  const confirmed = window.confirm(
+    `Supprimer définitivement « ${entry.name} » ?\n\n` +
+    "Cette action effacera aussi ses images et documents et ne pourra pas être annulée."
+  );
+
+  if (!confirmed) return;
+
+  try {
+    await removeEntityMedia(type, id);
+
+    const table = type === "zone" ? "zones" : "markers";
+
+    const { error } = await supabaseClient
+      .from(table)
+      .delete()
+      .eq("id", id)
+      .not("deleted_at", "is", null);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    if (type === "marker") {
+      favoriteIds.delete(String(id));
+      saveFavorites();
+    }
+
+    await Promise.all([loadMarkers(), loadZones(), loadMedia(), loadTrash()]);
+    showNotification("Élément supprimé définitivement.");
+  } catch (error) {
+    console.error("Suppression définitive impossible :", error);
+    showNotification(
+      `Suppression définitive impossible : ${error.message}`,
+      "error"
+    );
+  }
+}
+
+adminTrashRefreshButton?.addEventListener("click", loadTrash);
 
 /* =========================================================
    IMPORT / EXPORT ADMIN v0.8.4
    ========================================================= */
 
 const BACKUP_FORMAT_VERSION = "1.0";
-const ATLAS_VERSION = "0.8.4";
+const ATLAS_VERSION = "0.8.5";
 
 function setBackupStatus(message, type = "") {
   if (!adminBackupStatus) return;
@@ -3252,8 +3567,10 @@ function createAtlasBackup() {
     created_at: new Date().toISOString(),
     created_by: playerName || "Administrateur",
     metadata: {
-      marker_count: places.length,
-      zone_count: zones.length,
+      marker_count: places.length + trashedMarkers.length,
+      zone_count: zones.length + trashedZones.length,
+      trashed_marker_count: trashedMarkers.length,
+      trashed_zone_count: trashedZones.length,
       media_count: mediaRecords.length,
       image_count: mediaRecords.filter((item) => (item.media_type || "image") === "image").length,
       document_count: mediaRecords.filter((item) => item.media_type === "document").length
@@ -3262,8 +3579,8 @@ function createAtlasBackup() {
     settings: {
       layers: layerSettings
     },
-    markers: places,
-    zones,
+    markers: [...places, ...trashedMarkers],
+    zones: [...zones, ...trashedZones],
     media: mediaRecords
   };
 }
@@ -3512,7 +3829,12 @@ adminImportFileInput.addEventListener("change", async () => {
       saveLayerSettings();
     }
 
-    await Promise.all([loadMarkers(), loadZones(), loadMedia()]);
+    await Promise.all([
+    loadMarkers(),
+    loadZones(),
+    loadMedia(),
+    isAdmin ? loadTrash() : Promise.resolve()
+  ]);
 
     setBackupStatus(
       `Import terminé : ${markerIdMap.size} marqueur(s), ${zoneIdMap.size} zone(s), ` +
@@ -3545,6 +3867,7 @@ supabaseClient
     },
     () => {
       loadMarkers();
+      if (isAdmin) loadTrash();
     }
   )
   .subscribe((status) => {
@@ -3559,7 +3882,10 @@ supabaseClient
   .on(
     "postgres_changes",
     { event: "*", schema: "public", table: "zones" },
-    () => loadZones()
+    () => {
+      loadZones();
+      if (isAdmin) loadTrash();
+    }
   )
   .subscribe((status) => console.log("Statut zones Realtime :", status));
 

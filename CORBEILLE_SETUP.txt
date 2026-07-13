@@ -1,0 +1,19 @@
+ATLAS RP v0.8.5 — CORBEILLE
+
+La mise à jour du code suppose que cette requête SQL a déjà été exécutée :
+
+alter table public.markers
+  add column if not exists deleted_at timestamptz,
+  add column if not exists deleted_by uuid references auth.users(id) on delete set null,
+  add column if not exists deleted_by_name text;
+
+alter table public.zones
+  add column if not exists deleted_at timestamptz,
+  add column if not exists deleted_by uuid references auth.users(id) on delete set null,
+  add column if not exists deleted_by_name text;
+
+create index if not exists markers_deleted_at_idx
+  on public.markers (deleted_at);
+
+create index if not exists zones_deleted_at_idx
+  on public.zones (deleted_at);
