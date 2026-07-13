@@ -2606,3 +2606,27 @@ body.admin-drawer-open .admin-drawer-toggle {
 .leaflet-draw-toolbar a.leaflet-disabled::before {
   color: #94a3b8;
 }
+
+
+/* =========================================================
+   ASHEN WOLVES HUB — IDENTITÉ VISUELLE
+   ========================================================= */
+
+.sidebar-header h1 {
+  max-width: 100%;
+
+  font-size: 25px;
+  line-height: 1.05;
+  letter-spacing: -0.045em;
+}
+
+.subtitle {
+  max-width: 100%;
+  line-height: 1.35;
+}
+
+@media (max-width: 560px) {
+  .sidebar-header h1 {
+    font-size: 21px;
+  }
+}

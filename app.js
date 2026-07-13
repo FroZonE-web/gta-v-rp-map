@@ -1,6 +1,6 @@
 "use strict";
 
-console.info("Atlas RP app.js v0.8.0 chargé");
+console.info("Ashen Wolves HUB app.js v0.8.0 chargé");
 
 /* =========================================================
    CONFIGURATION DE LA CARTE
@@ -3960,7 +3960,7 @@ adminExportAtlasButton.addEventListener("click", () => {
 
   const backup = createAtlasBackup();
   const date = new Date().toISOString().slice(0, 10);
-  downloadJsonFile(`AtlasRP_Backup_${date}.json`, backup);
+  downloadJsonFile(`Ashen_Wolves_HUB_Backup_${new Date().toISOString().slice(0, 10)}.json`, backup);
   setBackupStatus(
     `${backup.metadata.marker_count} marqueur(s), ${backup.metadata.zone_count} zone(s) et ${backup.metadata.media_count} média(s) exportés.`,
     "success"

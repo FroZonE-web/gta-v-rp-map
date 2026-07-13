@@ -1,0 +1,15 @@
+ASHEN WOLVES HUB v1.0
+
+Cette version reprend intégralement la dernière version fonctionnelle de la carte
+et remplace toutes les mentions visibles « Atlas RP » par « Ashen Wolves HUB ».
+
+Modifications :
+- titre du navigateur renommé ;
+- en-tête principal renommé ;
+- sous-titre adapté au futur HUB ;
+- import/export renommé ;
+- noms des fichiers de sauvegarde renommés ;
+- identité visuelle ajustée pour le nouveau nom ;
+- aucune modification de Supabase ;
+- aucune donnée existante supprimée ;
+- les clés techniques internes atlas_* restent inchangées pour préserver la compatibilité.
