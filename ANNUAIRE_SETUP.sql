@@ -73,11 +73,12 @@ to anon, authenticated
 using (true);
 
 drop policy if exists "directory_members_admin_insert" on public.directory_members;
-create policy "directory_members_admin_insert"
+drop policy if exists "directory_members_member_insert" on public.directory_members;
+create policy "directory_members_member_insert"
 on public.directory_members
 for insert
 to authenticated
-with check (public.is_admin());
+with check (auth.uid() is not null);
 
 drop policy if exists "directory_members_admin_update" on public.directory_members;
 create policy "directory_members_admin_update"

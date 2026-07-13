@@ -27,6 +27,7 @@
 
   let members = [];
   let sessionUser = null;
+  let canAdd = false;
   let canManage = false;
   let editingId = null;
   let loadedOnce = false;
@@ -117,7 +118,7 @@
     counter.textContent = `${visible.length} membre${visible.length > 1 ? "s" : ""} affiché${visible.length > 1 ? "s" : ""} · ${members.length}/16`;
 
     if (!members.length) {
-      setState("empty", "Aucun membre enregistré", canManage
+      setState("empty", "Aucun membre enregistré", canAdd
         ? "Ajoutez le premier membre de l'annuaire avec le bouton prévu à cet effet."
         : "L'annuaire ne contient actuellement aucune fiche.");
       return;
@@ -175,6 +176,7 @@
     const { data, error } = await supabaseClient.auth.getSession();
     if (error) console.error("Session annuaire impossible :", error);
     sessionUser = data?.session?.user || null;
+    canAdd = Boolean(sessionUser);
     canManage = sessionUser ? isAdminAvailable() : false;
 
     if (sessionUser && !canManage) {
@@ -182,7 +184,7 @@
       canManage = adminAllowed === true;
     }
 
-    addButton.hidden = !canManage;
+    addButton.hidden = !canAdd;
     route.querySelectorAll("[data-admin-column]").forEach((cell) => {
       cell.hidden = !canManage;
     });
@@ -236,7 +238,7 @@
   }
 
   function openAdd() {
-    if (!canManage) return;
+    if (!canAdd) return;
     if (members.length >= 16) {
       window.alert("La limite de 16 membres actifs est atteinte.");
       return;
@@ -279,7 +281,7 @@
 
   async function saveMember(event) {
     event.preventDefault();
-    if (!canManage) return;
+    if (editingId ? !canManage : !canAdd) return;
 
     const payload = getPayload();
     if (!payload.grade_code || !payload.first_name || !payload.last_name || !payload.identity_name) {

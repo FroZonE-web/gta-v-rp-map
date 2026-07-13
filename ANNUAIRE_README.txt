@@ -6,8 +6,9 @@ ASHEN WOLVES HUB v1.2 — ANNUAIRE
 
 Permissions de cette version :
 - tout le monde, connecté ou non : consultation ;
+- utilisateur connecté : ajout d’un membre ;
 - administrateur : ajout, modification et suppression ;
-- mode visiteur administrateur : consultation uniquement.
+- mode visiteur administrateur : mêmes droits d’ajout qu’un utilisateur classique.
 
 Si ANNUAIRE_SETUP.sql avait déjà été exécuté, exécuter uniquement
 ANNUAIRE_PUBLIC_ACCESS_FIX.sql pour ouvrir la consultation publique.
