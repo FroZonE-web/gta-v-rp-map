@@ -8,7 +8,7 @@
     content="width=device-width, initial-scale=1"
   >
 
-  <title>Atlas RP v1.0.0 — Carte GTA V</title>
+  <title>Atlas RP v1.0 — Carte GTA V</title>
 
   <link
     rel="stylesheet"
@@ -20,7 +20,7 @@
     href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css"
   >
 
-  <link rel="stylesheet" href="style.css?v=1.0.0">
+  <link rel="stylesheet" href="style.css?v=1.0.1">
 </head>
 
 <body>
@@ -28,7 +28,7 @@
     <header class="sidebar-header">
       <div>
         <h1>Atlas RP</h1>
-        <p class="subtitle">Carte collaborative GTA V · v1.0.0</p>
+        <p class="subtitle">Carte collaborative GTA V · v1.0</p>
       </div>
 
       <div class="player-box">
@@ -102,40 +102,73 @@
     </section>
 
 
-    <section class="panel layers-panel">
-      <div class="panel-title-row">
+    <section id="layers-panel" class="panel layers-panel collapsible-panel">
+      <div class="panel-title-row collapsible-panel-header">
         <h2><span class="panel-icon">◫</span> Calques</h2>
-        <button id="reset-layers" class="small-secondary-button" type="button">Réinitialiser</button>
+
+        <div class="collapsible-panel-actions">
+          <button id="reset-layers" class="small-secondary-button" type="button">
+            Réinitialiser
+          </button>
+
+          <button
+            class="panel-collapse-button"
+            type="button"
+            data-collapse-target="layers-panel-body"
+            aria-expanded="true"
+            aria-controls="layers-panel-body"
+            title="Réduire ou développer les calques"
+          >
+            <span aria-hidden="true">⌄</span>
+          </button>
+        </div>
       </div>
 
-      <p class="panel-description">
-        Choisis les groupes visibles. Tes préférences sont conservées sur cet appareil.
-      </p>
+      <div id="layers-panel-body" class="collapsible-panel-body">
+        <p class="panel-description">
+          Choisis les groupes visibles. Tes préférences sont conservées sur cet appareil.
+        </p>
 
-      <div class="layer-master-list">
-        <label class="layer-switch-row">
-          <input id="layer-markers" type="checkbox" checked>
-          <span>📍 Marqueurs</span>
-        </label>
+        <div class="layer-master-list">
+          <label class="layer-switch-row">
+            <input id="layer-markers" type="checkbox" checked>
+            <span>📍 Marqueurs</span>
+          </label>
 
-        <label class="layer-switch-row">
-          <input id="layer-zones" type="checkbox" checked>
-          <span>⬛ Polyzones</span>
-        </label>
+          <label class="layer-switch-row">
+            <input id="layer-zones" type="checkbox" checked>
+            <span>⬛ Polyzones</span>
+          </label>
+        </div>
+
+        <div class="layer-divider"></div>
+        <div id="layer-category-list" class="layer-category-list"></div>
       </div>
-
-      <div class="layer-divider"></div>
-      <div id="layer-category-list" class="layer-category-list"></div>
     </section>
 
-    <section class="panel">
-      <h2><span class="panel-icon">≡</span> Filtres</h2>
+    <section id="filters-panel" class="panel collapsible-panel">
+      <div class="panel-title-row collapsible-panel-header">
+        <h2><span class="panel-icon">≡</span> Filtres</h2>
 
-      <p class="panel-description">
-        Affiche ou masque les différentes catégories.
-      </p>
+        <button
+          class="panel-collapse-button"
+          type="button"
+          data-collapse-target="filters-panel-body"
+          aria-expanded="true"
+          aria-controls="filters-panel-body"
+          title="Réduire ou développer les filtres"
+        >
+          <span aria-hidden="true">⌄</span>
+        </button>
+      </div>
 
-      <div id="filters-container"></div>
+      <div id="filters-panel-body" class="collapsible-panel-body">
+        <p class="panel-description">
+          Affiche ou masque les différentes catégories.
+        </p>
+
+        <div id="filters-container"></div>
+      </div>
     </section>
 
     <section class="panel">
@@ -511,6 +544,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script src="config.js"></script>
-  <script src="app.js?v=1.0.0"></script>
+  <script src="app.js?v=1.0.1"></script>
 </body>
 </html>

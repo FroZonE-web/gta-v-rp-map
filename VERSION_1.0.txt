@@ -1,0 +1,9 @@
+ATLAS RP v1.0
+
+Correctifs :
+- bouton Administration recentré et maintenu dans l'écran ;
+- outils rectangle et polygone rendus lisibles ;
+- Calques et Filtres repliables ;
+- état mémorisé dans le navigateur ;
+- version visuelle conservée à v1.0 ;
+- aucune modification de Supabase.

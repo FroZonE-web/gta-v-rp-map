@@ -2408,3 +2408,134 @@ button:active { transform: translateY(0); }
     transition-duration: .001ms !important;
   }
 }
+
+
+/* =========================================================
+   ATLAS RP v1.0 — CORRECTIFS DE CONFORT
+   ========================================================= */
+
+/* Languette Administration : toujours visible et centrée */
+
+.admin-drawer-toggle {
+  top: 50% !important;
+  right: 0 !important;
+  bottom: auto !important;
+
+  max-height: calc(100vh - 32px);
+
+  transform: translateY(-50%);
+
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+
+  overflow: hidden;
+}
+
+.admin-drawer-toggle:hover {
+  transform: translateY(-50%) translateX(-2px);
+}
+
+body.admin-drawer-open .admin-drawer-toggle {
+  right: 366px !important;
+
+  transform: translateY(-50%);
+}
+
+/* Outils Leaflet Draw visibles sur le thème sombre */
+
+.leaflet-draw-toolbar a,
+.leaflet-control-zoom a {
+  background-color: #f8fafc !important;
+  border-bottom-color: #cbd5e1 !important;
+}
+
+.leaflet-draw-toolbar a:hover,
+.leaflet-draw-toolbar a:focus,
+.leaflet-control-zoom a:hover,
+.leaflet-control-zoom a:focus {
+  background-color: #dbeafe !important;
+}
+
+.leaflet-draw-toolbar a {
+  opacity: 1 !important;
+  filter: contrast(1.35) brightness(1.08) !important;
+}
+
+/* Calques et Filtres repliables */
+
+.collapsible-panel {
+  overflow: hidden;
+}
+
+.collapsible-panel-header {
+  margin-bottom: 10px;
+}
+
+.collapsible-panel.is-collapsed .collapsible-panel-header {
+  margin-bottom: 0;
+}
+
+.collapsible-panel-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.panel-collapse-button {
+  display: grid;
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+  min-height: 30px;
+  place-items: center;
+
+  padding: 0;
+
+  color: #dce7f3;
+  background: rgba(31, 42, 58, 0.95);
+
+  border: 1px solid rgba(139, 162, 191, 0.25);
+  border-radius: 8px;
+
+  font-size: 18px;
+  line-height: 1;
+}
+
+.panel-collapse-button:hover {
+  color: #ffffff;
+  background: #29374a;
+
+  border-color: rgba(56, 189, 248, 0.38);
+}
+
+.panel-collapse-button span {
+  display: block;
+}
+
+.collapsible-panel-body[hidden] {
+  display: none !important;
+}
+
+.collapsible-panel.is-collapsed {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+@media (max-width: 850px) {
+  .admin-drawer-toggle {
+    top: auto !important;
+    right: 10px !important;
+    bottom: calc(56dvh + 10px) !important;
+
+    writing-mode: horizontal-tb;
+
+    transform: none;
+  }
+
+  .admin-drawer-toggle:hover,
+  body.admin-drawer-open .admin-drawer-toggle {
+    right: 10px !important;
+    transform: translateY(-1px);
+  }
+}

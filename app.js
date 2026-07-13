@@ -3904,7 +3904,7 @@ adminTrashRefreshButton?.addEventListener("click", loadTrash);
    ========================================================= */
 
 const BACKUP_FORMAT_VERSION = "1.0";
-const ATLAS_VERSION = "1.0.0";
+const ATLAS_VERSION = "1.0";
 
 function setBackupStatus(message, type = "") {
   if (!adminBackupStatus) return;
@@ -4286,10 +4286,58 @@ supabaseClient
   );
 
 /* =========================================================
+   PANNEAUX REPLIABLES v1.0
+   ========================================================= */
+
+function setCollapsiblePanelState(button, collapsed, save = true) {
+  const targetId = button.dataset.collapseTarget;
+  const body = document.getElementById(targetId);
+
+  if (!body) return;
+
+  const panel = button.closest(".collapsible-panel");
+
+  body.hidden = collapsed;
+  panel?.classList.toggle("is-collapsed", collapsed);
+  button.setAttribute("aria-expanded", String(!collapsed));
+
+  const icon = button.querySelector("span");
+
+  if (icon) {
+    icon.textContent = collapsed ? "›" : "⌄";
+  }
+
+  if (save) {
+    localStorage.setItem(
+      `atlas_panel_collapsed_${targetId}`,
+      String(collapsed)
+    );
+  }
+}
+
+function initializeCollapsiblePanels() {
+  document
+    .querySelectorAll("[data-collapse-target]")
+    .forEach((button) => {
+      const targetId = button.dataset.collapseTarget;
+      const savedState =
+        localStorage.getItem(`atlas_panel_collapsed_${targetId}`) === "true";
+
+      setCollapsiblePanelState(button, savedState, false);
+
+      button.addEventListener("click", () => {
+        const body = document.getElementById(targetId);
+        setCollapsiblePanelState(button, !body?.hidden);
+      });
+    });
+}
+
+/* =========================================================
    DÉMARRAGE
    ========================================================= */
 
 async function initializeApplication() {
+  initializeCollapsiblePanels();
   initializePlayerName();
   loadFavorites();
   loadLayerSettings();
