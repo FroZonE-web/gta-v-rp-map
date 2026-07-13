@@ -8,7 +8,7 @@
     content="width=device-width, initial-scale=1"
   >
 
-  <title>Atlas RP v0.8.2 — Carte GTA V</title>
+  <title>Atlas RP v0.8.3 — Carte GTA V</title>
 
   <link
     rel="stylesheet"
@@ -28,7 +28,7 @@
     <header class="sidebar-header">
       <div>
         <h1>Atlas RP</h1>
-        <p class="subtitle">Carte collaborative GTA V · v0.8.2</p>
+        <p class="subtitle">Carte collaborative GTA V · v0.8.3</p>
       </div>
 
       <div class="player-box">
@@ -350,6 +350,40 @@
         <div id="media-gallery" class="media-gallery">
           <p class="empty-results">Aucune image pour cette fiche.</p>
         </div>
+
+        <div class="media-gallery-heading document-heading">
+          <h3>Pièces jointes</h3>
+          <span id="document-count" class="marker-count">0 document</span>
+        </div>
+
+        <div id="document-upload-block" class="media-upload-block" hidden>
+          <label class="field-label" for="document-file">Ajouter un document</label>
+          <input
+            id="document-file"
+            type="file"
+            accept=".pdf,.docx,.xlsx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/plain"
+          >
+
+          <label class="field-label" for="document-title">Titre facultatif</label>
+          <input
+            id="document-title"
+            type="text"
+            maxlength="100"
+            placeholder="Exemple : Procédure interne"
+          >
+
+          <button id="document-upload-button" type="button" class="primary-button">
+            Envoyer le document
+          </button>
+
+          <p class="panel-description media-help">
+            PDF, DOCX, XLSX ou TXT · 10 Mo maximum.
+          </p>
+        </div>
+
+        <div id="document-list" class="document-list">
+          <p class="empty-results">Aucun document pour cette fiche.</p>
+        </div>
       </section>
     </div>
 
@@ -439,6 +473,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script src="config.js"></script>
-  <script src="app.js?v=0.8.2"></script>
+  <script src="app.js?v=0.8.3"></script>
 </body>
 </html>

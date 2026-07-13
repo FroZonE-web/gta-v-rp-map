@@ -1,0 +1,8 @@
+-- AUCUNE NOUVELLE TABLE N'EST NÉCESSAIRE.
+-- La table public.atlas_media existante accepte déjà media_type = 'document'.
+-- Vérifie seulement dans Storage > atlas-media > Configuration que les types MIME
+-- suivants sont autorisés, en plus des images :
+-- application/pdf
+-- application/vnd.openxmlformats-officedocument.wordprocessingml.document
+-- application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+-- text/plain

@@ -221,6 +221,12 @@ const mediaPreviewImage = document.getElementById("media-preview-image");
 const mediaUploadButton = document.getElementById("media-upload-button");
 const mediaGallery = document.getElementById("media-gallery");
 const mediaCountElement = document.getElementById("media-count");
+const documentUploadBlock = document.getElementById("document-upload-block");
+const documentFileInput = document.getElementById("document-file");
+const documentTitleInput = document.getElementById("document-title");
+const documentUploadButton = document.getElementById("document-upload-button");
+const documentList = document.getElementById("document-list");
+const documentCountElement = document.getElementById("document-count");
 
 
 /* =========================================================
@@ -490,23 +496,55 @@ function toggleFavorite(identifier) {
 
 function getEntityMedia(entityType, entityId) {
   return mediaRecords
-    .filter((media) => media.entity_type === entityType && String(media.entity_id) === String(entityId))
-    .sort((a, b) => Number(b.is_primary) - Number(a.is_primary) || new Date(a.created_at) - new Date(b.created_at));
+    .filter((media) =>
+      media.entity_type === entityType &&
+      String(media.entity_id) === String(entityId)
+    )
+    .sort((a, b) =>
+      Number(b.is_primary) - Number(a.is_primary) ||
+      new Date(a.created_at) - new Date(b.created_at)
+    );
+}
+
+function getEntityImages(entityType, entityId) {
+  return getEntityMedia(entityType, entityId)
+    .filter((media) => (media.media_type || "image") === "image");
+}
+
+function getEntityDocuments(entityType, entityId) {
+  return getEntityMedia(entityType, entityId)
+    .filter((media) => media.media_type === "document");
 }
 
 function getPrimaryMedia(entityType, entityId) {
-  const list = getEntityMedia(entityType, entityId);
+  const list = getEntityImages(entityType, entityId);
   return list.find((media) => media.is_primary) || list[0] || null;
 }
 
 function createPopupMedia(entityType, entityId) {
-  const list = getEntityMedia(entityType, entityId);
-  const primary = list.find((media) => media.is_primary) || list[0];
+  const images = getEntityImages(entityType, entityId);
+  const documents = getEntityDocuments(entityType, entityId);
+  const primary = images.find((media) => media.is_primary) || images[0];
+
   const image = primary
     ? `<button type="button" class="popup-media-image" data-media-open="${entityType}" data-media-entity-id="${escapeHtml(entityId)}"><img src="${escapeHtml(primary.public_url)}" alt="${escapeHtml(primary.title || "Image de la fiche")}" loading="lazy"></button>`
     : "";
-  const label = list.length > 0 ? `${list.length} image${list.length > 1 ? "s" : ""}` : "Ajouter une image";
-  return `${image}<button type="button" class="popup-media-button" data-media-open="${entityType}" data-media-entity-id="${escapeHtml(entityId)}">📷 ${label}</button>`;
+
+  const imageLabel = images.length > 0
+    ? `${images.length} image${images.length > 1 ? "s" : ""}`
+    : "Ajouter une image";
+
+  const documentLabel = documents.length > 0
+    ? `${documents.length} document${documents.length > 1 ? "s" : ""}`
+    : "Aucun document";
+
+  return `
+    ${image}
+    <div class="popup-media-actions">
+      <button type="button" class="popup-media-button" data-media-open="${entityType}" data-media-entity-id="${escapeHtml(entityId)}">📷 ${imageLabel}</button>
+      <button type="button" class="popup-media-button popup-document-button" data-media-open="${entityType}" data-media-entity-id="${escapeHtml(entityId)}">📎 ${documentLabel}</button>
+    </div>
+  `;
 }
 
 function findMediaEntity(entityType, entityId) {
@@ -527,6 +565,8 @@ function closeMediaModal() {
   mediaPrimaryInput.checked = false;
   mediaPreview.hidden = true;
   mediaPreviewImage.removeAttribute("src");
+  documentFileInput.value = "";
+  documentTitleInput.value = "";
   if (pendingMediaObjectUrl) URL.revokeObjectURL(pendingMediaObjectUrl);
   pendingMediaObjectUrl = null;
 }
@@ -541,14 +581,16 @@ function openMediaModal(entityType, entityId) {
   mediaDialogTitle.textContent = entityType === "marker" ? "Images du lieu" : "Images de la zone";
   mediaEntityLabel.textContent = entity.name || "Fiche sans nom";
   mediaUploadBlock.hidden = !adminToolsEnabled();
+  documentUploadBlock.hidden = !adminToolsEnabled();
   mediaModal.hidden = false;
   renderMediaGallery();
+  renderDocumentList();
 }
 
 function renderMediaGallery() {
   if (!activeMediaEntity) return;
   const { entityType, entityId } = activeMediaEntity;
-  const list = getEntityMedia(entityType, entityId);
+  const list = getEntityImages(entityType, entityId);
   mediaCountElement.textContent = `${list.length} image${list.length > 1 ? "s" : ""}`;
   mediaGallery.innerHTML = "";
 
@@ -618,7 +660,10 @@ async function loadMedia() {
 
   mediaRecords = Array.isArray(data) ? data : [];
   refreshInterface();
-  if (activeMediaEntity) renderMediaGallery();
+  if (activeMediaEntity) {
+    renderMediaGallery();
+    renderDocumentList();
+  }
 }
 
 function getSafeFileName(value) {
@@ -726,7 +771,7 @@ mediaUploadButton.addEventListener("click", async () => {
     if (uploadError) throw uploadError;
 
     const { data: publicData } = supabaseClient.storage.from("atlas-media").getPublicUrl(path);
-    const existing = getEntityMedia(entityType, entityId);
+    const existing = getEntityImages(entityType, entityId);
     const shouldBePrimary = mediaPrimaryInput.checked || existing.length === 0;
 
     if (shouldBePrimary && existing.length > 0) {
@@ -770,6 +815,238 @@ mediaUploadButton.addEventListener("click", async () => {
   } finally {
     mediaUploadButton.disabled = false;
     mediaUploadButton.textContent = "Envoyer l’image";
+  }
+});
+
+
+function getDocumentExtension(fileName) {
+  const match = String(fileName || "").toLowerCase().match(/\.([a-z0-9]+)$/);
+  return match ? match[1] : "";
+}
+
+function validateDocument(file) {
+  const allowedExtensions = new Set(["pdf", "docx", "xlsx", "txt"]);
+  const extension = getDocumentExtension(file.name);
+
+  if (!allowedExtensions.has(extension)) {
+    throw new Error("Format refusé. Utilise PDF, DOCX, XLSX ou TXT.");
+  }
+
+  if (file.size > 10 * 1024 * 1024) {
+    throw new Error("Le document dépasse la limite de 10 Mo.");
+  }
+
+  return extension;
+}
+
+function getDocumentIcon(fileName) {
+  const extension = getDocumentExtension(fileName);
+
+  if (extension === "pdf") return "📕";
+  if (extension === "docx") return "📘";
+  if (extension === "xlsx") return "📗";
+  if (extension === "txt") return "📄";
+
+  return "📎";
+}
+
+function formatFileSize(size) {
+  const bytes = Number(size || 0);
+
+  if (bytes < 1024) return `${bytes} o`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} Ko`;
+
+  return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
+}
+
+function renderDocumentList() {
+  if (!activeMediaEntity) return;
+
+  const { entityType, entityId } = activeMediaEntity;
+  const list = getEntityDocuments(entityType, entityId);
+
+  documentCountElement.textContent =
+    `${list.length} document${list.length > 1 ? "s" : ""}`;
+
+  documentList.innerHTML = "";
+
+  if (list.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "empty-results";
+    empty.textContent = "Aucun document pour cette fiche.";
+    documentList.appendChild(empty);
+    return;
+  }
+
+  list.forEach((documentRecord) => {
+    const row = document.createElement("article");
+    row.className = "document-item";
+
+    const openButton = document.createElement("button");
+    openButton.type = "button";
+    openButton.className = "document-open-button";
+    openButton.addEventListener("click", () => {
+      window.open(
+        documentRecord.public_url,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    });
+
+    const icon = document.createElement("span");
+    icon.className = "document-icon";
+    icon.textContent = getDocumentIcon(
+      documentRecord.storage_path || documentRecord.title
+    );
+
+    const information = document.createElement("span");
+    information.className = "document-information";
+
+    const title = document.createElement("strong");
+    title.textContent =
+      documentRecord.title ||
+      String(documentRecord.storage_path || "Document")
+        .split("/")
+        .pop();
+
+    const meta = document.createElement("small");
+    meta.textContent = [
+      documentRecord.description || null,
+      documentRecord.author ? `par ${documentRecord.author}` : null
+    ].filter(Boolean).join(" · ");
+
+    information.append(title, meta);
+    openButton.append(icon, information);
+    row.appendChild(openButton);
+
+    if (adminToolsEnabled()) {
+      const deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.className = "document-delete-button danger-button";
+      deleteButton.textContent = "Supprimer";
+      deleteButton.addEventListener("click", () => deleteDocument(documentRecord));
+      row.appendChild(deleteButton);
+    }
+
+    documentList.appendChild(row);
+  });
+}
+
+async function deleteDocument(documentRecord) {
+  if (
+    !adminToolsEnabled() ||
+    !window.confirm("Supprimer définitivement ce document ?")
+  ) {
+    return;
+  }
+
+  const { error: storageError } = await supabaseClient.storage
+    .from("atlas-media")
+    .remove([documentRecord.storage_path]);
+
+  if (storageError) {
+    showNotification(
+      `Suppression du fichier impossible : ${storageError.message}`,
+      "error"
+    );
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from("atlas_media")
+    .delete()
+    .eq("id", documentRecord.id);
+
+  if (error) {
+    showNotification(
+      `Suppression de la pièce jointe impossible : ${error.message}`,
+      "error"
+    );
+    return;
+  }
+
+  showNotification("Document supprimé.");
+  await loadMedia();
+}
+
+documentUploadButton.addEventListener("click", async () => {
+  if (!adminToolsEnabled() || !activeMediaEntity) return;
+
+  const file = documentFileInput.files?.[0];
+
+  if (!file) {
+    showNotification("Choisis d’abord un document.", "error");
+    return;
+  }
+
+  documentUploadButton.disabled = true;
+  documentUploadButton.textContent = "Envoi...";
+
+  try {
+    const extension = validateDocument(file);
+    const { entityType, entityId, entity } = activeMediaEntity;
+    const folder = entityType === "marker" ? "markers" : "zones";
+
+    const baseName = file.name.replace(/\.[^.]+$/, "");
+    const path =
+      `documents/${folder}/${entityId}/${Date.now()}-` +
+      `${getSafeFileName(baseName)}.${extension}`;
+
+    const { error: uploadError } = await supabaseClient.storage
+      .from("atlas-media")
+      .upload(path, file, {
+        contentType: file.type || "application/octet-stream",
+        upsert: false
+      });
+
+    if (uploadError) throw uploadError;
+
+    const { data: publicData } = supabaseClient.storage
+      .from("atlas-media")
+      .getPublicUrl(path);
+
+    const title = documentTitleInput.value.trim() || file.name;
+
+    const { error: insertError } = await supabaseClient
+      .from("atlas_media")
+      .insert([{
+        entity_type: entityType,
+        entity_id: Number(entityId),
+        storage_path: path,
+        public_url: publicData.publicUrl,
+        media_type: "document",
+        title,
+        description: formatFileSize(file.size),
+        is_primary: false,
+        author: playerName,
+        uploaded_by: adminUser?.id || null
+      }]);
+
+    if (insertError) {
+      await supabaseClient.storage
+        .from("atlas-media")
+        .remove([path]);
+
+      throw insertError;
+    }
+
+    documentFileInput.value = "";
+    documentTitleInput.value = "";
+
+    showNotification(
+      `Document ajouté à « ${entity.name || "la fiche"} ».`
+    );
+
+    await loadMedia();
+  } catch (error) {
+    console.error("Erreur document :", error);
+    showNotification(
+      `Envoi impossible : ${error.message}`,
+      "error"
+    );
+  } finally {
+    documentUploadButton.disabled = false;
+    documentUploadButton.textContent = "Envoyer le document";
   }
 });
 
