@@ -3,7 +3,8 @@
    ========================================================= */
 
 body.hub-dashboard-active,
-body.hub-placeholder-active {
+body.hub-placeholder-active,
+body.hub-regulation-active {
   display: block;
   overflow: auto;
 }
@@ -49,7 +50,7 @@ body.hub-placeholder-active {
 .hub-map-home:hover {
   color: #fff;
   background: #172235;
-  border-color: rgba(56, 189, 248, .5);
+  border-color: rgba(168, 85, 247, .5);
 }
 
 .hub-dashboard,
@@ -57,8 +58,8 @@ body.hub-placeholder-active {
   min-height: 100vh;
   color: var(--text);
   background:
-    radial-gradient(circle at 16% 8%, rgba(56, 189, 248, .11), transparent 29rem),
-    radial-gradient(circle at 85% 92%, rgba(99, 102, 241, .09), transparent 30rem),
+    radial-gradient(circle at 16% 8%, rgba(124, 58, 237, .15), transparent 29rem),
+    radial-gradient(circle at 85% 92%, rgba(168, 85, 247, .09), transparent 30rem),
     linear-gradient(145deg, #070b12, #0b111b 52%, #080c13);
 }
 
@@ -81,19 +82,19 @@ body.hub-placeholder-active {
   height: 72px;
   flex: 0 0 auto;
   place-items: center;
-  color: #061018;
-  background: linear-gradient(135deg, #8de2ff, #38bdf8);
-  border: 1px solid #a7e9ff;
+  color: #ffffff;
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  border: 1px solid #d8b4fe;
   border-radius: 20px;
   font-size: 23px;
   font-weight: 950;
   letter-spacing: -.06em;
-  box-shadow: 0 18px 45px rgba(14, 165, 233, .2);
+  box-shadow: 0 18px 45px rgba(124, 58, 237, .24);
 }
 
 .hub-eyebrow {
   margin: 0 0 7px;
-  color: #7dd3fc;
+  color: #c4b5fd;
   font-size: 11px;
   font-weight: 850;
   letter-spacing: .2em;
@@ -139,14 +140,14 @@ body.hub-placeholder-active {
 .hub-module-card:hover {
   color: #fff;
   background: linear-gradient(145deg, rgba(25, 38, 56, .98), rgba(13, 22, 35, .98));
-  border-color: rgba(56, 189, 248, .42);
+  border-color: rgba(168, 85, 247, .42);
   transform: translateY(-3px);
   box-shadow: 0 22px 52px rgba(0, 0, 0, .25);
 }
 
 .hub-module-card.is-available {
-  border-color: rgba(56, 189, 248, .42);
-  background: linear-gradient(145deg, rgba(22, 46, 65, .96), rgba(10, 25, 39, .98));
+  border-color: rgba(168, 85, 247, .42);
+  background: linear-gradient(145deg, rgba(55, 28, 94, .96), rgba(22, 13, 35, .98));
 }
 
 .hub-module-icon {
@@ -187,7 +188,7 @@ body.hub-placeholder-active {
   text-transform: uppercase;
 }
 
-.hub-module-card.is-available .hub-module-status { color: #7dd3fc; }
+.hub-module-card.is-available .hub-module-status { color: #c4b5fd; }
 
 .hub-dashboard-footer {
   margin-top: 30px;
@@ -223,7 +224,7 @@ body.hub-placeholder-active {
   text-decoration: none;
 }
 
-.hub-back-link:hover { color: #7dd3fc; }
+.hub-back-link:hover { color: #c4b5fd; }
 
 .hub-placeholder-icon {
   display: grid;
@@ -231,8 +232,8 @@ body.hub-placeholder-active {
   height: 68px;
   margin: 0 auto 22px;
   place-items: center;
-  background: rgba(56, 189, 248, .08);
-  border: 1px solid rgba(56, 189, 248, .22);
+  background: rgba(124, 58, 237, .10);
+  border: 1px solid rgba(168, 85, 247, .24);
   border-radius: 19px;
   font-size: 31px;
 }
@@ -250,9 +251,9 @@ body.hub-placeholder-active {
 .hub-coming-soon {
   display: inline-flex;
   padding: 8px 12px;
-  color: #bcecff;
-  background: rgba(56, 189, 248, .08);
-  border: 1px solid rgba(56, 189, 248, .22);
+  color: #ddd6fe;
+  background: rgba(124, 58, 237, .10);
+  border: 1px solid rgba(168, 85, 247, .24);
   border-radius: 999px;
   font-size: 10px;
   font-weight: 800;
@@ -297,3 +298,6 @@ body.hub-placeholder-active {
   .hub-placeholder { padding: 14px; }
   .hub-placeholder-card { padding: 30px 20px; }
 }
+
+.hub-module-card.is-in-progress { border-color: rgba(168, 85, 247, .34); }
+.hub-module-card.is-in-progress .hub-module-status { color: #c4b5fd; }

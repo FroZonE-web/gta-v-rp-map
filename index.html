@@ -21,7 +21,8 @@
   >
 
   <link rel="stylesheet" href="style.css?v=1.0.1">
-  <link rel="stylesheet" href="hub.css?v=1.0.1">
+  <link rel="stylesheet" href="hub.css?v=1.1.0">
+  <link rel="stylesheet" href="reglement.css?v=1.1.0">
 </head>
 
 <body class="hub-dashboard-active">
@@ -31,8 +32,8 @@
         <div class="hub-brand-mark" aria-hidden="true">AW</div>
         <div>
           <p class="hub-eyebrow">ASHEN WOLVES</p>
-          <h1 id="hub-dashboard-title">ATLAS RP — HUB DU GROUPE</h1>
-          <p class="hub-dashboard-intro">Tous les outils du groupe, réunis dans un seul espace.</p>
+          <h1 id="hub-dashboard-title">ASHEN WOLVES HUB</h1>
+          <p class="hub-dashboard-intro">Tous les outils du club réunis dans un seul espace.</p>
         </div>
       </header>
 
@@ -47,7 +48,7 @@
         <a class="hub-module-card" href="#/annuaire"><span class="hub-module-icon">👥</span><span class="hub-module-copy"><strong>Annuaire</strong><small>Membres, grades, rôles et contacts</small></span><span class="hub-module-status">À venir</span></a>
         <a class="hub-module-card" href="#/plans-op"><span class="hub-module-icon">🎯</span><span class="hub-module-copy"><strong>Plans d’OP</strong><small>Préparation et comptes rendus d’opérations</small></span><span class="hub-module-status">À venir</span></a>
         <a class="hub-module-card" href="#/agenda"><span class="hub-module-icon">📅</span><span class="hub-module-copy"><strong>Agenda</strong><small>Réunions, opérations et événements</small></span><span class="hub-module-status">À venir</span></a>
-        <a class="hub-module-card" href="#/reglement"><span class="hub-module-icon">📜</span><span class="hub-module-copy"><strong>Règlement</strong><small>Chapitres, recherche et mises à jour</small></span><span class="hub-module-status">À venir</span></a>
+        <a class="hub-module-card is-in-progress" href="#/reglement"><span class="hub-module-icon">📜</span><span class="hub-module-copy"><strong>Règlement</strong><small>Code officiel, chapitres et recherche</small></span><span class="hub-module-status">En cours de développement</span></a>
         <a class="hub-module-card" href="#/calculatrice-craft"><span class="hub-module-icon">🧮</span><span class="hub-module-copy"><strong>Calculatrice de craft</strong><small>Recettes, ressources et coûts</small></span><span class="hub-module-status">À venir</span></a>
         <a class="hub-module-card" href="#/notes-grades"><span class="hub-module-icon">🔒</span><span class="hub-module-copy"><strong>Notes des gradés</strong><small>Espace privé réservé aux grades autorisés</small></span><span class="hub-module-status">À venir</span></a>
       </nav>
@@ -55,6 +56,757 @@
       <footer class="hub-dashboard-footer">Ashen Wolves HUB <span>v1.0</span></footer>
     </div>
   </section>
+
+
+<section id="reglement-module" class="hub-route regulation-page" hidden aria-labelledby="regulation-title">
+  <header class="regulation-topbar">
+    <a class="regulation-home-link" href="#/">← HUB</a>
+    <div class="regulation-topbar-brand"><span class="regulation-brand-mark">AW</span><div><strong>ASHEN WOLVES HUB</strong><small>Règlement officiel</small></div></div>
+    <button id="regulation-menu-toggle" class="regulation-menu-toggle" type="button" aria-expanded="false" aria-controls="regulation-sidebar">☰ Sommaire</button>
+  </header>
+  <div class="regulation-layout">
+    <aside id="regulation-sidebar" class="regulation-sidebar" aria-label="Sommaire du règlement">
+      <div class="regulation-sidebar-head"><span>Navigation</span><button id="regulation-menu-close" type="button" aria-label="Fermer le sommaire">×</button></div>
+      <nav><a href="#reglement-preambule" data-reglement-nav>Préambule</a>
+<a href="#reglement-devise" data-reglement-nav>Devise officielle</a>
+<a href="#reglement-hierarchie" data-reglement-nav>Structure hiérarchique</a>
+<a href="#reglement-serment" data-reglement-nav>Serment Full Patch</a>
+<a href="#reglement-sommaire" data-reglement-nav>Table des matières</a>
+<a href="#chapitre-i" data-reglement-nav>Chapitre I<span>Loyauté et fraternité</span></a>
+<a href="#chapitre-ii" data-reglement-nav>Chapitre II<span>Respect de la hiérarchie</span></a>
+<a href="#chapitre-iii" data-reglement-nav>Chapitre III<span>Réunions et vie du club</span></a>
+<a href="#chapitre-iv" data-reglement-nav>Chapitre IV<span>Couleurs et image du club</span></a>
+<a href="#chapitre-v" data-reglement-nav>Chapitre V<span>Sécurité et discrétion</span></a>
+<a href="#chapitre-vi" data-reglement-nav>Chapitre VI<span>Discipline</span></a>
+<a href="#chapitre-vii" data-reglement-nav>Chapitre VII<span>Relations extérieures</span></a>
+<a href="#chapitre-viii" data-reglement-nav>Chapitre VIII<span>Disponibilité</span></a>
+<a href="#chapitre-ix" data-reglement-nav>Chapitre IX<span>Finances et biens du club</span></a>
+<a href="#chapitre-x" data-reglement-nav>Chapitre X<span>Comportement au Club House</span></a>
+<a href="#chapitre-xi" data-reglement-nav>Chapitre XI<span>Recrutement et progression</span></a>
+<a href="#chapitre-xii" data-reglement-nav>Chapitre XII<span>Sanctions et procédures disciplinaires</span></a>
+<a href="#chapitre-xiii" data-reglement-nav>Chapitre XIII<span>Votes et gouvernance</span></a>
+<a href="#chapitre-xiv" data-reglement-nav>Chapitre XIV<span>Opérations et sécurité opérationnelle</span></a>
+<a href="#chapitre-xv" data-reglement-nav>Chapitre XV<span>Devoirs envers la meute</span></a></nav>
+    </aside>
+    <button id="regulation-menu-overlay" class="regulation-menu-overlay" type="button" aria-label="Fermer le sommaire"></button>
+    <main class="regulation-content">
+      <section class="regulation-hero">
+        <span class="regulation-hero-icon" aria-hidden="true">📜</span>
+        <p>ASHEN WOLVES MC</p>
+        <h1 id="regulation-title">CODE OFFICIEL DU ASHEN WOLVES MC</h1>
+        <p class="regulation-hero-subtitle">Règlement et principes fondateurs de la meute</p>
+      </section>
+      <section class="regulation-tools" aria-label="Recherche dans le règlement">
+        <label for="regulation-search"><span aria-hidden="true">⌕</span><input id="regulation-search" type="search" placeholder="Rechercher un article, un mot ou une expression…" autocomplete="off"></label>
+        <button id="regulation-search-clear" type="button" hidden>Effacer</button>
+        <span id="regulation-search-count" aria-live="polite">140 articles</span>
+      </section>
+      <div id="regulation-no-results" class="regulation-no-results" hidden><strong>Aucun article trouvé</strong><p>Essaie avec un autre mot ou efface la recherche.</p></div>
+      <div id="regulation-document">
+        <section id="reglement-preambule" class="regulation-feature regulation-preamble"><div class="regulation-section-label">Préambule</div><div class="regulation-prose"><p>Le 17 janvier 2026, les flammes ont consumé le Club House du Ashes Crow MC à Phoenix, Arizona.</p>
+<p>En quelques minutes, une famille entière fut réduite en cendres.</p>
+<p>Des frères tombèrent.</p>
+<p>Des couleurs furent perdues.</p>
+<p>Des générations de souvenirs disparurent dans le feu.</p>
+<p>Mais trois membres survécurent.</p>
+<p>Mason Moretti.</p>
+<p>Raven Blackwood.</p>
+<p>Grant Blackwood.</p>
+<p>Après avoir vengé leurs morts, ils refusèrent de laisser disparaître l&#x27;héritage de ceux qui les avaient élevés.</p>
+<p>Ils abandonnèrent le symbole du corbeau pour adopter celui du loup.</p>
+<p>Le corbeau représentait ce qui avait été perdu.</p>
+<p>Le loup représenterait désormais ce qui survivrait.</p>
+<p>Ainsi naquit le Ashen Wolves MC.</p>
+<p>Ce règlement n&#x27;est pas uniquement un ensemble de règles.</p>
+<p>Il représente les principes, les traditions, les devoirs et les valeurs qui unissent chaque membre de la meute.</p>
+<p>Tout membre portant les couleurs du Ashen Wolves MC reconnaît et accepte l&#x27;intégralité des dispositions contenues dans ce document.</p></div></section>
+        <section id="reglement-devise" class="regulation-feature regulation-motto"><div class="regulation-section-label">Devise officielle</div><blockquote><p>&quot;Ils ont brûlé notre maison. Pas la meute.&quot;</p></blockquote></section>
+        <section id="reglement-hierarchie" class="regulation-feature"><div class="regulation-section-label">Structure hiérarchique du Ashen Wolves MC</div><div class="regulation-ranks"><div class="regulation-rank"><span>Rang 1</span><strong>Président (President)</strong></div><div class="regulation-rank"><span>Rang 2</span><strong>Vice-Président (Vice President)</strong></div><div class="regulation-rank"><span>Rang 3</span><strong>Sergent d&#x27;Armes (Sergeant at Arms)</strong></div><div class="regulation-rank"><span>Rang 4</span><strong>4.A – Trésorier (Treasurer)<br>4.B – Secrétaire (Secretary)</strong></div><div class="regulation-rank"><span>Rang 5</span><strong>Enforcer</strong></div><div class="regulation-rank"><span>Rang 6</span><strong>Road Captain</strong></div><div class="regulation-rank"><span>Rang 7</span><strong>Full Patch</strong></div><div class="regulation-rank"><span>Rang 8</span><strong>Wolf</strong></div><div class="regulation-rank"><span>Rang 9</span><strong>Prospect</strong></div></div></section>
+        <section id="reglement-serment" class="regulation-feature regulation-oath"><div class="regulation-section-label">Serment Full Patch</div><div class="regulation-prose"><p>Moi, [Nom du membre],</p>
+<p>Je jure devant mes frères, devant les couleurs que je porte et devant la mémoire de ceux qui sont tombés avant moi, de servir le Ashen Wolves MC avec loyauté, honneur et respect.</p>
+<p>Je jure de protéger les intérêts de la meute avant les miens lorsque les circonstances l&#x27;exigent.</p>
+<p>Je jure de respecter la hiérarchie, les traditions et les règles qui régissent ce club.</p>
+<p>Je jure de ne jamais trahir mes frères, mes couleurs ou l&#x27;héritage qui m&#x27;est confié aujourd&#x27;hui.</p>
+<p>Je porterai ces couleurs avec fierté.</p>
+<p>Je défendrai cette meute jusqu&#x27;à mon dernier souffle.</p>
+<p>Des cendres nous sommes nés.</p>
+<p>Comme des loups nous survivrons.</p></div></section>
+        <section id="reglement-sommaire" class="regulation-feature"><div class="regulation-section-label">Table des matières</div><div class="regulation-toc"><a href="#chapitre-i">Chapitre I – Loyauté et fraternité (Articles 1 à 5)</a><a href="#chapitre-ii">Chapitre II – Respect de la hiérarchie (Articles 6 à 10)</a><a href="#chapitre-iii">Chapitre III – Réunions et vie du club (Articles 11 à 15)</a><a href="#chapitre-iv">Chapitre IV – Couleurs et image du club (Articles 16 à 20)</a><a href="#chapitre-v">Chapitre V – Sécurité et discrétion (Articles 21 à 25)</a><a href="#chapitre-vi">Chapitre VI – Discipline (Articles 26 à 30)</a><a href="#chapitre-vii">Chapitre VII – Relations extérieures (Articles 31 à 35)</a><a href="#chapitre-viii">Chapitre VIII – Disponibilité (Articles 36 à 40)</a><a href="#chapitre-ix">Chapitre IX – Finances et biens du club (Articles 41 à 50)</a><a href="#chapitre-x">Chapitre X – Comportement au Club House (Articles 51 à 59)</a><a href="#chapitre-xi">Chapitre XI – Recrutement et progression (Articles 60 à 70)</a><a href="#chapitre-xii">Chapitre XII – Sanctions et procédures disciplinaires (Articles 71 à 80)</a><a href="#chapitre-xiii">Chapitre XIII – Votes et gouvernance (Articles 81 à 100)</a><a href="#chapitre-xiv">Chapitre XIV – Opérations et sécurité opérationnelle (Articles 101 à 120)</a><a href="#chapitre-xv">Chapitre XV – Devoirs envers la meute (Articles 121 à 140)</a></div></section>
+        <section id="chapitre-i" class="regulation-chapter" data-regulation-chapter>
+  <header class="regulation-chapter-header">
+    <span>CHAPITRE I</span>
+    <h2>Loyauté et fraternité</h2>
+    <p>5 articles</p>
+  </header>
+  <div class="regulation-articles"><article id="article-1" class="regulation-article" data-regulation-search="article 1 le club passe avant les intérêts personnels de chacun de ses membres.">
+  <div class="regulation-article-number">Article 1</div>
+  <div class="regulation-article-text"><p>Le club passe avant les intérêts personnels de chacun de ses membres.</p></div>
+  <a class="regulation-article-link" href="#article-1" aria-label="Lien vers l’article 1" title="Copier ou partager le lien vers l’article 1">#</a>
+</article><article id="article-2" class="regulation-article" data-regulation-search="article 2 aucun membre ne peut volontairement mettre en danger un frère, un officier ou les intérêts du ashen wolves mc.">
+  <div class="regulation-article-number">Article 2</div>
+  <div class="regulation-article-text"><p>Aucun membre ne peut volontairement mettre en danger un frère, un officier ou les intérêts du Ashen Wolves MC.</p></div>
+  <a class="regulation-article-link" href="#article-2" aria-label="Lien vers l’article 2" title="Copier ou partager le lien vers l’article 2">#</a>
+</article><article id="article-3" class="regulation-article" data-regulation-search="article 3 toute forme de trahison envers le club entraîne l&#x27;ouverture d&#x27;un vote des membres habilités. la sanction prononcée pourra aller d&#x27;un simple avertissement jusqu&#x27;à l&#x27;exécution du membre concerné selon la gravité des faits.">
+  <div class="regulation-article-number">Article 3</div>
+  <div class="regulation-article-text"><p>Toute forme de trahison envers le club entraîne l&#x27;ouverture d&#x27;un vote des membres habilités.</p>
+<p>La sanction prononcée pourra aller d&#x27;un simple avertissement jusqu&#x27;à l&#x27;exécution du membre concerné selon la gravité des faits.</p></div>
+  <a class="regulation-article-link" href="#article-3" aria-label="Lien vers l’article 3" title="Copier ou partager le lien vers l’article 3">#</a>
+</article><article id="article-4" class="regulation-article" data-regulation-search="article 4 les affaires internes du club ne doivent jamais être divulguées à des personnes extérieures sans autorisation préalable.">
+  <div class="regulation-article-number">Article 4</div>
+  <div class="regulation-article-text"><p>Les affaires internes du club ne doivent jamais être divulguées à des personnes extérieures sans autorisation préalable.</p></div>
+  <a class="regulation-article-link" href="#article-4" aria-label="Lien vers l’article 4" title="Copier ou partager le lien vers l’article 4">#</a>
+</article><article id="article-5" class="regulation-article" data-regulation-search="article 5 un membre en difficulté doit pouvoir compter sur l&#x27;aide de la meute dans la mesure des capacités du club.">
+  <div class="regulation-article-number">Article 5</div>
+  <div class="regulation-article-text"><p>Un membre en difficulté doit pouvoir compter sur l&#x27;aide de la meute dans la mesure des capacités du club.</p></div>
+  <a class="regulation-article-link" href="#article-5" aria-label="Lien vers l’article 5" title="Copier ou partager le lien vers l’article 5">#</a>
+</article></div>
+</section><section id="chapitre-ii" class="regulation-chapter" data-regulation-chapter>
+  <header class="regulation-chapter-header">
+    <span>CHAPITRE II</span>
+    <h2>Respect de la hiérarchie</h2>
+    <p>5 articles</p>
+  </header>
+  <div class="regulation-articles"><article id="article-6" class="regulation-article" data-regulation-search="article 6 les décisions du président sont définitives sauf dans le cadre d&#x27;une procédure officielle de destitution.">
+  <div class="regulation-article-number">Article 6</div>
+  <div class="regulation-article-text"><p>Les décisions du Président sont définitives sauf dans le cadre d&#x27;une procédure officielle de destitution.</p></div>
+  <a class="regulation-article-link" href="#article-6" aria-label="Lien vers l’article 6" title="Copier ou partager le lien vers l’article 6">#</a>
+</article><article id="article-7" class="regulation-article" data-regulation-search="article 7 chaque membre est tenu de respecter les grades, fonctions et responsabilités de ses frères.">
+  <div class="regulation-article-number">Article 7</div>
+  <div class="regulation-article-text"><p>Chaque membre est tenu de respecter les grades, fonctions et responsabilités de ses frères.</p></div>
+  <a class="regulation-article-link" href="#article-7" aria-label="Lien vers l’article 7" title="Copier ou partager le lien vers l’article 7">#</a>
+</article><article id="article-8" class="regulation-article" data-regulation-search="article 8 un ordre donné par un supérieur hiérarchique doit être exécuté sauf s&#x27;il met directement en danger le club ou ses intérêts fondamentaux.">
+  <div class="regulation-article-number">Article 8</div>
+  <div class="regulation-article-text"><p>Un ordre donné par un supérieur hiérarchique doit être exécuté sauf s&#x27;il met directement en danger le club ou ses intérêts fondamentaux.</p></div>
+  <a class="regulation-article-link" href="#article-8" aria-label="Lien vers l’article 8" title="Copier ou partager le lien vers l’article 8">#</a>
+</article><article id="article-9" class="regulation-article" data-regulation-search="article 9 toute contestation doit être formulée dans le respect de la chaîne de commandement.">
+  <div class="regulation-article-number">Article 9</div>
+  <div class="regulation-article-text"><p>Toute contestation doit être formulée dans le respect de la chaîne de commandement.</p></div>
+  <a class="regulation-article-link" href="#article-9" aria-label="Lien vers l’article 9" title="Copier ou partager le lien vers l’article 9">#</a>
+</article><article id="article-10" class="regulation-article" data-regulation-search="article 10 le manque de respect envers un officier ou un membre de la hiérarchie peut entraîner des sanctions disciplinaires.">
+  <div class="regulation-article-number">Article 10</div>
+  <div class="regulation-article-text"><p>Le manque de respect envers un officier ou un membre de la hiérarchie peut entraîner des sanctions disciplinaires.</p></div>
+  <a class="regulation-article-link" href="#article-10" aria-label="Lien vers l’article 10" title="Copier ou partager le lien vers l’article 10">#</a>
+</article></div>
+</section><section id="chapitre-iii" class="regulation-chapter" data-regulation-chapter>
+  <header class="regulation-chapter-header">
+    <span>CHAPITRE III</span>
+    <h2>Réunions et vie du club</h2>
+    <p>5 articles</p>
+  </header>
+  <div class="regulation-articles"><article id="article-11" class="regulation-article" data-regulation-search="article 11 la présence aux réunions officielles est obligatoire sauf justification valable ou autorisation préalable.">
+  <div class="regulation-article-number">Article 11</div>
+  <div class="regulation-article-text"><p>La présence aux réunions officielles est obligatoire sauf justification valable ou autorisation préalable.</p></div>
+  <a class="regulation-article-link" href="#article-11" aria-label="Lien vers l’article 11" title="Copier ou partager le lien vers l’article 11">#</a>
+</article><article id="article-12" class="regulation-article" data-regulation-search="article 12 tout membre absent à une réunion officielle doit prévenir un officier dans les meilleurs délais et transmettre sa procuration de vote à un membre disposant du droit de vote.">
+  <div class="regulation-article-number">Article 12</div>
+  <div class="regulation-article-text"><p>Tout membre absent à une réunion officielle doit prévenir un officier dans les meilleurs délais et transmettre sa procuration de vote à un membre disposant du droit de vote.</p></div>
+  <a class="regulation-article-link" href="#article-12" aria-label="Lien vers l’article 12" title="Copier ou partager le lien vers l’article 12">#</a>
+</article><article id="article-13" class="regulation-article" data-regulation-search="article 13 aucun moyen de communication ne doit être utilisé durant une réunion officielle sauf autorisation explicite du président.">
+  <div class="regulation-article-number">Article 13</div>
+  <div class="regulation-article-text"><p>Aucun moyen de communication ne doit être utilisé durant une réunion officielle sauf autorisation explicite du Président.</p></div>
+  <a class="regulation-article-link" href="#article-13" aria-label="Lien vers l’article 13" title="Copier ou partager le lien vers l’article 13">#</a>
+</article><article id="article-14" class="regulation-article" data-regulation-search="article 14 seules les personnes autorisées peuvent assister aux réunions du club.">
+  <div class="regulation-article-number">Article 14</div>
+  <div class="regulation-article-text"><p>Seules les personnes autorisées peuvent assister aux réunions du club.</p></div>
+  <a class="regulation-article-link" href="#article-14" aria-label="Lien vers l’article 14" title="Copier ou partager le lien vers l’article 14">#</a>
+</article><article id="article-15" class="regulation-article" data-regulation-search="article 15 toute décision adoptée lors d&#x27;une réunion officielle doit être respectée par l&#x27;ensemble des membres, y compris ceux ayant voté contre.">
+  <div class="regulation-article-number">Article 15</div>
+  <div class="regulation-article-text"><p>Toute décision adoptée lors d&#x27;une réunion officielle doit être respectée par l&#x27;ensemble des membres, y compris ceux ayant voté contre.</p></div>
+  <a class="regulation-article-link" href="#article-15" aria-label="Lien vers l’article 15" title="Copier ou partager le lien vers l’article 15">#</a>
+</article></div>
+</section><section id="chapitre-iv" class="regulation-chapter" data-regulation-chapter>
+  <header class="regulation-chapter-header">
+    <span>CHAPITRE IV</span>
+    <h2>Couleurs et image du club</h2>
+    <p>5 articles</p>
+  </header>
+  <div class="regulation-articles"><article id="article-16" class="regulation-article" data-regulation-search="article 16 les couleurs du ashen wolves mc sont sacrées.">
+  <div class="regulation-article-number">Article 16</div>
+  <div class="regulation-article-text"><p>Les couleurs du Ashen Wolves MC sont sacrées.</p></div>
+  <a class="regulation-article-link" href="#article-16" aria-label="Lien vers l’article 16" title="Copier ou partager le lien vers l’article 16">#</a>
+</article><article id="article-17" class="regulation-article" data-regulation-search="article 17 aucun membre ne peut prêter, vendre, céder ou abandonner ses couleurs sans autorisation du club.">
+  <div class="regulation-article-number">Article 17</div>
+  <div class="regulation-article-text"><p>Aucun membre ne peut prêter, vendre, céder ou abandonner ses couleurs sans autorisation du club.</p></div>
+  <a class="regulation-article-link" href="#article-17" aria-label="Lien vers l’article 17" title="Copier ou partager le lien vers l’article 17">#</a>
+</article><article id="article-18" class="regulation-article" data-regulation-search="article 18 tout membre portant les couleurs du club doit représenter dignement le ashen wolves mc.">
+  <div class="regulation-article-number">Article 18</div>
+  <div class="regulation-article-text"><p>Tout membre portant les couleurs du club doit représenter dignement le Ashen Wolves MC.</p></div>
+  <a class="regulation-article-link" href="#article-18" aria-label="Lien vers l’article 18" title="Copier ou partager le lien vers l’article 18">#</a>
+</article><article id="article-19" class="regulation-article" data-regulation-search="article 19 toute action susceptible de nuire à l&#x27;image, à la réputation ou aux intérêts du club peut faire l&#x27;objet de sanctions disciplinaires.">
+  <div class="regulation-article-number">Article 19</div>
+  <div class="regulation-article-text"><p>Toute action susceptible de nuire à l&#x27;image, à la réputation ou aux intérêts du club peut faire l&#x27;objet de sanctions disciplinaires.</p></div>
+  <a class="regulation-article-link" href="#article-19" aria-label="Lien vers l’article 19" title="Copier ou partager le lien vers l’article 19">#</a>
+</article><article id="article-20" class="regulation-article" data-regulation-search="article 20 tout membre exclu ou quittant le club doit restituer immédiatement les couleurs et tout élément appartenant au ashen wolves mc.">
+  <div class="regulation-article-number">Article 20</div>
+  <div class="regulation-article-text"><p>Tout membre exclu ou quittant le club doit restituer immédiatement les couleurs et tout élément appartenant au Ashen Wolves MC.</p></div>
+  <a class="regulation-article-link" href="#article-20" aria-label="Lien vers l’article 20" title="Copier ou partager le lien vers l’article 20">#</a>
+</article></div>
+</section><section id="chapitre-v" class="regulation-chapter" data-regulation-chapter>
+  <header class="regulation-chapter-header">
+    <span>CHAPITRE V</span>
+    <h2>Sécurité et discrétion</h2>
+    <p>5 articles</p>
+  </header>
+  <div class="regulation-articles"><article id="article-21" class="regulation-article" data-regulation-search="article 21 les informations sensibles concernant le club, ses membres, ses activités ou ses ressources doivent demeurer strictement confidentielles.">
+  <div class="regulation-article-number">Article 21</div>
+  <div class="regulation-article-text"><p>Les informations sensibles concernant le club, ses membres, ses activités ou ses ressources doivent demeurer strictement confidentielles.</p></div>
+  <a class="regulation-article-link" href="#article-21" aria-label="Lien vers l’article 21" title="Copier ou partager le lien vers l’article 21">#</a>
+</article><article id="article-22" class="regulation-article" data-regulation-search="article 22 aucun membre ne doit divulguer l&#x27;emplacement des planques, stocks, infrastructures ou lieux sécurisés du club sans autorisation préalable.">
+  <div class="regulation-article-number">Article 22</div>
+  <div class="regulation-article-text"><p>Aucun membre ne doit divulguer l&#x27;emplacement des planques, stocks, infrastructures ou lieux sécurisés du club sans autorisation préalable.</p></div>
+  <a class="regulation-article-link" href="#article-22" aria-label="Lien vers l’article 22" title="Copier ou partager le lien vers l’article 22">#</a>
+</article><article id="article-23" class="regulation-article" data-regulation-search="article 23 les activités du club ne doivent jamais être discutées en présence de personnes non autorisées à en prendre connaissance.">
+  <div class="regulation-article-number">Article 23</div>
+  <div class="regulation-article-text"><p>Les activités du club ne doivent jamais être discutées en présence de personnes non autorisées à en prendre connaissance.</p></div>
+  <a class="regulation-article-link" href="#article-23" aria-label="Lien vers l’article 23" title="Copier ou partager le lien vers l’article 23">#</a>
+</article><article id="article-24" class="regulation-article" data-regulation-search="article 24 tout risque, menace ou information susceptible de mettre en danger le club doit être signalé à un officier dans les plus brefs délais.">
+  <div class="regulation-article-number">Article 24</div>
+  <div class="regulation-article-text"><p>Tout risque, menace ou information susceptible de mettre en danger le club doit être signalé à un officier dans les plus brefs délais.</p></div>
+  <a class="regulation-article-link" href="#article-24" aria-label="Lien vers l’article 24" title="Copier ou partager le lien vers l’article 24">#</a>
+</article><article id="article-25" class="regulation-article" data-regulation-search="article 25 les membres sont tenus de respecter les consignes de sécurité émises par le sergent d&#x27;armes.">
+  <div class="regulation-article-number">Article 25</div>
+  <div class="regulation-article-text"><p>Les membres sont tenus de respecter les consignes de sécurité émises par le Sergent d&#x27;Armes.</p></div>
+  <a class="regulation-article-link" href="#article-25" aria-label="Lien vers l’article 25" title="Copier ou partager le lien vers l’article 25">#</a>
+</article></div>
+</section><section id="chapitre-vi" class="regulation-chapter" data-regulation-chapter>
+  <header class="regulation-chapter-header">
+    <span>CHAPITRE VI</span>
+    <h2>Discipline</h2>
+    <p>5 articles</p>
+  </header>
+  <div class="regulation-articles"><article id="article-26" class="regulation-article" data-regulation-search="article 26 les conflits entre membres doivent être signalés au sergent d&#x27;armes afin qu&#x27;une solution adaptée puisse être apportée.">
+  <div class="regulation-article-number">Article 26</div>
+  <div class="regulation-article-text"><p>Les conflits entre membres doivent être signalés au Sergent d&#x27;Armes afin qu&#x27;une solution adaptée puisse être apportée.</p></div>
+  <a class="regulation-article-link" href="#article-26" aria-label="Lien vers l’article 26" title="Copier ou partager le lien vers l’article 26">#</a>
+</article><article id="article-27" class="regulation-article" data-regulation-search="article 27 aucun membre ne peut engager une action violente contre un frère sans autorisation ou décision disciplinaire préalable.">
+  <div class="regulation-article-number">Article 27</div>
+  <div class="regulation-article-text"><p>Aucun membre ne peut engager une action violente contre un frère sans autorisation ou décision disciplinaire préalable.</p></div>
+  <a class="regulation-article-link" href="#article-27" aria-label="Lien vers l’article 27" title="Copier ou partager le lien vers l’article 27">#</a>
+</article><article id="article-28" class="regulation-article" data-regulation-search="article 28 les sanctions prononcées par le club doivent être respectées sans contestation publique.">
+  <div class="regulation-article-number">Article 28</div>
+  <div class="regulation-article-text"><p>Les sanctions prononcées par le club doivent être respectées sans contestation publique.</p></div>
+  <a class="regulation-article-link" href="#article-28" aria-label="Lien vers l’article 28" title="Copier ou partager le lien vers l’article 28">#</a>
+</article><article id="article-29" class="regulation-article" data-regulation-search="article 29 toute récidive peut entraîner une aggravation des sanctions prononcées.">
+  <div class="regulation-article-number">Article 29</div>
+  <div class="regulation-article-text"><p>Toute récidive peut entraîner une aggravation des sanctions prononcées.</p></div>
+  <a class="regulation-article-link" href="#article-29" aria-label="Lien vers l’article 29" title="Copier ou partager le lien vers l’article 29">#</a>
+</article><article id="article-30" class="regulation-article" data-regulation-search="article 30 le refus délibéré d&#x27;obéir à une décision officielle du club constitue une faute disciplinaire.">
+  <div class="regulation-article-number">Article 30</div>
+  <div class="regulation-article-text"><p>Le refus délibéré d&#x27;obéir à une décision officielle du club constitue une faute disciplinaire.</p></div>
+  <a class="regulation-article-link" href="#article-30" aria-label="Lien vers l’article 30" title="Copier ou partager le lien vers l’article 30">#</a>
+</article></div>
+</section><section id="chapitre-vii" class="regulation-chapter" data-regulation-chapter>
+  <header class="regulation-chapter-header">
+    <span>CHAPITRE VII</span>
+    <h2>Relations extérieures</h2>
+    <p>5 articles</p>
+  </header>
+  <div class="regulation-articles"><article id="article-31" class="regulation-article" data-regulation-search="article 31 aucun membre ne peut engager le club dans une guerre, une alliance, un partenariat ou un accord sans autorisation de la hiérarchie compétente.">
+  <div class="regulation-article-number">Article 31</div>
+  <div class="regulation-article-text"><p>Aucun membre ne peut engager le club dans une guerre, une alliance, un partenariat ou un accord sans autorisation de la hiérarchie compétente.</p></div>
+  <a class="regulation-article-link" href="#article-31" aria-label="Lien vers l’article 31" title="Copier ou partager le lien vers l’article 31">#</a>
+</article><article id="article-32" class="regulation-article" data-regulation-search="article 32 toute proposition importante provenant d&#x27;une organisation extérieure doit être transmise à un officier dans les meilleurs délais.">
+  <div class="regulation-article-number">Article 32</div>
+  <div class="regulation-article-text"><p>Toute proposition importante provenant d&#x27;une organisation extérieure doit être transmise à un officier dans les meilleurs délais.</p></div>
+  <a class="regulation-article-link" href="#article-32" aria-label="Lien vers l’article 32" title="Copier ou partager le lien vers l’article 32">#</a>
+</article><article id="article-33" class="regulation-article" data-regulation-search="article 33 les intérêts du ashen wolves mc doivent primer lors des relations entretenues avec des organisations extérieures.">
+  <div class="regulation-article-number">Article 33</div>
+  <div class="regulation-article-text"><p>Les intérêts du Ashen Wolves MC doivent primer lors des relations entretenues avec des organisations extérieures.</p></div>
+  <a class="regulation-article-link" href="#article-33" aria-label="Lien vers l’article 33" title="Copier ou partager le lien vers l’article 33">#</a>
+</article><article id="article-34" class="regulation-article" data-regulation-search="article 34 les membres doivent adopter un comportement respectueux et professionnel lors des rencontres officielles.">
+  <div class="regulation-article-number">Article 34</div>
+  <div class="regulation-article-text"><p>Les membres doivent adopter un comportement respectueux et professionnel lors des rencontres officielles.</p></div>
+  <a class="regulation-article-link" href="#article-34" aria-label="Lien vers l’article 34" title="Copier ou partager le lien vers l’article 34">#</a>
+</article><article id="article-35" class="regulation-article" data-regulation-search="article 35 toute représentation menée au nom du club doit être validée par la hiérarchie compétente.">
+  <div class="regulation-article-number">Article 35</div>
+  <div class="regulation-article-text"><p>Toute représentation menée au nom du club doit être validée par la hiérarchie compétente.</p></div>
+  <a class="regulation-article-link" href="#article-35" aria-label="Lien vers l’article 35" title="Copier ou partager le lien vers l’article 35">#</a>
+</article></div>
+</section><section id="chapitre-viii" class="regulation-chapter" data-regulation-chapter>
+  <header class="regulation-chapter-header">
+    <span>CHAPITRE VIII</span>
+    <h2>Disponibilité</h2>
+    <p>5 articles</p>
+  </header>
+  <div class="regulation-articles"><article id="article-36" class="regulation-article" data-regulation-search="article 36 tout membre doit répondre aux sollicitations du club lorsqu&#x27;il est en mesure de le faire.">
+  <div class="regulation-article-number">Article 36</div>
+  <div class="regulation-article-text"><p>Tout membre doit répondre aux sollicitations du club lorsqu&#x27;il est en mesure de le faire.</p></div>
+  <a class="regulation-article-link" href="#article-36" aria-label="Lien vers l’article 36" title="Copier ou partager le lien vers l’article 36">#</a>
+</article><article id="article-37" class="regulation-article" data-regulation-search="article 37 toute absence prolongée doit être signalée à un officier dans les meilleurs délais.">
+  <div class="regulation-article-number">Article 37</div>
+  <div class="regulation-article-text"><p>Toute absence prolongée doit être signalée à un officier dans les meilleurs délais.</p></div>
+  <a class="regulation-article-link" href="#article-37" aria-label="Lien vers l’article 37" title="Copier ou partager le lien vers l’article 37">#</a>
+</article><article id="article-38" class="regulation-article" data-regulation-search="article 38 l&#x27;inactivité répétée peut entraîner une réévaluation de la place du membre au sein du club.">
+  <div class="regulation-article-number">Article 38</div>
+  <div class="regulation-article-text"><p>L&#x27;inactivité répétée peut entraîner une réévaluation de la place du membre au sein du club.</p></div>
+  <a class="regulation-article-link" href="#article-38" aria-label="Lien vers l’article 38" title="Copier ou partager le lien vers l’article 38">#</a>
+</article><article id="article-39" class="regulation-article" data-regulation-search="article 39 les membres doivent participer de manière régulière à la vie, aux activités et au développement du club.">
+  <div class="regulation-article-number">Article 39</div>
+  <div class="regulation-article-text"><p>Les membres doivent participer de manière régulière à la vie, aux activités et au développement du club.</p></div>
+  <a class="regulation-article-link" href="#article-39" aria-label="Lien vers l’article 39" title="Copier ou partager le lien vers l’article 39">#</a>
+</article><article id="article-40" class="regulation-article" data-regulation-search="article 40 la préparation des membres avant une opération relève de la responsabilité du sergent d&#x27;armes. chaque membre est tenu de respecter les consignes, exigences et vérifications imposées par celui-ci avant le début d&#x27;une mission ou d&#x27;une opération.">
+  <div class="regulation-article-number">Article 40</div>
+  <div class="regulation-article-text"><p>La préparation des membres avant une opération relève de la responsabilité du Sergent d&#x27;Armes.</p>
+<p>Chaque membre est tenu de respecter les consignes, exigences et vérifications imposées par celui-ci avant le début d&#x27;une mission ou d&#x27;une opération.</p></div>
+  <a class="regulation-article-link" href="#article-40" aria-label="Lien vers l’article 40" title="Copier ou partager le lien vers l’article 40">#</a>
+</article></div>
+</section><section id="chapitre-ix" class="regulation-chapter" data-regulation-chapter>
+  <header class="regulation-chapter-header">
+    <span>CHAPITRE IX</span>
+    <h2>Finances et biens du club</h2>
+    <p>10 articles</p>
+  </header>
+  <div class="regulation-articles"><article id="article-41" class="regulation-article" data-regulation-search="article 41 tout membre est tenu de régler les cotisations, contributions et participations financières décidées par le club.">
+  <div class="regulation-article-number">Article 41</div>
+  <div class="regulation-article-text"><p>Tout membre est tenu de régler les cotisations, contributions et participations financières décidées par le club.</p></div>
+  <a class="regulation-article-link" href="#article-41" aria-label="Lien vers l’article 41" title="Copier ou partager le lien vers l’article 41">#</a>
+</article><article id="article-42" class="regulation-article" data-regulation-search="article 42 les biens appartenant au ashen wolves mc doivent être utilisés exclusivement dans l&#x27;intérêt du club.">
+  <div class="regulation-article-number">Article 42</div>
+  <div class="regulation-article-text"><p>Les biens appartenant au Ashen Wolves MC doivent être utilisés exclusivement dans l&#x27;intérêt du club.</p></div>
+  <a class="regulation-article-link" href="#article-42" aria-label="Lien vers l’article 42" title="Copier ou partager le lien vers l’article 42">#</a>
+</article><article id="article-43" class="regulation-article" data-regulation-search="article 43 toute perte, destruction, dégradation ou disparition de matériel appartenant au club doit être signalée dans les plus brefs délais au trésorier, au secrétaire ainsi qu&#x27;au sergent d&#x27;armes.">
+  <div class="regulation-article-number">Article 43</div>
+  <div class="regulation-article-text"><p>Toute perte, destruction, dégradation ou disparition de matériel appartenant au club doit être signalée dans les plus brefs délais au Trésorier, au Secrétaire ainsi qu&#x27;au Sergent d&#x27;Armes.</p></div>
+  <a class="regulation-article-link" href="#article-43" aria-label="Lien vers l’article 43" title="Copier ou partager le lien vers l’article 43">#</a>
+</article><article id="article-44" class="regulation-article" data-regulation-search="article 44 les véhicules, armes, équipements et ressources appartenant au club ne peuvent être prêtés ou mis à disposition de personnes extérieures sans autorisation.">
+  <div class="regulation-article-number">Article 44</div>
+  <div class="regulation-article-text"><p>Les véhicules, armes, équipements et ressources appartenant au club ne peuvent être prêtés ou mis à disposition de personnes extérieures sans autorisation.</p></div>
+  <a class="regulation-article-link" href="#article-44" aria-label="Lien vers l’article 44" title="Copier ou partager le lien vers l’article 44">#</a>
+</article><article id="article-45" class="regulation-article" data-regulation-search="article 45 les amendes et contraventions liées aux activités d&#x27;un membre doivent être déclarées au trésorier.">
+  <div class="regulation-article-number">Article 45</div>
+  <div class="regulation-article-text"><p>Les amendes et contraventions liées aux activités d&#x27;un membre doivent être déclarées au Trésorier.</p></div>
+  <a class="regulation-article-link" href="#article-45" aria-label="Lien vers l’article 45" title="Copier ou partager le lien vers l’article 45">#</a>
+</article><article id="article-46" class="regulation-article" data-regulation-search="article 46 tout enrichissement réalisé grâce aux ressources, aux contacts ou aux moyens du club peut faire l&#x27;objet d&#x27;une contribution financière au bénéfice du club.">
+  <div class="regulation-article-number">Article 46</div>
+  <div class="regulation-article-text"><p>Tout enrichissement réalisé grâce aux ressources, aux contacts ou aux moyens du club peut faire l&#x27;objet d&#x27;une contribution financière au bénéfice du club.</p></div>
+  <a class="regulation-article-link" href="#article-46" aria-label="Lien vers l’article 46" title="Copier ou partager le lien vers l’article 46">#</a>
+</article><article id="article-47" class="regulation-article" data-regulation-search="article 47 le détournement de fonds, de matériel ou de ressources appartenant au club est considéré comme une faute grave.">
+  <div class="regulation-article-number">Article 47</div>
+  <div class="regulation-article-text"><p>Le détournement de fonds, de matériel ou de ressources appartenant au club est considéré comme une faute grave.</p></div>
+  <a class="regulation-article-link" href="#article-47" aria-label="Lien vers l’article 47" title="Copier ou partager le lien vers l’article 47">#</a>
+</article><article id="article-48" class="regulation-article" data-regulation-search="article 48 les registres financiers, inventaires et archives du club sont considérés comme des documents sensibles.">
+  <div class="regulation-article-number">Article 48</div>
+  <div class="regulation-article-text"><p>Les registres financiers, inventaires et archives du club sont considérés comme des documents sensibles.</p></div>
+  <a class="regulation-article-link" href="#article-48" aria-label="Lien vers l’article 48" title="Copier ou partager le lien vers l’article 48">#</a>
+</article><article id="article-49" class="regulation-article" data-regulation-search="article 49 toute dette contractée au nom du club doit être validée par un officier habilité.">
+  <div class="regulation-article-number">Article 49</div>
+  <div class="regulation-article-text"><p>Toute dette contractée au nom du club doit être validée par un officier habilité.</p></div>
+  <a class="regulation-article-link" href="#article-49" aria-label="Lien vers l’article 49" title="Copier ou partager le lien vers l’article 49">#</a>
+</article><article id="article-50" class="regulation-article" data-regulation-search="article 50 le trésorier peut demander à consulter toute information nécessaire à l&#x27;évaluation de la situation financière du club.">
+  <div class="regulation-article-number">Article 50</div>
+  <div class="regulation-article-text"><p>Le Trésorier peut demander à consulter toute information nécessaire à l&#x27;évaluation de la situation financière du club.</p></div>
+  <a class="regulation-article-link" href="#article-50" aria-label="Lien vers l’article 50" title="Copier ou partager le lien vers l’article 50">#</a>
+</article></div>
+</section><section id="chapitre-x" class="regulation-chapter" data-regulation-chapter>
+  <header class="regulation-chapter-header">
+    <span>CHAPITRE X</span>
+    <h2>Comportement au Club House</h2>
+    <p>9 articles</p>
+  </header>
+  <div class="regulation-articles"><article id="article-51" class="regulation-article" data-regulation-search="article 51 le club house est considéré comme un lieu de vie, de réunion et de sécurité pour la meute. il doit être respecté en toute circonstance.">
+  <div class="regulation-article-number">Article 51</div>
+  <div class="regulation-article-text"><p>Le Club House est considéré comme un lieu de vie, de réunion et de sécurité pour la meute. Il doit être respecté en toute circonstance.</p></div>
+  <a class="regulation-article-link" href="#article-51" aria-label="Lien vers l’article 51" title="Copier ou partager le lien vers l’article 51">#</a>
+</article><article id="article-52" class="regulation-article" data-regulation-search="article 52 tout membre entrant au club house doit saluer les membres présents.">
+  <div class="regulation-article-number">Article 52</div>
+  <div class="regulation-article-text"><p>Tout membre entrant au Club House doit saluer les membres présents.</p></div>
+  <a class="regulation-article-link" href="#article-52" aria-label="Lien vers l’article 52" title="Copier ou partager le lien vers l’article 52">#</a>
+</article><article id="article-53" class="regulation-article" data-regulation-search="article 53 toute personne extérieure présente au club house doit être accompagnée ou autorisée par un membre du club.">
+  <div class="regulation-article-number">Article 53</div>
+  <div class="regulation-article-text"><p>Toute personne extérieure présente au Club House doit être accompagnée ou autorisée par un membre du club.</p></div>
+  <a class="regulation-article-link" href="#article-53" aria-label="Lien vers l’article 53" title="Copier ou partager le lien vers l’article 53">#</a>
+</article><article id="article-54" class="regulation-article" data-regulation-search="article 54 les conflits personnels ne doivent pas être réglés à l&#x27;intérieur du club house sans intervention du sergent d&#x27;armes.">
+  <div class="regulation-article-number">Article 54</div>
+  <div class="regulation-article-text"><p>Les conflits personnels ne doivent pas être réglés à l&#x27;intérieur du Club House sans intervention du Sergent d&#x27;Armes.</p></div>
+  <a class="regulation-article-link" href="#article-54" aria-label="Lien vers l’article 54" title="Copier ou partager le lien vers l’article 54">#</a>
+</article><article id="article-55" class="regulation-article" data-regulation-search="article 55 aucun membre ne peut sortir une arme à l&#x27;intérieur du club house sans raison valable.">
+  <div class="regulation-article-number">Article 55</div>
+  <div class="regulation-article-text"><p>Aucun membre ne peut sortir une arme à l&#x27;intérieur du Club House sans raison valable.</p></div>
+  <a class="regulation-article-link" href="#article-55" aria-label="Lien vers l’article 55" title="Copier ou partager le lien vers l’article 55">#</a>
+</article><article id="article-56" class="regulation-article" data-regulation-search="article 56 tout membre est responsable de la propreté des espaces communs qu&#x27;il utilise.">
+  <div class="regulation-article-number">Article 56</div>
+  <div class="regulation-article-text"><p>Tout membre est responsable de la propreté des espaces communs qu&#x27;il utilise.</p></div>
+  <a class="regulation-article-link" href="#article-56" aria-label="Lien vers l’article 56" title="Copier ou partager le lien vers l’article 56">#</a>
+</article><article id="article-57" class="regulation-article" data-regulation-search="article 57 les appartements et espaces privés des membres doivent être respectés.">
+  <div class="regulation-article-number">Article 57</div>
+  <div class="regulation-article-text"><p>Les appartements et espaces privés des membres doivent être respectés.</p></div>
+  <a class="regulation-article-link" href="#article-57" aria-label="Lien vers l’article 57" title="Copier ou partager le lien vers l’article 57">#</a>
+</article><article id="article-58" class="regulation-article" data-regulation-search="article 58 toute dégradation volontaire du club house ou des biens communs peut entraîner des sanctions.">
+  <div class="regulation-article-number">Article 58</div>
+  <div class="regulation-article-text"><p>Toute dégradation volontaire du Club House ou des biens communs peut entraîner des sanctions.</p></div>
+  <a class="regulation-article-link" href="#article-58" aria-label="Lien vers l’article 58" title="Copier ou partager le lien vers l’article 58">#</a>
+</article><article id="article-59" class="regulation-article" data-regulation-search="article 59 les décisions prises lors d&#x27;une réunion officielle au club house entrent en application dès la clôture de celle-ci, sauf mention contraire du président.">
+  <div class="regulation-article-number">Article 59</div>
+  <div class="regulation-article-text"><p>Les décisions prises lors d&#x27;une réunion officielle au Club House entrent en application dès la clôture de celle-ci, sauf mention contraire du Président.</p></div>
+  <a class="regulation-article-link" href="#article-59" aria-label="Lien vers l’article 59" title="Copier ou partager le lien vers l’article 59">#</a>
+</article></div>
+</section><section id="chapitre-xi" class="regulation-chapter" data-regulation-chapter>
+  <header class="regulation-chapter-header">
+    <span>CHAPITRE XI</span>
+    <h2>Recrutement et progression</h2>
+    <p>11 articles</p>
+  </header>
+  <div class="regulation-articles"><article id="article-60" class="regulation-article" data-regulation-search="article 60 aucun candidat ne peut prétendre intégrer le club sans être proposé par un membre du ashen wolves mc.">
+  <div class="regulation-article-number">Article 60</div>
+  <div class="regulation-article-text"><p>Aucun candidat ne peut prétendre intégrer le club sans être proposé par un membre du Ashen Wolves MC.</p></div>
+  <a class="regulation-article-link" href="#article-60" aria-label="Lien vers l’article 60" title="Copier ou partager le lien vers l’article 60">#</a>
+</article><article id="article-61" class="regulation-article" data-regulation-search="article 61 un prospect représente le club même s&#x27;il ne porte pas encore les couleurs complètes.">
+  <div class="regulation-article-number">Article 61</div>
+  <div class="regulation-article-text"><p>Un Prospect représente le club même s&#x27;il ne porte pas encore les couleurs complètes.</p></div>
+  <a class="regulation-article-link" href="#article-61" aria-label="Lien vers l’article 61" title="Copier ou partager le lien vers l’article 61">#</a>
+</article><article id="article-62" class="regulation-article" data-regulation-search="article 62 le prospect doit se montrer disponible, discipliné et volontaire dans les tâches qui lui sont confiées.">
+  <div class="regulation-article-number">Article 62</div>
+  <div class="regulation-article-text"><p>Le Prospect doit se montrer disponible, discipliné et volontaire dans les tâches qui lui sont confiées.</p></div>
+  <a class="regulation-article-link" href="#article-62" aria-label="Lien vers l’article 62" title="Copier ou partager le lien vers l’article 62">#</a>
+</article><article id="article-63" class="regulation-article" data-regulation-search="article 63 un prospect ou un wolf peut être rétrogradé ou exclu plus facilement qu&#x27;un full patch si son comportement est jugé incompatible avec les valeurs du club.">
+  <div class="regulation-article-number">Article 63</div>
+  <div class="regulation-article-text"><p>Un Prospect ou un Wolf peut être rétrogradé ou exclu plus facilement qu&#x27;un Full Patch si son comportement est jugé incompatible avec les valeurs du club.</p></div>
+  <a class="regulation-article-link" href="#article-63" aria-label="Lien vers l’article 63" title="Copier ou partager le lien vers l’article 63">#</a>
+</article><article id="article-64" class="regulation-article" data-regulation-search="article 64 l&#x27;accès au rang de wolf est soumis à l&#x27;approbation du club.">
+  <div class="regulation-article-number">Article 64</div>
+  <div class="regulation-article-text"><p>L&#x27;accès au rang de Wolf est soumis à l&#x27;approbation du club.</p></div>
+  <a class="regulation-article-link" href="#article-64" aria-label="Lien vers l’article 64" title="Copier ou partager le lien vers l’article 64">#</a>
+</article><article id="article-65" class="regulation-article" data-regulation-search="article 65 l&#x27;accès au rang de full patch est soumis à un vote des membres disposant du droit de vote.">
+  <div class="regulation-article-number">Article 65</div>
+  <div class="regulation-article-text"><p>L&#x27;accès au rang de Full Patch est soumis à un vote des membres disposant du droit de vote.</p></div>
+  <a class="regulation-article-link" href="#article-65" aria-label="Lien vers l’article 65" title="Copier ou partager le lien vers l’article 65">#</a>
+</article><article id="article-66" class="regulation-article" data-regulation-search="article 66 tout membre accédant au rang de full patch doit prononcer son serment envers le ashen wolves mc et s&#x27;engager publiquement à respecter les règles, les valeurs et les intérêts du club.">
+  <div class="regulation-article-number">Article 66</div>
+  <div class="regulation-article-text"><p>Tout membre accédant au rang de Full Patch doit prononcer son serment envers le Ashen Wolves MC et s&#x27;engager publiquement à respecter les règles, les valeurs et les intérêts du club.</p></div>
+  <a class="regulation-article-link" href="#article-66" aria-label="Lien vers l’article 66" title="Copier ou partager le lien vers l’article 66">#</a>
+</article><article id="article-67" class="regulation-article" data-regulation-search="article 67 tout membre ayant parrainé une recrue partage une part de responsabilité dans son comportement.">
+  <div class="regulation-article-number">Article 67</div>
+  <div class="regulation-article-text"><p>Tout membre ayant parrainé une recrue partage une part de responsabilité dans son comportement.</p></div>
+  <a class="regulation-article-link" href="#article-67" aria-label="Lien vers l’article 67" title="Copier ou partager le lien vers l’article 67">#</a>
+</article><article id="article-68" class="regulation-article" data-regulation-search="article 68 le mensonge ou la dissimulation volontaire d&#x27;informations importantes durant la période de recrutement est considéré comme une faute grave.">
+  <div class="regulation-article-number">Article 68</div>
+  <div class="regulation-article-text"><p>Le mensonge ou la dissimulation volontaire d&#x27;informations importantes durant la période de recrutement est considéré comme une faute grave.</p></div>
+  <a class="regulation-article-link" href="#article-68" aria-label="Lien vers l’article 68" title="Copier ou partager le lien vers l’article 68">#</a>
+</article><article id="article-69" class="regulation-article" data-regulation-search="article 69 toute promotion peut être retardée si le club estime que le candidat n&#x27;est pas prêt à assumer les responsabilités du rang supérieur.">
+  <div class="regulation-article-number">Article 69</div>
+  <div class="regulation-article-text"><p>Toute promotion peut être retardée si le club estime que le candidat n&#x27;est pas prêt à assumer les responsabilités du rang supérieur.</p></div>
+  <a class="regulation-article-link" href="#article-69" aria-label="Lien vers l’article 69" title="Copier ou partager le lien vers l’article 69">#</a>
+</article><article id="article-70" class="regulation-article" data-regulation-search="article 70 les couleurs ne sont pas une récompense mais une responsabilité.">
+  <div class="regulation-article-number">Article 70</div>
+  <div class="regulation-article-text"><p>Les couleurs ne sont pas une récompense mais une responsabilité.</p></div>
+  <a class="regulation-article-link" href="#article-70" aria-label="Lien vers l’article 70" title="Copier ou partager le lien vers l’article 70">#</a>
+</article></div>
+</section><section id="chapitre-xii" class="regulation-chapter" data-regulation-chapter>
+  <header class="regulation-chapter-header">
+    <span>CHAPITRE XII</span>
+    <h2>Sanctions et procédures disciplinaires</h2>
+    <p>10 articles</p>
+  </header>
+  <div class="regulation-articles"><article id="article-71" class="regulation-article" data-regulation-search="article 71 toute sanction doit être proportionnelle à la faute commise.">
+  <div class="regulation-article-number">Article 71</div>
+  <div class="regulation-article-text"><p>Toute sanction doit être proportionnelle à la faute commise.</p></div>
+  <a class="regulation-article-link" href="#article-71" aria-label="Lien vers l’article 71" title="Copier ou partager le lien vers l’article 71">#</a>
+</article><article id="article-72" class="regulation-article" data-regulation-search="article 72 le sergent d&#x27;armes est chargé d&#x27;appliquer ou de faire appliquer les sanctions décidées par le club.">
+  <div class="regulation-article-number">Article 72</div>
+  <div class="regulation-article-text"><p>Le Sergent d&#x27;Armes est chargé d&#x27;appliquer ou de faire appliquer les sanctions décidées par le club.</p></div>
+  <a class="regulation-article-link" href="#article-72" aria-label="Lien vers l’article 72" title="Copier ou partager le lien vers l’article 72">#</a>
+</article><article id="article-73" class="regulation-article" data-regulation-search="article 73 un membre mis en cause doit pouvoir exposer sa version des faits avant qu&#x27;une décision définitive ne soit prise.">
+  <div class="regulation-article-number">Article 73</div>
+  <div class="regulation-article-text"><p>Un membre mis en cause doit pouvoir exposer sa version des faits avant qu&#x27;une décision définitive ne soit prise.</p></div>
+  <a class="regulation-article-link" href="#article-73" aria-label="Lien vers l’article 73" title="Copier ou partager le lien vers l’article 73">#</a>
+</article><article id="article-74" class="regulation-article" data-regulation-search="article 74 les fautes mineures peuvent être sanctionnées directement par le sergent d&#x27;armes.">
+  <div class="regulation-article-number">Article 74</div>
+  <div class="regulation-article-text"><p>Les fautes mineures peuvent être sanctionnées directement par le Sergent d&#x27;Armes.</p></div>
+  <a class="regulation-article-link" href="#article-74" aria-label="Lien vers l’article 74" title="Copier ou partager le lien vers l’article 74">#</a>
+</article><article id="article-75" class="regulation-article" data-regulation-search="article 75 les fautes graves doivent être soumises à un vote des membres disposant du droit de vote.">
+  <div class="regulation-article-number">Article 75</div>
+  <div class="regulation-article-text"><p>Les fautes graves doivent être soumises à un vote des membres disposant du droit de vote.</p></div>
+  <a class="regulation-article-link" href="#article-75" aria-label="Lien vers l’article 75" title="Copier ou partager le lien vers l’article 75">#</a>
+</article><article id="article-76" class="regulation-article" data-regulation-search="article 76 les sanctions peuvent prendre la forme d&#x27;un avertissement, d&#x27;une amende, d&#x27;une rétrogradation, d&#x27;une suspension ou d&#x27;une exclusion.">
+  <div class="regulation-article-number">Article 76</div>
+  <div class="regulation-article-text"><p>Les sanctions peuvent prendre la forme d&#x27;un avertissement, d&#x27;une amende, d&#x27;une rétrogradation, d&#x27;une suspension ou d&#x27;une exclusion.</p></div>
+  <a class="regulation-article-link" href="#article-76" aria-label="Lien vers l’article 76" title="Copier ou partager le lien vers l’article 76">#</a>
+</article><article id="article-77" class="regulation-article" data-regulation-search="article 77 les actes de trahison, de détournement de ressources appartenant au club ou de mise en danger volontaire d&#x27;un frère peuvent entraîner les sanctions les plus sévères décidées par le club.">
+  <div class="regulation-article-number">Article 77</div>
+  <div class="regulation-article-text"><p>Les actes de trahison, de détournement de ressources appartenant au club ou de mise en danger volontaire d&#x27;un frère peuvent entraîner les sanctions les plus sévères décidées par le club.</p></div>
+  <a class="regulation-article-link" href="#article-77" aria-label="Lien vers l’article 77" title="Copier ou partager le lien vers l’article 77">#</a>
+</article><article id="article-78" class="regulation-article" data-regulation-search="article 78 tout membre exclu doit restituer immédiatement les biens, équipements, documents et couleurs appartenant au club.">
+  <div class="regulation-article-number">Article 78</div>
+  <div class="regulation-article-text"><p>Tout membre exclu doit restituer immédiatement les biens, équipements, documents et couleurs appartenant au club.</p></div>
+  <a class="regulation-article-link" href="#article-78" aria-label="Lien vers l’article 78" title="Copier ou partager le lien vers l’article 78">#</a>
+</article><article id="article-79" class="regulation-article" data-regulation-search="article 79 toute tentative d&#x27;échapper à une sanction constitue une faute supplémentaire.">
+  <div class="regulation-article-number">Article 79</div>
+  <div class="regulation-article-text"><p>Toute tentative d&#x27;échapper à une sanction constitue une faute supplémentaire.</p></div>
+  <a class="regulation-article-link" href="#article-79" aria-label="Lien vers l’article 79" title="Copier ou partager le lien vers l’article 79">#</a>
+</article><article id="article-80" class="regulation-article" data-regulation-search="article 80 les décisions disciplinaires validées par le club doivent être respectées par l&#x27;ensemble des membres.">
+  <div class="regulation-article-number">Article 80</div>
+  <div class="regulation-article-text"><p>Les décisions disciplinaires validées par le club doivent être respectées par l&#x27;ensemble des membres.</p></div>
+  <a class="regulation-article-link" href="#article-80" aria-label="Lien vers l’article 80" title="Copier ou partager le lien vers l’article 80">#</a>
+</article></div>
+</section><section id="chapitre-xiii" class="regulation-chapter" data-regulation-chapter>
+  <header class="regulation-chapter-header">
+    <span>CHAPITRE XIII</span>
+    <h2>Votes et gouvernance</h2>
+    <p>20 articles</p>
+  </header>
+  <div class="regulation-articles"><article id="article-81" class="regulation-article" data-regulation-search="article 81 le droit de vote est réservé aux membres disposant officiellement de cette prérogative.">
+  <div class="regulation-article-number">Article 81</div>
+  <div class="regulation-article-text"><p>Le droit de vote est réservé aux membres disposant officiellement de cette prérogative.</p></div>
+  <a class="regulation-article-link" href="#article-81" aria-label="Lien vers l’article 81" title="Copier ou partager le lien vers l’article 81">#</a>
+</article><article id="article-82" class="regulation-article" data-regulation-search="article 82 chaque membre disposant du droit de vote ne peut exprimer qu&#x27;une seule voix par scrutin.">
+  <div class="regulation-article-number">Article 82</div>
+  <div class="regulation-article-text"><p>Chaque membre disposant du droit de vote ne peut exprimer qu&#x27;une seule voix par scrutin.</p></div>
+  <a class="regulation-article-link" href="#article-82" aria-label="Lien vers l’article 82" title="Copier ou partager le lien vers l’article 82">#</a>
+</article><article id="article-83" class="regulation-article" data-regulation-search="article 83 un membre absent lors d&#x27;un vote peut transmettre sa procuration à un autre membre disposant du droit de vote.">
+  <div class="regulation-article-number">Article 83</div>
+  <div class="regulation-article-text"><p>Un membre absent lors d&#x27;un vote peut transmettre sa procuration à un autre membre disposant du droit de vote.</p></div>
+  <a class="regulation-article-link" href="#article-83" aria-label="Lien vers l’article 83" title="Copier ou partager le lien vers l’article 83">#</a>
+</article><article id="article-84" class="regulation-article" data-regulation-search="article 84 une procuration ne peut être utilisée que pour un seul vote et doit être annoncée avant l&#x27;ouverture du scrutin.">
+  <div class="regulation-article-number">Article 84</div>
+  <div class="regulation-article-text"><p>Une procuration ne peut être utilisée que pour un seul vote et doit être annoncée avant l&#x27;ouverture du scrutin.</p></div>
+  <a class="regulation-article-link" href="#article-84" aria-label="Lien vers l’article 84" title="Copier ou partager le lien vers l’article 84">#</a>
+</article><article id="article-85" class="regulation-article" data-regulation-search="article 85 les décisions ordinaires sont adoptées à la majorité simple des voix exprimées.">
+  <div class="regulation-article-number">Article 85</div>
+  <div class="regulation-article-text"><p>Les décisions ordinaires sont adoptées à la majorité simple des voix exprimées.</p></div>
+  <a class="regulation-article-link" href="#article-85" aria-label="Lien vers l’article 85" title="Copier ou partager le lien vers l’article 85">#</a>
+</article><article id="article-86" class="regulation-article" data-regulation-search="article 86 en cas d&#x27;égalité parfaite lors d&#x27;un vote, la décision revient au président.">
+  <div class="regulation-article-number">Article 86</div>
+  <div class="regulation-article-text"><p>En cas d&#x27;égalité parfaite lors d&#x27;un vote, la décision revient au Président.</p></div>
+  <a class="regulation-article-link" href="#article-86" aria-label="Lien vers l’article 86" title="Copier ou partager le lien vers l’article 86">#</a>
+</article><article id="article-87" class="regulation-article" data-regulation-search="article 87 le président dispose d&#x27;un droit de veto sur toute décision du club, à l&#x27;exception d&#x27;une procédure de destitution engagée à son encontre.">
+  <div class="regulation-article-number">Article 87</div>
+  <div class="regulation-article-text"><p>Le Président dispose d&#x27;un droit de veto sur toute décision du club, à l&#x27;exception d&#x27;une procédure de destitution engagée à son encontre.</p></div>
+  <a class="regulation-article-link" href="#article-87" aria-label="Lien vers l’article 87" title="Copier ou partager le lien vers l’article 87">#</a>
+</article><article id="article-88" class="regulation-article" data-regulation-search="article 88 toute proposition soumise au vote doit être clairement présentée avant l&#x27;ouverture du scrutin.">
+  <div class="regulation-article-number">Article 88</div>
+  <div class="regulation-article-text"><p>Toute proposition soumise au vote doit être clairement présentée avant l&#x27;ouverture du scrutin.</p></div>
+  <a class="regulation-article-link" href="#article-88" aria-label="Lien vers l’article 88" title="Copier ou partager le lien vers l’article 88">#</a>
+</article><article id="article-89" class="regulation-article" data-regulation-search="article 89 les résultats des votes sont consignés par le secrétaire et archivés dans les registres du club.">
+  <div class="regulation-article-number">Article 89</div>
+  <div class="regulation-article-text"><p>Les résultats des votes sont consignés par le Secrétaire et archivés dans les registres du club.</p></div>
+  <a class="regulation-article-link" href="#article-89" aria-label="Lien vers l’article 89" title="Copier ou partager le lien vers l’article 89">#</a>
+</article><article id="article-90" class="regulation-article" data-regulation-search="article 90 toute tentative de fraude, d&#x27;intimidation ou de manipulation d&#x27;un vote constitue une faute grave.">
+  <div class="regulation-article-number">Article 90</div>
+  <div class="regulation-article-text"><p>Toute tentative de fraude, d&#x27;intimidation ou de manipulation d&#x27;un vote constitue une faute grave.</p></div>
+  <a class="regulation-article-link" href="#article-90" aria-label="Lien vers l’article 90" title="Copier ou partager le lien vers l’article 90">#</a>
+</article><article id="article-91" class="regulation-article" data-regulation-search="article 91 les promotions au sein du club peuvent être soumises à un vote lorsque la hiérarchie l&#x27;estime nécessaire.">
+  <div class="regulation-article-number">Article 91</div>
+  <div class="regulation-article-text"><p>Les promotions au sein du club peuvent être soumises à un vote lorsque la hiérarchie l&#x27;estime nécessaire.</p></div>
+  <a class="regulation-article-link" href="#article-91" aria-label="Lien vers l’article 91" title="Copier ou partager le lien vers l’article 91">#</a>
+</article><article id="article-92" class="regulation-article" data-regulation-search="article 92 les exclusions définitives doivent être soumises à un vote des membres disposant du droit de vote.">
+  <div class="regulation-article-number">Article 92</div>
+  <div class="regulation-article-text"><p>Les exclusions définitives doivent être soumises à un vote des membres disposant du droit de vote.</p></div>
+  <a class="regulation-article-link" href="#article-92" aria-label="Lien vers l’article 92" title="Copier ou partager le lien vers l’article 92">#</a>
+</article><article id="article-93" class="regulation-article" data-regulation-search="article 93 les décisions engageant durablement l&#x27;avenir du club doivent être soumises à un vote.">
+  <div class="regulation-article-number">Article 93</div>
+  <div class="regulation-article-text"><p>Les décisions engageant durablement l&#x27;avenir du club doivent être soumises à un vote.</p></div>
+  <a class="regulation-article-link" href="#article-93" aria-label="Lien vers l’article 93" title="Copier ou partager le lien vers l’article 93">#</a>
+</article><article id="article-94" class="regulation-article" data-regulation-search="article 94 les déclarations de guerre, alliances et accords majeurs doivent être soumis à un vote avant leur mise en application.">
+  <div class="regulation-article-number">Article 94</div>
+  <div class="regulation-article-text"><p>Les déclarations de guerre, alliances et accords majeurs doivent être soumis à un vote avant leur mise en application.</p></div>
+  <a class="regulation-article-link" href="#article-94" aria-label="Lien vers l’article 94" title="Copier ou partager le lien vers l’article 94">#</a>
+</article><article id="article-95" class="regulation-article" data-regulation-search="article 95 le président conserve l&#x27;autorité finale concernant l&#x27;application des décisions validées par le club.">
+  <div class="regulation-article-number">Article 95</div>
+  <div class="regulation-article-text"><p>Le Président conserve l&#x27;autorité finale concernant l&#x27;application des décisions validées par le club.</p></div>
+  <a class="regulation-article-link" href="#article-95" aria-label="Lien vers l’article 95" title="Copier ou partager le lien vers l’article 95">#</a>
+</article><article id="article-96" class="regulation-article" data-regulation-search="article 96 une procédure de destitution du président peut être engagée en cas de manquement grave à ses devoirs envers le club.">
+  <div class="regulation-article-number">Article 96</div>
+  <div class="regulation-article-text"><p>Une procédure de destitution du Président peut être engagée en cas de manquement grave à ses devoirs envers le club.</p></div>
+  <a class="regulation-article-link" href="#article-96" aria-label="Lien vers l’article 96" title="Copier ou partager le lien vers l’article 96">#</a>
+</article><article id="article-97" class="regulation-article" data-regulation-search="article 97 la procédure de destitution du président ne peut être initiée que par le vice-président ou le sergent d&#x27;armes.">
+  <div class="regulation-article-number">Article 97</div>
+  <div class="regulation-article-text"><p>La procédure de destitution du Président ne peut être initiée que par le Vice-Président ou le Sergent d&#x27;Armes.</p></div>
+  <a class="regulation-article-link" href="#article-97" aria-label="Lien vers l’article 97" title="Copier ou partager le lien vers l’article 97">#</a>
+</article><article id="article-98" class="regulation-article" data-regulation-search="article 98 le président ne peut exercer son droit de veto sur une procédure de destitution le concernant.">
+  <div class="regulation-article-number">Article 98</div>
+  <div class="regulation-article-text"><p>Le Président ne peut exercer son droit de veto sur une procédure de destitution le concernant.</p></div>
+  <a class="regulation-article-link" href="#article-98" aria-label="Lien vers l’article 98" title="Copier ou partager le lien vers l’article 98">#</a>
+</article><article id="article-99" class="regulation-article" data-regulation-search="article 99 toute procédure de destitution doit être soumise à un vote exceptionnel des membres disposant du droit de vote.">
+  <div class="regulation-article-number">Article 99</div>
+  <div class="regulation-article-text"><p>Toute procédure de destitution doit être soumise à un vote exceptionnel des membres disposant du droit de vote.</p></div>
+  <a class="regulation-article-link" href="#article-99" aria-label="Lien vers l’article 99" title="Copier ou partager le lien vers l’article 99">#</a>
+</article><article id="article-100" class="regulation-article" data-regulation-search="article 100 en cas de destitution du président, le vice-président assure l&#x27;intérim jusqu&#x27;à la tenue d&#x27;un vote officiel permettant la désignation d&#x27;un nouveau président.">
+  <div class="regulation-article-number">Article 100</div>
+  <div class="regulation-article-text"><p>En cas de destitution du Président, le Vice-Président assure l&#x27;intérim jusqu&#x27;à la tenue d&#x27;un vote officiel permettant la désignation d&#x27;un nouveau Président.</p></div>
+  <a class="regulation-article-link" href="#article-100" aria-label="Lien vers l’article 100" title="Copier ou partager le lien vers l’article 100">#</a>
+</article></div>
+</section><section id="chapitre-xiv" class="regulation-chapter" data-regulation-chapter>
+  <header class="regulation-chapter-header">
+    <span>CHAPITRE XIV</span>
+    <h2>Opérations et sécurité opérationnelle</h2>
+    <p>20 articles</p>
+  </header>
+  <div class="regulation-articles"><article id="article-101" class="regulation-article" data-regulation-search="article 101 toute opération impliquant le club doit respecter la chaîne de commandement.">
+  <div class="regulation-article-number">Article 101</div>
+  <div class="regulation-article-text"><p>Toute opération impliquant le club doit respecter la chaîne de commandement.</p></div>
+  <a class="regulation-article-link" href="#article-101" aria-label="Lien vers l’article 101" title="Copier ou partager le lien vers l’article 101">#</a>
+</article><article id="article-102" class="regulation-article" data-regulation-search="article 102 le sergent d&#x27;armes dispose de l&#x27;autorité opérationnelle durant les missions et opérations du club.">
+  <div class="regulation-article-number">Article 102</div>
+  <div class="regulation-article-text"><p>Le Sergent d&#x27;Armes dispose de l&#x27;autorité opérationnelle durant les missions et opérations du club.</p></div>
+  <a class="regulation-article-link" href="#article-102" aria-label="Lien vers l’article 102" title="Copier ou partager le lien vers l’article 102">#</a>
+</article><article id="article-103" class="regulation-article" data-regulation-search="article 103 les décisions du sergent d&#x27;armes concernant la sécurité d&#x27;une opération doivent être respectées par l&#x27;ensemble des participants.">
+  <div class="regulation-article-number">Article 103</div>
+  <div class="regulation-article-text"><p>Les décisions du Sergent d&#x27;Armes concernant la sécurité d&#x27;une opération doivent être respectées par l&#x27;ensemble des participants.</p></div>
+  <a class="regulation-article-link" href="#article-103" aria-label="Lien vers l’article 103" title="Copier ou partager le lien vers l’article 103">#</a>
+</article><article id="article-104" class="regulation-article" data-regulation-search="article 104 le road captain dispose de l&#x27;autorité sur les déplacements et convois durant les opérations impliquant un mouvement collectif.">
+  <div class="regulation-article-number">Article 104</div>
+  <div class="regulation-article-text"><p>Le Road Captain dispose de l&#x27;autorité sur les déplacements et convois durant les opérations impliquant un mouvement collectif.</p></div>
+  <a class="regulation-article-link" href="#article-104" aria-label="Lien vers l’article 104" title="Copier ou partager le lien vers l’article 104">#</a>
+</article><article id="article-105" class="regulation-article" data-regulation-search="article 105 aucun membre ne peut engager le nom ou les ressources du club dans une opération personnelle sans autorisation.">
+  <div class="regulation-article-number">Article 105</div>
+  <div class="regulation-article-text"><p>Aucun membre ne peut engager le nom ou les ressources du club dans une opération personnelle sans autorisation.</p></div>
+  <a class="regulation-article-link" href="#article-105" aria-label="Lien vers l’article 105" title="Copier ou partager le lien vers l’article 105">#</a>
+</article><article id="article-106" class="regulation-article" data-regulation-search="article 106 les informations relatives à une opération ne doivent être communiquées qu&#x27;aux personnes ayant besoin de les connaître.">
+  <div class="regulation-article-number">Article 106</div>
+  <div class="regulation-article-text"><p>Les informations relatives à une opération ne doivent être communiquées qu&#x27;aux personnes ayant besoin de les connaître.</p></div>
+  <a class="regulation-article-link" href="#article-106" aria-label="Lien vers l’article 106" title="Copier ou partager le lien vers l’article 106">#</a>
+</article><article id="article-107" class="regulation-article" data-regulation-search="article 107 les membres doivent signaler immédiatement toute menace, surveillance ou risque identifié avant, pendant ou après une opération.">
+  <div class="regulation-article-number">Article 107</div>
+  <div class="regulation-article-text"><p>Les membres doivent signaler immédiatement toute menace, surveillance ou risque identifié avant, pendant ou après une opération.</p></div>
+  <a class="regulation-article-link" href="#article-107" aria-label="Lien vers l’article 107" title="Copier ou partager le lien vers l’article 107">#</a>
+</article><article id="article-108" class="regulation-article" data-regulation-search="article 108 tout matériel confié pour une opération doit être restitué à son propriétaire ou au club à l&#x27;issue de celle-ci.">
+  <div class="regulation-article-number">Article 108</div>
+  <div class="regulation-article-text"><p>Tout matériel confié pour une opération doit être restitué à son propriétaire ou au club à l&#x27;issue de celle-ci.</p></div>
+  <a class="regulation-article-link" href="#article-108" aria-label="Lien vers l’article 108" title="Copier ou partager le lien vers l’article 108">#</a>
+</article><article id="article-109" class="regulation-article" data-regulation-search="article 109 aucun membre ne peut abandonner volontairement un frère lors d&#x27;une opération sans raison valable.">
+  <div class="regulation-article-number">Article 109</div>
+  <div class="regulation-article-text"><p>Aucun membre ne peut abandonner volontairement un frère lors d&#x27;une opération sans raison valable.</p></div>
+  <a class="regulation-article-link" href="#article-109" aria-label="Lien vers l’article 109" title="Copier ou partager le lien vers l’article 109">#</a>
+</article><article id="article-110" class="regulation-article" data-regulation-search="article 110 en cas de blessure ou d&#x27;incident majeur, la sécurité des membres prime sur les gains matériels.">
+  <div class="regulation-article-number">Article 110</div>
+  <div class="regulation-article-text"><p>En cas de blessure ou d&#x27;incident majeur, la sécurité des membres prime sur les gains matériels.</p></div>
+  <a class="regulation-article-link" href="#article-110" aria-label="Lien vers l’article 110" title="Copier ou partager le lien vers l’article 110">#</a>
+</article><article id="article-111" class="regulation-article" data-regulation-search="article 111 les communications durant une opération doivent rester claires, brèves et strictement liées à la mission.">
+  <div class="regulation-article-number">Article 111</div>
+  <div class="regulation-article-text"><p>Les communications durant une opération doivent rester claires, brèves et strictement liées à la mission.</p></div>
+  <a class="regulation-article-link" href="#article-111" aria-label="Lien vers l’article 111" title="Copier ou partager le lien vers l’article 111">#</a>
+</article><article id="article-112" class="regulation-article" data-regulation-search="article 112 les membres doivent respecter le niveau de discrétion demandé pour chaque opération.">
+  <div class="regulation-article-number">Article 112</div>
+  <div class="regulation-article-text"><p>Les membres doivent respecter le niveau de discrétion demandé pour chaque opération.</p></div>
+  <a class="regulation-article-link" href="#article-112" aria-label="Lien vers l’article 112" title="Copier ou partager le lien vers l’article 112">#</a>
+</article><article id="article-113" class="regulation-article" data-regulation-search="article 113 toute arrestation ou interpellation liée à une activité du club doit être signalée à un officier dans les plus brefs délais.">
+  <div class="regulation-article-number">Article 113</div>
+  <div class="regulation-article-text"><p>Toute arrestation ou interpellation liée à une activité du club doit être signalée à un officier dans les plus brefs délais.</p></div>
+  <a class="regulation-article-link" href="#article-113" aria-label="Lien vers l’article 113" title="Copier ou partager le lien vers l’article 113">#</a>
+</article><article id="article-114" class="regulation-article" data-regulation-search="article 114 aucun membre ne doit communiquer volontairement des informations concernant le club aux autorités.">
+  <div class="regulation-article-number">Article 114</div>
+  <div class="regulation-article-text"><p>Aucun membre ne doit communiquer volontairement des informations concernant le club aux autorités.</p></div>
+  <a class="regulation-article-link" href="#article-114" aria-label="Lien vers l’article 114" title="Copier ou partager le lien vers l’article 114">#</a>
+</article><article id="article-115" class="regulation-article" data-regulation-search="article 115 toute perte d&#x27;arme, de véhicule, de matériel ou de ressource du club doit être signalée immédiatement au sergent d&#x27;armes.">
+  <div class="regulation-article-number">Article 115</div>
+  <div class="regulation-article-text"><p>Toute perte d&#x27;arme, de véhicule, de matériel ou de ressource du club doit être signalée immédiatement au Sergent d&#x27;Armes.</p></div>
+  <a class="regulation-article-link" href="#article-115" aria-label="Lien vers l’article 115" title="Copier ou partager le lien vers l’article 115">#</a>
+</article><article id="article-116" class="regulation-article" data-regulation-search="article 116 les opérations présentant un risque élevé doivent être validées par la hiérarchie compétente avant leur exécution.">
+  <div class="regulation-article-number">Article 116</div>
+  <div class="regulation-article-text"><p>Les opérations présentant un risque élevé doivent être validées par la hiérarchie compétente avant leur exécution.</p></div>
+  <a class="regulation-article-link" href="#article-116" aria-label="Lien vers l’article 116" title="Copier ou partager le lien vers l’article 116">#</a>
+</article><article id="article-117" class="regulation-article" data-regulation-search="article 117 aucun membre ne peut modifier seul les objectifs d&#x27;une opération sans autorisation.">
+  <div class="regulation-article-number">Article 117</div>
+  <div class="regulation-article-text"><p>Aucun membre ne peut modifier seul les objectifs d&#x27;une opération sans autorisation.</p></div>
+  <a class="regulation-article-link" href="#article-117" aria-label="Lien vers l’article 117" title="Copier ou partager le lien vers l’article 117">#</a>
+</article><article id="article-118" class="regulation-article" data-regulation-search="article 118 les membres doivent se présenter équipés et préparés avant le début d&#x27;une opération.">
+  <div class="regulation-article-number">Article 118</div>
+  <div class="regulation-article-text"><p>Les membres doivent se présenter équipés et préparés avant le début d&#x27;une opération.</p></div>
+  <a class="regulation-article-link" href="#article-118" aria-label="Lien vers l’article 118" title="Copier ou partager le lien vers l’article 118">#</a>
+</article><article id="article-119" class="regulation-article" data-regulation-search="article 119 le refus injustifié de participer à une opération validée par le club peut faire l&#x27;objet d&#x27;un examen disciplinaire.">
+  <div class="regulation-article-number">Article 119</div>
+  <div class="regulation-article-text"><p>Le refus injustifié de participer à une opération validée par le club peut faire l&#x27;objet d&#x27;un examen disciplinaire.</p></div>
+  <a class="regulation-article-link" href="#article-119" aria-label="Lien vers l’article 119" title="Copier ou partager le lien vers l’article 119">#</a>
+</article><article id="article-120" class="regulation-article" data-regulation-search="article 120 la sécurité de la meute reste prioritaire sur toute autre considération opérationnelle.">
+  <div class="regulation-article-number">Article 120</div>
+  <div class="regulation-article-text"><p>La sécurité de la meute reste prioritaire sur toute autre considération opérationnelle.</p></div>
+  <a class="regulation-article-link" href="#article-120" aria-label="Lien vers l’article 120" title="Copier ou partager le lien vers l’article 120">#</a>
+</article></div>
+</section><section id="chapitre-xv" class="regulation-chapter" data-regulation-chapter>
+  <header class="regulation-chapter-header">
+    <span>CHAPITRE XV</span>
+    <h2>Devoirs envers la meute</h2>
+    <p>20 articles</p>
+  </header>
+  <div class="regulation-articles"><article id="article-121" class="regulation-article" data-regulation-search="article 121 chaque membre du ashen wolves mc est responsable de la réputation du club.">
+  <div class="regulation-article-number">Article 121</div>
+  <div class="regulation-article-text"><p>Chaque membre du Ashen Wolves MC est responsable de la réputation du club.</p></div>
+  <a class="regulation-article-link" href="#article-121" aria-label="Lien vers l’article 121" title="Copier ou partager le lien vers l’article 121">#</a>
+</article><article id="article-122" class="regulation-article" data-regulation-search="article 122 chaque membre doit protéger les intérêts de la meute avant ses intérêts personnels lorsque les deux entrent en conflit.">
+  <div class="regulation-article-number">Article 122</div>
+  <div class="regulation-article-text"><p>Chaque membre doit protéger les intérêts de la meute avant ses intérêts personnels lorsque les deux entrent en conflit.</p></div>
+  <a class="regulation-article-link" href="#article-122" aria-label="Lien vers l’article 122" title="Copier ou partager le lien vers l’article 122">#</a>
+</article><article id="article-123" class="regulation-article" data-regulation-search="article 123 aucun membre ne doit abandonner volontairement un frère dans le besoin sans raison valable.">
+  <div class="regulation-article-number">Article 123</div>
+  <div class="regulation-article-text"><p>Aucun membre ne doit abandonner volontairement un frère dans le besoin sans raison valable.</p></div>
+  <a class="regulation-article-link" href="#article-123" aria-label="Lien vers l’article 123" title="Copier ou partager le lien vers l’article 123">#</a>
+</article><article id="article-124" class="regulation-article" data-regulation-search="article 124 les membres doivent se porter assistance mutuellement lorsque la situation l&#x27;exige.">
+  <div class="regulation-article-number">Article 124</div>
+  <div class="regulation-article-text"><p>Les membres doivent se porter assistance mutuellement lorsque la situation l&#x27;exige.</p></div>
+  <a class="regulation-article-link" href="#article-124" aria-label="Lien vers l’article 124" title="Copier ou partager le lien vers l’article 124">#</a>
+</article><article id="article-125" class="regulation-article" data-regulation-search="article 125 les différents personnels ne doivent jamais mettre en péril les intérêts du club.">
+  <div class="regulation-article-number">Article 125</div>
+  <div class="regulation-article-text"><p>Les différents personnels ne doivent jamais mettre en péril les intérêts du club.</p></div>
+  <a class="regulation-article-link" href="#article-125" aria-label="Lien vers l’article 125" title="Copier ou partager le lien vers l’article 125">#</a>
+</article><article id="article-126" class="regulation-article" data-regulation-search="article 126 chaque membre est tenu de respecter la mémoire des frères tombés avant lui.">
+  <div class="regulation-article-number">Article 126</div>
+  <div class="regulation-article-text"><p>Chaque membre est tenu de respecter la mémoire des frères tombés avant lui.</p></div>
+  <a class="regulation-article-link" href="#article-126" aria-label="Lien vers l’article 126" title="Copier ou partager le lien vers l’article 126">#</a>
+</article><article id="article-127" class="regulation-article" data-regulation-search="article 127 tout membre portant les couleurs du ashen wolves mc représente également l&#x27;héritage du ashes crow mc.">
+  <div class="regulation-article-number">Article 127</div>
+  <div class="regulation-article-text"><p>Tout membre portant les couleurs du Ashen Wolves MC représente également l&#x27;héritage du Ashes Crow MC.</p></div>
+  <a class="regulation-article-link" href="#article-127" aria-label="Lien vers l’article 127" title="Copier ou partager le lien vers l’article 127">#</a>
+</article><article id="article-128" class="regulation-article" data-regulation-search="article 128 les membres doivent transmettre les valeurs du club aux nouvelles générations de recrues.">
+  <div class="regulation-article-number">Article 128</div>
+  <div class="regulation-article-text"><p>Les membres doivent transmettre les valeurs du club aux nouvelles générations de recrues.</p></div>
+  <a class="regulation-article-link" href="#article-128" aria-label="Lien vers l’article 128" title="Copier ou partager le lien vers l’article 128">#</a>
+</article><article id="article-129" class="regulation-article" data-regulation-search="article 129 les couleurs du club ne sont pas un privilège mais une responsabilité envers la meute.">
+  <div class="regulation-article-number">Article 129</div>
+  <div class="regulation-article-text"><p>Les couleurs du club ne sont pas un privilège mais une responsabilité envers la meute.</p></div>
+  <a class="regulation-article-link" href="#article-129" aria-label="Lien vers l’article 129" title="Copier ou partager le lien vers l’article 129">#</a>
+</article><article id="article-130" class="regulation-article" data-regulation-search="article 130 chaque membre doit contribuer à la croissance, à la stabilité et à la pérennité du club selon ses capacités.">
+  <div class="regulation-article-number">Article 130</div>
+  <div class="regulation-article-text"><p>Chaque membre doit contribuer à la croissance, à la stabilité et à la pérennité du club selon ses capacités.</p></div>
+  <a class="regulation-article-link" href="#article-130" aria-label="Lien vers l’article 130" title="Copier ou partager le lien vers l’article 130">#</a>
+</article><article id="article-131" class="regulation-article" data-regulation-search="article 131 aucun membre ne doit utiliser sa position au sein du club à des fins personnelles au détriment de la meute.">
+  <div class="regulation-article-number">Article 131</div>
+  <div class="regulation-article-text"><p>Aucun membre ne doit utiliser sa position au sein du club à des fins personnelles au détriment de la meute.</p></div>
+  <a class="regulation-article-link" href="#article-131" aria-label="Lien vers l’article 131" title="Copier ou partager le lien vers l’article 131">#</a>
+</article><article id="article-132" class="regulation-article" data-regulation-search="article 132 les officiers doivent montrer l&#x27;exemple par leur comportement et leurs décisions.">
+  <div class="regulation-article-number">Article 132</div>
+  <div class="regulation-article-text"><p>Les officiers doivent montrer l&#x27;exemple par leur comportement et leurs décisions.</p></div>
+  <a class="regulation-article-link" href="#article-132" aria-label="Lien vers l’article 132" title="Copier ou partager le lien vers l’article 132">#</a>
+</article><article id="article-133" class="regulation-article" data-regulation-search="article 133 le respect entre frères constitue l&#x27;un des fondements du ashen wolves mc.">
+  <div class="regulation-article-number">Article 133</div>
+  <div class="regulation-article-text"><p>Le respect entre frères constitue l&#x27;un des fondements du Ashen Wolves MC.</p></div>
+  <a class="regulation-article-link" href="#article-133" aria-label="Lien vers l’article 133" title="Copier ou partager le lien vers l’article 133">#</a>
+</article><article id="article-134" class="regulation-article" data-regulation-search="article 134 les intérêts de la meute doivent survivre aux intérêts individuels de ses membres.">
+  <div class="regulation-article-number">Article 134</div>
+  <div class="regulation-article-text"><p>Les intérêts de la meute doivent survivre aux intérêts individuels de ses membres.</p></div>
+  <a class="regulation-article-link" href="#article-134" aria-label="Lien vers l’article 134" title="Copier ou partager le lien vers l’article 134">#</a>
+</article><article id="article-135" class="regulation-article" data-regulation-search="article 135 chaque membre doit agir de manière à ce que les sacrifices des frères disparus ne soient jamais oubliés.">
+  <div class="regulation-article-number">Article 135</div>
+  <div class="regulation-article-text"><p>Chaque membre doit agir de manière à ce que les sacrifices des frères disparus ne soient jamais oubliés.</p></div>
+  <a class="regulation-article-link" href="#article-135" aria-label="Lien vers l’article 135" title="Copier ou partager le lien vers l’article 135">#</a>
+</article><article id="article-136" class="regulation-article" data-regulation-search="article 136 les membres doivent préserver et protéger les traditions du club.">
+  <div class="regulation-article-number">Article 136</div>
+  <div class="regulation-article-text"><p>Les membres doivent préserver et protéger les traditions du club.</p></div>
+  <a class="regulation-article-link" href="#article-136" aria-label="Lien vers l’article 136" title="Copier ou partager le lien vers l’article 136">#</a>
+</article><article id="article-137" class="regulation-article" data-regulation-search="article 137 le port des couleurs implique l&#x27;acceptation pleine et entière du présent règlement.">
+  <div class="regulation-article-number">Article 137</div>
+  <div class="regulation-article-text"><p>Le port des couleurs implique l&#x27;acceptation pleine et entière du présent règlement.</p></div>
+  <a class="regulation-article-link" href="#article-137" aria-label="Lien vers l’article 137" title="Copier ou partager le lien vers l’article 137">#</a>
+</article><article id="article-138" class="regulation-article" data-regulation-search="article 138 toute personne intégrant le ashen wolves mc accepte de faire passer la loyauté envers la meute avant toute autre considération liée au club.">
+  <div class="regulation-article-number">Article 138</div>
+  <div class="regulation-article-text"><p>Toute personne intégrant le Ashen Wolves MC accepte de faire passer la loyauté envers la meute avant toute autre considération liée au club.</p></div>
+  <a class="regulation-article-link" href="#article-138" aria-label="Lien vers l’article 138" title="Copier ou partager le lien vers l’article 138">#</a>
+</article><article id="article-139" class="regulation-article" data-regulation-search="article 139 le club appartient à la meute et non à un individu.">
+  <div class="regulation-article-number">Article 139</div>
+  <div class="regulation-article-text"><p>Le club appartient à la meute et non à un individu.</p></div>
+  <a class="regulation-article-link" href="#article-139" aria-label="Lien vers l’article 139" title="Copier ou partager le lien vers l’article 139">#</a>
+</article><article id="article-140" class="regulation-article" data-regulation-search="article 140 &quot;ils ont brûlé notre maison. pas la meute.&quot; cette devise constitue le principe fondateur du ashen wolves mc et doit guider les décisions, les actions et le comportement de chacun de ses membres.">
+  <div class="regulation-article-number">Article 140</div>
+  <div class="regulation-article-text"><p>&quot;Ils ont brûlé notre maison. Pas la meute.&quot;</p>
+<p>Cette devise constitue le principe fondateur du Ashen Wolves MC et doit guider les décisions, les actions et le comportement de chacun de ses membres.</p></div>
+  <a class="regulation-article-link" href="#article-140" aria-label="Lien vers l’article 140" title="Copier ou partager le lien vers l’article 140">#</a>
+</article></div>
+</section>
+      </div>
+      <footer class="regulation-footer"><strong>ASHEN WOLVES HUB</strong><span>Code officiel du Ashen Wolves MC</span></footer>
+    </main>
+  </div>
+  <a id="regulation-back-to-top" class="regulation-back-to-top" href="#reglement-module" aria-label="Retour en haut">↑</a>
+</section>
 
   <section id="hub-placeholder" class="hub-route hub-placeholder" hidden>
     <div class="hub-placeholder-card">
@@ -593,6 +1345,7 @@
 
   <script src="config.js"></script>
   <script src="app.js?v=1.0.1"></script>
-  <script src="hub.js?v=1.0.1"></script>
+  <script src="reglement.js?v=1.1.0"></script>
+  <script src="hub.js?v=1.1.0"></script>
 </body>
 </html>
