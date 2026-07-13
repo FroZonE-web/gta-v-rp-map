@@ -1,0 +1,15 @@
+ATLAS RP v1.0.0
+
+Refonte graphique finale de la V1 :
+
+- suppression de l'option Historique jamais finalisée ;
+- harmonisation des panneaux, formulaires et boutons ;
+- amélioration des popups, médias et documents ;
+- panneau admin réorganisé :
+  Mode > Demandes > Corbeille > Import / Export ;
+- adresse email toujours masquée après connexion ;
+- amélioration tablette et mobile ;
+- animations discrètes ;
+- aucune modification de Supabase ou des données existantes.
+
+Aucune nouvelle requête SQL n'est nécessaire.

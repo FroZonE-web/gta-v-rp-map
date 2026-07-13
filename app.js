@@ -197,7 +197,6 @@ const adminDrawerClose = document.getElementById("admin-drawer-close");
 const adminModeInput = document.getElementById("admin-mode");
 const visitorModeInput = document.getElementById("visitor-mode");
 const visitorModeBadge = document.getElementById("visitor-mode-badge");
-const showHistoryInput = document.getElementById("show-history");
 
 const zoneForm = document.getElementById("zone-form");
 const zoneNameInput = document.getElementById("zone-name");
@@ -252,7 +251,6 @@ let adminUser = null;
 let isAdmin = false;
 let visitorMode = false;
 let adminDrawerOpen = false;
-let showHistories = false;
 let movingMarkerId = null;
 let zones = [];
 let trashedMarkers = [];
@@ -1191,14 +1189,6 @@ adminModeInput.addEventListener("change", () => {
 visitorModeInput.addEventListener("change", () => {
   if (visitorModeInput.checked) setVisitorMode(true);
 });
-showHistoryInput.addEventListener("change", () => {
-  showHistories = showHistoryInput.checked;
-  sessionStorage.setItem("atlas_show_histories", String(showHistories));
-  document.body.classList.toggle("show-admin-histories", adminToolsEnabled() && showHistories);
-  refreshInterface();
-  renderZones();
-});
-
 /* =========================================================
    ADMINISTRATION
    ========================================================= */
@@ -1214,11 +1204,10 @@ function updateAdminInterface() {
     adminModeInput.checked = true;
     visitorModeInput.checked = false;
     visitorModeBadge.hidden = true;
-    document.body.classList.remove("visitor-mode-active", "show-admin-histories");
+    document.body.classList.remove("visitor-mode-active");
   } else {
     visitorModeBadge.hidden = !visitorMode;
     document.body.classList.toggle("visitor-mode-active", visitorMode);
-    document.body.classList.toggle("show-admin-histories", adminToolsEnabled() && showHistories);
   }
 
   if (adminTrashGroup) {
@@ -3915,7 +3904,7 @@ adminTrashRefreshButton?.addEventListener("click", loadTrash);
    ========================================================= */
 
 const BACKUP_FORMAT_VERSION = "1.0";
-const ATLAS_VERSION = "0.8.6.2";
+const ATLAS_VERSION = "1.0.0";
 
 function setBackupStatus(message, type = "") {
   if (!adminBackupStatus) return;
@@ -4304,8 +4293,6 @@ async function initializeApplication() {
   initializePlayerName();
   loadFavorites();
   loadLayerSettings();
-  showHistories = sessionStorage.getItem("atlas_show_histories") === "true";
-  showHistoryInput.checked = showHistories;
   setAdminDrawer(false);
   await checkAdminSession();
   createCategoryOptions();

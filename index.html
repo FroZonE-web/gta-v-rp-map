@@ -8,7 +8,7 @@
     content="width=device-width, initial-scale=1"
   >
 
-  <title>Atlas RP v0.8.6.2 — Carte GTA V</title>
+  <title>Atlas RP v1.0.0 — Carte GTA V</title>
 
   <link
     rel="stylesheet"
@@ -20,7 +20,7 @@
     href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css"
   >
 
-  <link rel="stylesheet" href="style.css?v=0.8.1">
+  <link rel="stylesheet" href="style.css?v=1.0.0">
 </head>
 
 <body>
@@ -28,7 +28,7 @@
     <header class="sidebar-header">
       <div>
         <h1>Atlas RP</h1>
-        <p class="subtitle">Carte collaborative GTA V · v0.8.6.2</p>
+        <p class="subtitle">Carte collaborative GTA V · v1.0.0</p>
       </div>
 
       <div class="player-box">
@@ -48,7 +48,7 @@
 
     <section class="panel search-panel">
       <div class="panel-title-row">
-        <h2>Rechercher un lieu</h2>
+        <h2><span class="panel-icon">⌕</span> Rechercher un lieu</h2>
 
         <span id="visible-marker-count" class="marker-count">
           0 lieu
@@ -85,7 +85,7 @@
 
     <section class="panel favorites-panel">
       <div class="panel-title-row">
-        <h2>Mes favoris</h2>
+        <h2><span class="panel-icon">★</span> Mes favoris</h2>
         <span id="favorite-count" class="marker-count">0 favori</span>
       </div>
 
@@ -104,7 +104,7 @@
 
     <section class="panel layers-panel">
       <div class="panel-title-row">
-        <h2>Calques</h2>
+        <h2><span class="panel-icon">◫</span> Calques</h2>
         <button id="reset-layers" class="small-secondary-button" type="button">Réinitialiser</button>
       </div>
 
@@ -129,7 +129,7 @@
     </section>
 
     <section class="panel">
-      <h2>Filtres</h2>
+      <h2><span class="panel-icon">≡</span> Filtres</h2>
 
       <p class="panel-description">
         Affiche ou masque les différentes catégories.
@@ -139,7 +139,7 @@
     </section>
 
     <section class="panel">
-      <h2>Ajouter un point</h2>
+      <h2><span class="panel-icon">＋</span> Ajouter un point</h2>
 
       <p id="location-status" class="location-status">
         Clique sur la carte pour choisir un emplacement.
@@ -195,7 +195,7 @@
 
     <section class="panel zone-panel">
       <div class="panel-title-row">
-        <h2>Polyzones</h2>
+        <h2><span class="panel-icon">⬡</span> Polyzones</h2>
         <span id="zone-count" class="marker-count">0 zone</span>
       </div>
 
@@ -392,7 +392,7 @@
   <aside id="admin-drawer" class="admin-drawer" aria-label="Panneau d’administration">
     <header class="admin-drawer-header">
       <div>
-        <h2>Administration</h2>
+        <h2><span class="panel-icon">◆</span> Administration</h2>
         <span id="admin-badge" class="admin-badge">Déconnecté</span>
       </div>
       <button id="admin-drawer-close" class="admin-drawer-close" type="button" aria-label="Réduire le panneau">▶</button>
@@ -417,7 +417,7 @@
           <span>Session sécurisée active</span>
         </div>
 
-        <section class="admin-control-group">
+<section class="admin-control-group">
           <h3>Mode d’affichage</h3>
           <label class="admin-mode-option">
             <input id="admin-mode" name="atlas-mode" type="radio" value="admin" checked>
@@ -429,16 +429,47 @@
           </label>
         </section>
 
-        <section class="admin-control-group">
-          <h3>Affichage des fiches</h3>
-          <label class="admin-switch-row">
-            <input id="show-history" type="checkbox">
-            <span>Afficher les historiques dans les fiches</span>
-          </label>
-          <p class="admin-help">L’historique restera masqué par défaut. Cette option est prête pour la future timeline.</p>
+<section id="admin-deletion-requests-group" class="admin-control-group admin-deletion-requests-group">
+          <div class="admin-request-header">
+            <div>
+              <h3>Demandes de suppression</h3>
+              <p class="admin-help">
+                Examine chaque demande puis accepte-la ou refuse-la.
+              </p>
+            </div>
+            <span id="admin-deletion-request-count" class="marker-count">0 demande</span>
+          </div>
+
+          <button id="admin-deletion-request-refresh" class="secondary-button" type="button">
+            Actualiser les demandes
+          </button>
+
+          <div id="admin-deletion-request-list" class="admin-request-list">
+            <p class="empty-results">Aucune demande en attente.</p>
+          </div>
         </section>
 
-        <section class="admin-control-group admin-backup-group">
+<section id="admin-trash-group" class="admin-control-group admin-trash-group">
+          <div class="admin-trash-header">
+            <div>
+              <h3>Corbeille</h3>
+              <p class="admin-help">
+                Les suppressions sont réversibles. La suppression définitive efface aussi les médias liés.
+              </p>
+            </div>
+            <span id="admin-trash-count" class="marker-count">0 élément</span>
+          </div>
+
+          <button id="admin-trash-refresh" class="secondary-button" type="button">
+            Actualiser la corbeille
+          </button>
+
+          <div id="admin-trash-list" class="admin-trash-list">
+            <p class="empty-results">La corbeille est vide.</p>
+          </div>
+        </section>
+
+<section class="admin-control-group admin-backup-group">
           <h3>Sauvegarde Atlas</h3>
           <p class="admin-help">
             Export et import réservés aux administrateurs. Les fichiers médias sont inclus dans la restauration lorsque leur URL publique reste accessible.
@@ -462,46 +493,6 @@
           <p id="admin-backup-status" class="admin-backup-status" aria-live="polite"></p>
         </section>
 
-        <section id="admin-deletion-requests-group" class="admin-control-group admin-deletion-requests-group">
-          <div class="admin-request-header">
-            <div>
-              <h3>Demandes de suppression</h3>
-              <p class="admin-help">
-                Examine chaque demande puis accepte-la ou refuse-la.
-              </p>
-            </div>
-            <span id="admin-deletion-request-count" class="marker-count">0 demande</span>
-          </div>
-
-          <button id="admin-deletion-request-refresh" class="secondary-button" type="button">
-            Actualiser les demandes
-          </button>
-
-          <div id="admin-deletion-request-list" class="admin-request-list">
-            <p class="empty-results">Aucune demande en attente.</p>
-          </div>
-        </section>
-
-        <section id="admin-trash-group" class="admin-control-group admin-trash-group">
-          <div class="admin-trash-header">
-            <div>
-              <h3>Corbeille</h3>
-              <p class="admin-help">
-                Les suppressions sont réversibles. La suppression définitive efface aussi les médias liés.
-              </p>
-            </div>
-            <span id="admin-trash-count" class="marker-count">0 élément</span>
-          </div>
-
-          <button id="admin-trash-refresh" class="secondary-button" type="button">
-            Actualiser la corbeille
-          </button>
-
-          <div id="admin-trash-list" class="admin-trash-list">
-            <p class="empty-results">La corbeille est vide.</p>
-          </div>
-        </section>
-
         <button id="admin-logout-button" class="secondary-button" type="button">Se déconnecter</button>
       </div>
     </div>
@@ -520,6 +511,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script src="config.js"></script>
-  <script src="app.js?v=0.8.6.2"></script>
+  <script src="app.js?v=1.0.0"></script>
 </body>
 </html>
