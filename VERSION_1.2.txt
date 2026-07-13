@@ -6,6 +6,11 @@ ASHEN WOLVES HUB v1.2 — ANNUAIRE
 - Tri hiérarchique sans affichage des postes vacants.
 - Limite stricte de 16 membres.
 - Recherche instantanée et affichage responsive.
-- Consultation réservée aux comptes authentifiés.
+- Consultation publique de l’annuaire, avec ou sans connexion.
 - Ajout, modification et suppression réservés à l'administrateur.
 - Les espaces Personnes rencontrées et Forces de l'ordre sont préparés pour les étapes suivantes.
+
+Correctif v1.2 :
+- Suppression du lien latéral « Retour au HUB » dans l’annuaire.
+- Trois boutons d’annuaire fixes, côte à côte.
+- Politique Supabase de lecture ouverte aux rôles anon et authenticated.

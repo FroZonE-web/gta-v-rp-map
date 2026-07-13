@@ -113,12 +113,6 @@
   }
 
   function renderMembers() {
-    if (!sessionUser) {
-      counter.textContent = "Accès réservé";
-      setState("restricted", "Annuaire interne", "Connectez-vous avec un compte autorisé pour consulter les informations des membres du club.");
-      return;
-    }
-
     const visible = getFilteredMembers();
     counter.textContent = `${visible.length} membre${visible.length > 1 ? "s" : ""} affiché${visible.length > 1 ? "s" : ""} · ${members.length}/16`;
 
@@ -201,12 +195,6 @@
     }
 
     await resolveAccess();
-    if (!sessionUser) {
-      members = [];
-      loadedOnce = true;
-      renderMembers();
-      return;
-    }
 
     setState("loading", "Chargement", "Récupération de l'annuaire interne…");
     const { data, error } = await supabaseClient
@@ -217,7 +205,7 @@
 
     if (error) {
       console.error("Chargement annuaire impossible :", error);
-      setState("restricted", "Annuaire indisponible", "La table Supabase de l'annuaire n'est pas encore installée ou votre compte ne dispose pas des droits nécessaires.");
+      setState("restricted", "Annuaire indisponible", "La table Supabase de l'annuaire n'est pas encore installée ou sa politique de lecture publique doit être mise à jour.");
       return;
     }
 

@@ -65,10 +65,11 @@ for each row execute function public.directory_members_enforce_limit();
 alter table public.directory_members enable row level security;
 
 drop policy if exists "directory_members_authenticated_read" on public.directory_members;
-create policy "directory_members_authenticated_read"
+drop policy if exists "directory_members_public_read" on public.directory_members;
+create policy "directory_members_public_read"
 on public.directory_members
 for select
-to authenticated
+to anon, authenticated
 using (true);
 
 drop policy if exists "directory_members_admin_insert" on public.directory_members;
