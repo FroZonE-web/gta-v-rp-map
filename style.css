@@ -1493,3 +1493,39 @@ button:disabled {
     width: 100%;
   }
 }
+
+
+/* =========================================================
+   IMPORT / EXPORT ADMIN v0.8.4
+   ========================================================= */
+
+.admin-backup-group {
+  display: grid;
+  gap: 9px;
+}
+
+.admin-backup-group .primary-button,
+.admin-backup-group .secondary-button {
+  margin: 0;
+}
+
+.admin-import-file {
+  display: none;
+}
+
+.admin-backup-status {
+  min-height: 16px;
+  margin: 0;
+
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.admin-backup-status.is-success {
+  color: #9ce8c3;
+}
+
+.admin-backup-status.is-error {
+  color: #ffaaaa;
+}

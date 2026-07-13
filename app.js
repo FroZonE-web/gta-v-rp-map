@@ -147,8 +147,10 @@ const locationStatus =
 const addMarkerButton =
   document.getElementById("add-marker-button");
 
-const exportButton =
-  document.getElementById("export-json");
+const adminExportAtlasButton = document.getElementById("admin-export-atlas");
+const adminImportFileInput = document.getElementById("admin-import-file");
+const adminImportAtlasButton = document.getElementById("admin-import-atlas");
+const adminBackupStatus = document.getElementById("admin-backup-status");
 
 const notificationElement =
   document.getElementById("notification");
@@ -3216,67 +3218,317 @@ async function deleteZone(id) {
 }
 
 /* =========================================================
-   EXPORT JSON
+   IMPORT / EXPORT ADMIN v0.8.4
    ========================================================= */
 
-exportButton.addEventListener(
-  "click",
-  () => {
-    const exportData = {
-      exported_at:
-        new Date().toISOString(),
+const BACKUP_FORMAT_VERSION = "1.0";
+const ATLAS_VERSION = "0.8.4";
 
-      marker_count:
-        places.length,
+function setBackupStatus(message, type = "") {
+  if (!adminBackupStatus) return;
+  adminBackupStatus.textContent = message;
+  adminBackupStatus.className = `admin-backup-status${type ? ` is-${type}` : ""}`;
+}
 
-      markers:
-        places,
+function downloadJsonFile(fileName, value) {
+  const blob = new Blob([JSON.stringify(value, null, 2)], {
+    type: "application/json"
+  });
 
-      zone_count:
-        zones.length,
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
 
-      zones:
-        zones
-    };
+function createAtlasBackup() {
+  return {
+    backup_version: BACKUP_FORMAT_VERSION,
+    atlas_version: ATLAS_VERSION,
+    created_at: new Date().toISOString(),
+    created_by: playerName || "Administrateur",
+    metadata: {
+      marker_count: places.length,
+      zone_count: zones.length,
+      media_count: mediaRecords.length,
+      image_count: mediaRecords.filter((item) => (item.media_type || "image") === "image").length,
+      document_count: mediaRecords.filter((item) => item.media_type === "document").length
+    },
+    categories: CATEGORIES,
+    settings: {
+      layers: layerSettings
+    },
+    markers: places,
+    zones,
+    media: mediaRecords
+  };
+}
 
-    const blob = new Blob(
-      [
-        JSON.stringify(
-          exportData,
-          null,
-          2
-        )
-      ],
-      {
-        type: "application/json"
-      }
-    );
+adminExportAtlasButton.addEventListener("click", () => {
+  if (!adminToolsEnabled()) {
+    showNotification("L’export est réservé au mode administrateur.", "error");
+    return;
+  }
 
-    const url =
-      URL.createObjectURL(blob);
+  const backup = createAtlasBackup();
+  const date = new Date().toISOString().slice(0, 10);
+  downloadJsonFile(`AtlasRP_Backup_${date}.json`, backup);
+  setBackupStatus(
+    `${backup.metadata.marker_count} marqueur(s), ${backup.metadata.zone_count} zone(s) et ${backup.metadata.media_count} média(s) exportés.`,
+    "success"
+  );
+  showNotification("Sauvegarde Atlas exportée.");
+});
 
-    const link =
-      document.createElement("a");
+adminImportAtlasButton.addEventListener("click", () => {
+  if (!adminToolsEnabled()) {
+    showNotification("L’import est réservé au mode administrateur.", "error");
+    return;
+  }
 
-    link.href = url;
+  adminImportFileInput.click();
+});
 
-    link.download =
-      `atlas-rp-markers-${new Date()
-        .toISOString()
-        .slice(0, 10)}.json`;
+function assertBackupShape(backup) {
+  if (!backup || typeof backup !== "object") {
+    throw new Error("Fichier de sauvegarde invalide.");
+  }
 
-    document.body.appendChild(link);
-
-    link.click();
-    link.remove();
-
-    URL.revokeObjectURL(url);
-
-    showNotification(
-      `${places.length} marqueur(s) exporté(s).`
+  if (backup.backup_version !== BACKUP_FORMAT_VERSION) {
+    throw new Error(
+      `Version de sauvegarde incompatible : ${backup.backup_version || "inconnue"}.`
     );
   }
-);
+
+  if (!Array.isArray(backup.markers) || !Array.isArray(backup.zones) || !Array.isArray(backup.media)) {
+    throw new Error("La sauvegarde ne contient pas les sections attendues.");
+  }
+}
+
+function cleanMarkerForImport(marker) {
+  return {
+    name: String(marker.name || "Lieu importé").slice(0, 100),
+    description: String(marker.description || "").slice(0, 1000),
+    category: CATEGORIES[marker.category] ? marker.category : "autre",
+    subcategory: marker.subcategory || null,
+    lat: Number(marker.lat),
+    lng: Number(marker.lng),
+    author: String(marker.author || "Import Atlas").slice(0, 50)
+  };
+}
+
+function cleanZoneForImport(zone) {
+  return {
+    name: String(zone.name || "Zone importée").slice(0, 100),
+    description: String(zone.description || "").slice(0, 1000),
+    category: zone.category || "autre",
+    subcategory: zone.subcategory || null,
+    color: zone.color || getZoneColor(zone.category, zone.subcategory),
+    coordinates: zone.coordinates,
+    author: String(zone.author || "Import Atlas").slice(0, 50),
+    created_by: adminUser?.id || null
+  };
+}
+
+async function importMarkers(markers) {
+  const idMap = new Map();
+
+  for (const marker of markers) {
+    const payload = cleanMarkerForImport(marker);
+
+    if (!Number.isFinite(payload.lat) || !Number.isFinite(payload.lng)) {
+      continue;
+    }
+
+    const { data, error } = await supabaseClient
+      .from("markers")
+      .insert([payload])
+      .select("id")
+      .single();
+
+    if (error) throw new Error(`Import d’un marqueur impossible : ${error.message}`);
+    idMap.set(String(marker.id), String(data.id));
+  }
+
+  return idMap;
+}
+
+async function importZones(zoneRecords) {
+  const idMap = new Map();
+
+  for (const zone of zoneRecords) {
+    const payload = cleanZoneForImport(zone);
+
+    if (!Array.isArray(payload.coordinates) || payload.coordinates.length < 3) {
+      continue;
+    }
+
+    const { data, error } = await supabaseClient
+      .from("zones")
+      .insert([payload])
+      .select("id")
+      .single();
+
+    if (error) throw new Error(`Import d’une zone impossible : ${error.message}`);
+    idMap.set(String(zone.id), String(data.id));
+  }
+
+  return idMap;
+}
+
+async function copyMediaFileToCurrentBucket(media, destinationPath) {
+  const existing = mediaRecords.find((item) => item.storage_path === destinationPath);
+  if (existing) return existing.public_url;
+
+  const response = await fetch(media.public_url, { mode: "cors" });
+  if (!response.ok) {
+    throw new Error(`Téléchargement impossible pour ${media.title || destinationPath}.`);
+  }
+
+  const blob = await response.blob();
+  const { error: uploadError } = await supabaseClient.storage
+    .from("atlas-media")
+    .upload(destinationPath, blob, {
+      contentType: blob.type || "application/octet-stream",
+      upsert: false
+    });
+
+  if (uploadError && !String(uploadError.message).toLowerCase().includes("already exists")) {
+    throw uploadError;
+  }
+
+  const { data } = supabaseClient.storage
+    .from("atlas-media")
+    .getPublicUrl(destinationPath);
+
+  return data.publicUrl;
+}
+
+async function importMedia(mediaList, markerIdMap, zoneIdMap) {
+  let imported = 0;
+  let skipped = 0;
+
+  for (const media of mediaList) {
+    const map = media.entity_type === "marker" ? markerIdMap : zoneIdMap;
+    const newEntityId = map.get(String(media.entity_id));
+
+    if (!newEntityId) {
+      skipped += 1;
+      continue;
+    }
+
+    const oldPath = String(media.storage_path || "");
+    const fileName = oldPath.split("/").pop() || `media-${Date.now()}`;
+    const typeFolder = media.media_type === "document" ? "documents" : "images";
+    const entityFolder = media.entity_type === "marker" ? "markers" : "zones";
+    const destinationPath = `${typeFolder}/${entityFolder}/${newEntityId}/${Date.now()}-${fileName}`;
+
+    try {
+      const publicUrl = await copyMediaFileToCurrentBucket(media, destinationPath);
+
+      const { error } = await supabaseClient
+        .from("atlas_media")
+        .insert([{
+          entity_type: media.entity_type,
+          entity_id: Number(newEntityId),
+          storage_path: destinationPath,
+          public_url: publicUrl,
+          media_type: media.media_type || "image",
+          title: media.title || null,
+          description: media.description || null,
+          is_primary: Boolean(media.is_primary),
+          author: String(media.author || "Import Atlas").slice(0, 50),
+          uploaded_by: adminUser?.id || null
+        }]);
+
+      if (error) throw error;
+      imported += 1;
+    } catch (error) {
+      console.warn("Média ignoré pendant l’import :", media, error);
+      skipped += 1;
+    }
+  }
+
+  return { imported, skipped };
+}
+
+adminImportFileInput.addEventListener("change", async () => {
+  const file = adminImportFileInput.files?.[0];
+  adminImportFileInput.value = "";
+
+  if (!file || !adminToolsEnabled()) return;
+
+  adminImportAtlasButton.disabled = true;
+  adminExportAtlasButton.disabled = true;
+  setBackupStatus("Lecture de la sauvegarde…");
+
+  try {
+    const backup = JSON.parse(await file.text());
+    assertBackupShape(backup);
+
+    const summary = backup.metadata || {
+      marker_count: backup.markers.length,
+      zone_count: backup.zones.length,
+      media_count: backup.media.length
+    };
+
+    const confirmed = window.confirm(
+      `Importer cette sauvegarde ?
+
+` +
+      `${summary.marker_count || backup.markers.length} marqueur(s)
+` +
+      `${summary.zone_count || backup.zones.length} zone(s)
+` +
+      `${summary.media_count || backup.media.length} média(s)
+
+` +
+      `L’import ajoute les éléments à l’Atlas actuel.`
+    );
+
+    if (!confirmed) {
+      setBackupStatus("Import annulé.");
+      return;
+    }
+
+    setBackupStatus("Import des marqueurs…");
+    const markerIdMap = await importMarkers(backup.markers);
+
+    setBackupStatus("Import des polyzones…");
+    const zoneIdMap = await importZones(backup.zones);
+
+    setBackupStatus("Import des images et documents…");
+    const mediaResult = await importMedia(backup.media, markerIdMap, zoneIdMap);
+
+    if (backup.settings?.layers) {
+      layerSettings = {
+        ...layerSettings,
+        ...backup.settings.layers
+      };
+      saveLayerSettings();
+    }
+
+    await Promise.all([loadMarkers(), loadZones(), loadMedia()]);
+
+    setBackupStatus(
+      `Import terminé : ${markerIdMap.size} marqueur(s), ${zoneIdMap.size} zone(s), ` +
+      `${mediaResult.imported} média(s). ${mediaResult.skipped} média(s) ignoré(s).`,
+      "success"
+    );
+    showNotification("Sauvegarde Atlas importée.");
+  } catch (error) {
+    console.error("Erreur import Atlas :", error);
+    setBackupStatus(error.message || "Import impossible.", "error");
+    showNotification(`Import impossible : ${error.message}`, "error");
+  } finally {
+    adminImportAtlasButton.disabled = false;
+    adminExportAtlasButton.disabled = false;
+  }
+});
 
 /* =========================================================
    TEMPS RÉEL
