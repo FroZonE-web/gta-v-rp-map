@@ -75,8 +75,54 @@ const regulationObserver = new IntersectionObserver((entries) => {
     .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
   if (!visible) return;
   regulationNavLinks.forEach((link) => {
-    link.classList.toggle("is-active", link.getAttribute("href") === `#${visible.target.id}`);
+    link.classList.toggle("is-active", link.dataset.regulationTarget === visible.target.id);
   });
 }, { rootMargin: "-25% 0px -65% 0px", threshold: [0, .2, .6] });
 
 document.querySelectorAll(".regulation-feature, .regulation-chapter").forEach((section) => regulationObserver.observe(section));
+
+
+function getRegulationTargetFromHash() {
+  const parts = window.location.hash
+    .replace(/^#\/?/, "")
+    .split("/")
+    .filter(Boolean)
+    .map((part) => decodeURIComponent(part));
+  return parts[0] === "reglement" ? (parts[1] || "") : "";
+}
+
+function scrollToRegulationTarget(target, behavior = "smooth") {
+  if (!target) {
+    window.scrollTo({ top: 0, behavior: behavior === "smooth" ? "smooth" : "auto" });
+    return;
+  }
+
+  const element = document.getElementById(target);
+  if (!element) return;
+
+  window.requestAnimationFrame(() => {
+    element.scrollIntoView({ behavior, block: "start" });
+  });
+}
+
+/*
+ * Le HUB utilise déjà le fragment d’URL pour ses routes (#/reglement).
+ * Les ancres internes sont donc placées après la route :
+ * #/reglement/chapitre-i ou #/reglement/article-42.
+ */
+document.querySelectorAll('#reglement-module a[href^="#"]:not([href^="#/"])').forEach((link) => {
+  const target = link.getAttribute("href").slice(1);
+  link.dataset.regulationTarget = target;
+  link.setAttribute("href", `#/reglement/${encodeURIComponent(target)}`);
+  link.addEventListener("click", (event) => {
+    if (window.location.hash === link.getAttribute("href")) {
+      event.preventDefault();
+      scrollToRegulationTarget(target, "smooth");
+    }
+  });
+});
+
+window.addEventListener("hub:regulation-visible", (event) => {
+  const target = event.detail?.target || "";
+  window.setTimeout(() => scrollToRegulationTarget(target, "smooth"), 0);
+});

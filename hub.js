@@ -56,8 +56,16 @@ const placeholderIcon = document.getElementById("hub-placeholder-icon");
 const placeholderTitle = document.getElementById("hub-placeholder-title");
 const placeholderDescription = document.getElementById("hub-placeholder-description");
 
+function getHubRouteParts() {
+  return window.location.hash
+    .replace(/^#\/?/, "")
+    .split("/")
+    .filter(Boolean)
+    .map((part) => decodeURIComponent(part));
+}
+
 function getHubRoute() {
-  return window.location.hash.replace(/^#\/?/, "").split("/")[0].toLowerCase();
+  return (getHubRouteParts()[0] || "").toLowerCase();
 }
 
 function refreshLeafletMap() {
@@ -94,7 +102,10 @@ function displayHubRoute() {
 
   if (showRegulation) {
     document.title = "Règlement — Ashen Wolves HUB";
-    window.scrollTo({ top: 0, behavior: "auto" });
+    const regulationTarget = getHubRouteParts()[1] || "";
+    window.dispatchEvent(new CustomEvent("hub:regulation-visible", {
+      detail: { target: regulationTarget }
+    }));
   } else if (showPlaceholder) {
     placeholderIcon.textContent = module.icon;
     placeholderTitle.textContent = module.title;
