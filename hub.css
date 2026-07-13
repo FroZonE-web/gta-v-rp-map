@@ -1,0 +1,299 @@
+/* =========================================================
+   HUB — TABLEAU DE BORD ET NAVIGATION v1.0
+   ========================================================= */
+
+body.hub-dashboard-active,
+body.hub-placeholder-active {
+  display: block;
+  overflow: auto;
+}
+
+.hub-map-module {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.hub-map-module.is-active {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.hub-map-home {
+  position: fixed;
+  top: 14px;
+  left: calc(var(--sidebar-width) + 14px);
+  z-index: 1200;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 8px 12px;
+  color: #eaf7ff;
+  background: rgba(9, 15, 24, .92);
+  border: 1px solid rgba(125, 151, 186, .32);
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-decoration: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .36);
+  backdrop-filter: blur(12px);
+}
+
+.hub-map-home:hover {
+  color: #fff;
+  background: #172235;
+  border-color: rgba(56, 189, 248, .5);
+}
+
+.hub-dashboard,
+.hub-placeholder {
+  min-height: 100vh;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 16% 8%, rgba(56, 189, 248, .11), transparent 29rem),
+    radial-gradient(circle at 85% 92%, rgba(99, 102, 241, .09), transparent 30rem),
+    linear-gradient(145deg, #070b12, #0b111b 52%, #080c13);
+}
+
+.hub-dashboard-shell {
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 56px 0 32px;
+}
+
+.hub-dashboard-header {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  margin-bottom: 38px;
+}
+
+.hub-brand-mark {
+  display: grid;
+  width: 72px;
+  height: 72px;
+  flex: 0 0 auto;
+  place-items: center;
+  color: #061018;
+  background: linear-gradient(135deg, #8de2ff, #38bdf8);
+  border: 1px solid #a7e9ff;
+  border-radius: 20px;
+  font-size: 23px;
+  font-weight: 950;
+  letter-spacing: -.06em;
+  box-shadow: 0 18px 45px rgba(14, 165, 233, .2);
+}
+
+.hub-eyebrow {
+  margin: 0 0 7px;
+  color: #7dd3fc;
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: .2em;
+}
+
+.hub-dashboard-header h1,
+.hub-placeholder h1 {
+  margin: 0;
+  color: #f8fafc;
+  font-size: clamp(27px, 4vw, 45px);
+  line-height: 1.05;
+  letter-spacing: -.045em;
+}
+
+.hub-dashboard-intro {
+  margin: 12px 0 0;
+  color: #94a3b8;
+  font-size: 15px;
+}
+
+.hub-module-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.hub-module-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 14px;
+  min-height: 142px;
+  padding: 20px;
+  color: #edf2f7;
+  background: linear-gradient(145deg, rgba(20, 29, 42, .92), rgba(11, 17, 27, .95));
+  border: 1px solid rgba(125, 151, 186, .19);
+  border-radius: 17px;
+  text-decoration: none;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, .17), inset 0 1px 0 rgba(255, 255, 255, .025);
+  transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+
+.hub-module-card:hover {
+  color: #fff;
+  background: linear-gradient(145deg, rgba(25, 38, 56, .98), rgba(13, 22, 35, .98));
+  border-color: rgba(56, 189, 248, .42);
+  transform: translateY(-3px);
+  box-shadow: 0 22px 52px rgba(0, 0, 0, .25);
+}
+
+.hub-module-card.is-available {
+  border-color: rgba(56, 189, 248, .42);
+  background: linear-gradient(145deg, rgba(22, 46, 65, .96), rgba(10, 25, 39, .98));
+}
+
+.hub-module-icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  background: rgba(5, 11, 18, .68);
+  border: 1px solid rgba(125, 151, 186, .19);
+  border-radius: 14px;
+  font-size: 24px;
+}
+
+.hub-module-copy strong,
+.hub-module-copy small {
+  display: block;
+}
+
+.hub-module-copy strong {
+  margin: 3px 0 7px;
+  font-size: 16px;
+}
+
+.hub-module-copy small {
+  color: #8998ab;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.hub-module-status {
+  position: absolute;
+  right: 16px;
+  bottom: 14px;
+  color: #718197;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.hub-module-card.is-available .hub-module-status { color: #7dd3fc; }
+
+.hub-dashboard-footer {
+  margin-top: 30px;
+  color: #59677a;
+  font-size: 11px;
+  text-align: center;
+}
+
+.hub-dashboard-footer span { color: #7f90a8; }
+
+.hub-placeholder {
+  display: grid;
+  place-items: center;
+  padding: 30px;
+}
+
+.hub-placeholder-card {
+  width: min(620px, 100%);
+  padding: 42px;
+  text-align: center;
+  background: linear-gradient(145deg, rgba(20, 29, 42, .94), rgba(10, 16, 25, .97));
+  border: 1px solid rgba(125, 151, 186, .22);
+  border-radius: 22px;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, .3);
+}
+
+.hub-back-link {
+  display: block;
+  margin-bottom: 30px;
+  color: #91a3b8;
+  font-size: 11px;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.hub-back-link:hover { color: #7dd3fc; }
+
+.hub-placeholder-icon {
+  display: grid;
+  width: 68px;
+  height: 68px;
+  margin: 0 auto 22px;
+  place-items: center;
+  background: rgba(56, 189, 248, .08);
+  border: 1px solid rgba(56, 189, 248, .22);
+  border-radius: 19px;
+  font-size: 31px;
+}
+
+.hub-placeholder h1 { font-size: clamp(28px, 5vw, 40px); }
+
+.hub-placeholder-card > p:not(.hub-eyebrow) {
+  max-width: 470px;
+  margin: 17px auto 24px;
+  color: #91a0b3;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.hub-coming-soon {
+  display: inline-flex;
+  padding: 8px 12px;
+  color: #bcecff;
+  background: rgba(56, 189, 248, .08);
+  border: 1px solid rgba(56, 189, 248, .22);
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 900px) {
+  .hub-module-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 850px) {
+  .hub-map-home {
+    top: auto;
+    right: 14px;
+    bottom: 14px;
+    left: auto;
+  }
+}
+
+@media (max-width: 620px) {
+  .hub-dashboard-shell {
+    width: min(100% - 24px, 1180px);
+    padding-top: 30px;
+  }
+
+  .hub-dashboard-header {
+    align-items: flex-start;
+    gap: 15px;
+    margin-bottom: 26px;
+  }
+
+  .hub-brand-mark {
+    width: 52px;
+    height: 52px;
+    border-radius: 15px;
+    font-size: 18px;
+  }
+
+  .hub-module-grid { grid-template-columns: 1fr; gap: 11px; }
+  .hub-module-card { min-height: 124px; padding: 17px; }
+  .hub-placeholder { padding: 14px; }
+  .hub-placeholder-card { padding: 30px 20px; }
+}

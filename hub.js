@@ -59,17 +59,34 @@ function getHubRoute() {
   return window.location.hash.replace(/^#\/?/, "").split("/")[0].toLowerCase();
 }
 
+function refreshLeafletMap() {
+  const refresh = () => {
+    if (typeof map !== "undefined" && map && typeof map.invalidateSize === "function") {
+      map.invalidateSize({ pan: false });
+    }
+  };
+
+  window.requestAnimationFrame(refresh);
+  window.setTimeout(refresh, 120);
+  window.setTimeout(refresh, 350);
+}
+
 function displayHubRoute() {
   const route = getHubRoute();
   const module = HUB_MODULES[route];
   const showMap = route === "carte";
   const showPlaceholder = Boolean(module);
+  const showDashboard = !showMap && !showPlaceholder;
 
-  dashboardRoute.hidden = showMap || showPlaceholder;
-  mapRoute.hidden = !showMap;
+  dashboardRoute.hidden = !showDashboard;
   placeholderRoute.hidden = !showPlaceholder;
+
+  mapRoute.classList.toggle("is-active", showMap);
+  mapRoute.setAttribute("aria-hidden", String(!showMap));
+
   document.body.classList.toggle("hub-map-active", showMap);
-  document.body.classList.toggle("hub-dashboard-active", !showMap && !showPlaceholder);
+  document.body.classList.toggle("hub-dashboard-active", showDashboard);
+  document.body.classList.toggle("hub-placeholder-active", showPlaceholder);
 
   if (showPlaceholder) {
     placeholderIcon.textContent = module.icon;
@@ -78,9 +95,7 @@ function displayHubRoute() {
     document.title = `${module.title} — Ashen Wolves HUB`;
   } else if (showMap) {
     document.title = "Carte — Ashen Wolves HUB";
-    window.setTimeout(() => {
-      if (typeof map !== "undefined") map.invalidateSize();
-    }, 0);
+    refreshLeafletMap();
   } else {
     document.title = "Ashen Wolves HUB";
   }

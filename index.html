@@ -20,10 +20,11 @@
     href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css"
   >
 
-  <link rel="stylesheet" href="style.css?v=1.0-hub">
+  <link rel="stylesheet" href="style.css?v=1.0.1">
+  <link rel="stylesheet" href="hub.css?v=1.0.1">
 </head>
 
-<body>
+<body class="hub-dashboard-active">
   <section id="hub-dashboard" class="hub-route hub-dashboard" aria-labelledby="hub-dashboard-title">
     <div class="hub-dashboard-shell">
       <header class="hub-dashboard-header">
@@ -66,7 +67,7 @@
     </div>
   </section>
 
-  <div id="map-module" class="hub-route hub-map-module" hidden>
+  <div id="map-module" class="hub-route hub-map-module" aria-hidden="true">
     <a class="hub-map-home" href="#/" aria-label="Retour au tableau de bord">
       <span aria-hidden="true">⌂</span> HUB
     </a>
@@ -591,7 +592,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script src="config.js"></script>
-  <script src="app.js?v=1.0-hub"></script>
-  <script src="hub.js?v=1.0-hub"></script>
+  <script src="app.js?v=1.0.1"></script>
+  <script src="hub.js?v=1.0.1"></script>
 </body>
 </html>
