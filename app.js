@@ -3440,12 +3440,71 @@ function renderDeletionRequests() {
   });
 }
 
-async function loadDeletionRequests() {
-  if (!isAdmin) {
-    deletionRequests = [];
-    renderDeletionRequests();
+async function loadDeletionRequests(options = {}) {
+  const { showFeedback = false } = options;
+
+  /*
+   * On relit la session avant chaque actualisation manuelle.
+   * Cela évite qu'un état admin local devenu obsolète bloque le bouton.
+   */
+  const { data: sessionData, error: sessionError } =
+    await supabaseClient.auth.getSession();
+
+  if (sessionError) {
+    console.error("Lecture de la session impossible :", sessionError);
+
+    if (showFeedback) {
+      showNotification(
+        `Session administrateur indisponible : ${sessionError.message}`,
+        "error"
+      );
+    }
+
     return;
   }
+
+  const sessionUser = sessionData.session?.user || null;
+
+  if (!sessionUser) {
+    adminUser = null;
+    isAdmin = false;
+    deletionRequests = [];
+    renderDeletionRequests();
+
+    if (showFeedback) {
+      showNotification(
+        "Reconnecte-toi comme administrateur pour actualiser les demandes.",
+        "error"
+      );
+    }
+
+    return;
+  }
+
+  adminUser = sessionUser;
+
+  const { data: allowed, error: roleError } =
+    await supabaseClient.rpc("is_admin");
+
+  if (roleError || allowed !== true) {
+    console.error("Vérification administrateur impossible :", roleError);
+    isAdmin = false;
+    deletionRequests = [];
+    renderDeletionRequests();
+
+    if (showFeedback) {
+      showNotification(
+        roleError
+          ? `Vérification admin impossible : ${roleError.message}`
+          : "Ce compte n'est pas autorisé comme administrateur.",
+        "error"
+      );
+    }
+
+    return;
+  }
+
+  isAdmin = true;
 
   const { data, error } = await supabaseClient
     .from("deletion_requests")
@@ -3455,12 +3514,25 @@ async function loadDeletionRequests() {
 
   if (error) {
     console.error("Chargement des demandes impossible :", error);
-    showNotification(`Demandes indisponibles : ${error.message}`, "error");
+
+    showNotification(
+      `Demandes indisponibles : ${error.message}`,
+      "error"
+    );
+
     return;
   }
 
   deletionRequests = Array.isArray(data) ? data : [];
   renderDeletionRequests();
+
+  if (showFeedback) {
+    showNotification(
+      `${deletionRequests.length} demande${
+        deletionRequests.length > 1 ? "s" : ""
+      } en attente.`
+    );
+  }
 }
 
 async function setDeletionRequestStatus(requestId, status) {
@@ -3557,7 +3629,32 @@ async function rejectDeletionRequest(request) {
 
 adminDeletionRequestRefreshButton?.addEventListener(
   "click",
-  loadDeletionRequests
+  async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const button = event.currentTarget;
+    const originalText = button.textContent;
+
+    button.disabled = true;
+    button.textContent = "Actualisation...";
+
+    try {
+      await loadDeletionRequests({
+        showFeedback: true
+      });
+    } catch (error) {
+      console.error("Actualisation manuelle impossible :", error);
+
+      showNotification(
+        `Actualisation impossible : ${error.message}`,
+        "error"
+      );
+    } finally {
+      button.disabled = false;
+      button.textContent = originalText;
+    }
+  }
 );
 
 /* =========================================================
@@ -3818,7 +3915,7 @@ adminTrashRefreshButton?.addEventListener("click", loadTrash);
    ========================================================= */
 
 const BACKUP_FORMAT_VERSION = "1.0";
-const ATLAS_VERSION = "0.8.6.1";
+const ATLAS_VERSION = "0.8.6.2";
 
 function setBackupStatus(message, type = "") {
   if (!adminBackupStatus) return;
