@@ -2337,7 +2337,7 @@ function createPopupContent(place, identifier, favorite) {
             data-request-deletion-id="${escapeHtml(place.id)}"
             data-request-deletion-name="${escapeHtml(place.name)}"
           >
-            Demander la suppression
+            🗑️ Demander la suppression
           </button>
         </div>
       `}
@@ -2809,7 +2809,7 @@ function createZonePopup(zone) {
       </header>
       ${createPopupMedia("zone", zone.id)}
       <div class="popup-description">${description}</div>
-      ${adminToolsEnabled() ? `<div class="popup-admin-actions zone-admin-actions"><button type="button" class="zone-edit-button" data-zone-edit="${zone.id}">Modifier les infos</button><button type="button" class="zone-shape-button" data-zone-shape-edit="${zone.id}">Modifier la forme</button><button type="button" data-media-open="zone" data-media-entity-id="${zone.id}">Images</button><button type="button" class="danger-button" data-zone-delete="${zone.id}">Supprimer la zone</button></div>` : `<div class="popup-user-actions"><button type="button" class="request-deletion-button" data-request-deletion-type="zone" data-request-deletion-id="${zone.id}" data-request-deletion-name="${escapeHtml(zone.name)}">Demander la suppression</button></div>`}
+      ${adminToolsEnabled() ? `<div class="popup-admin-actions zone-admin-actions"><button type="button" class="zone-edit-button" data-zone-edit="${zone.id}">Modifier les infos</button><button type="button" class="zone-shape-button" data-zone-shape-edit="${zone.id}">Modifier la forme</button><button type="button" data-media-open="zone" data-media-entity-id="${zone.id}">Images</button><button type="button" class="danger-button" data-zone-delete="${zone.id}">Supprimer la zone</button></div>` : `<div class="popup-user-actions"><button type="button" class="request-deletion-button" data-request-deletion-type="zone" data-request-deletion-id="${zone.id}" data-request-deletion-name="${escapeHtml(zone.name)}">🗑️ Demander la suppression</button></div>`}
       <footer class="marker-popup-footer"><span>Ajoutée par <strong>${escapeHtml(zone.author || "Inconnu")}</strong></span></footer>
     </article>`;
 }
@@ -3818,7 +3818,7 @@ adminTrashRefreshButton?.addEventListener("click", loadTrash);
    ========================================================= */
 
 const BACKUP_FORMAT_VERSION = "1.0";
-const ATLAS_VERSION = "0.8.6";
+const ATLAS_VERSION = "0.8.6.1";
 
 function setBackupStatus(message, type = "") {
   if (!adminBackupStatus) return;
