@@ -2441,25 +2441,6 @@ body.admin-drawer-open .admin-drawer-toggle {
   transform: translateY(-50%);
 }
 
-/* Outils Leaflet Draw visibles sur le thème sombre */
-
-.leaflet-draw-toolbar a,
-.leaflet-control-zoom a {
-  background-color: #f8fafc !important;
-  border-bottom-color: #cbd5e1 !important;
-}
-
-.leaflet-draw-toolbar a:hover,
-.leaflet-draw-toolbar a:focus,
-.leaflet-control-zoom a:hover,
-.leaflet-control-zoom a:focus {
-  background-color: #dbeafe !important;
-}
-
-.leaflet-draw-toolbar a {
-  opacity: 1 !important;
-  filter: contrast(1.35) brightness(1.08) !important;
-}
 
 /* Calques et Filtres repliables */
 
@@ -2538,4 +2519,90 @@ body.admin-drawer-open .admin-drawer-toggle {
     right: 10px !important;
     transform: translateY(-1px);
   }
+}
+
+
+/* =========================================================
+   ATLAS RP v1.0 — OUTILS DE DESSIN CORRIGÉS
+   ========================================================= */
+
+.leaflet-draw-toolbar a {
+  display: grid !important;
+  width: 32px !important;
+  height: 32px !important;
+  place-items: center !important;
+
+  padding: 0 !important;
+
+  color: #0f172a !important;
+  background-color: #f8fafc !important;
+  background-image: none !important;
+
+  border-bottom-color: #cbd5e1 !important;
+
+  text-indent: 0 !important;
+  font-size: 0 !important;
+  line-height: 1 !important;
+
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+.leaflet-draw-toolbar a::before {
+  display: block;
+
+  color: #0f172a;
+
+  font-family: Arial, sans-serif;
+  font-size: 19px;
+  font-weight: 800;
+  line-height: 1;
+
+  text-align: center;
+}
+
+.leaflet-draw-toolbar a:hover,
+.leaflet-draw-toolbar a:focus {
+  color: #020617 !important;
+  background-color: #bae6fd !important;
+}
+
+.leaflet-draw-toolbar a:hover::before,
+.leaflet-draw-toolbar a:focus::before {
+  color: #020617;
+}
+
+/* Dessiner un polygone */
+.leaflet-draw-toolbar .leaflet-draw-draw-polygon::before {
+  content: "⬡";
+}
+
+/* Dessiner un rectangle */
+.leaflet-draw-toolbar .leaflet-draw-draw-rectangle::before {
+  content: "▭";
+}
+
+/* Modifier une forme */
+.leaflet-draw-toolbar .leaflet-draw-edit-edit::before {
+  content: "✎";
+}
+
+/* Supprimer une forme */
+.leaflet-draw-toolbar .leaflet-draw-edit-remove::before {
+  content: "×";
+  font-size: 23px;
+}
+
+/* État désactivé */
+.leaflet-draw-toolbar a.leaflet-disabled {
+  cursor: not-allowed;
+
+  color: #94a3b8 !important;
+  background-color: #e2e8f0 !important;
+
+  opacity: 0.55 !important;
+}
+
+.leaflet-draw-toolbar a.leaflet-disabled::before {
+  color: #94a3b8;
 }
