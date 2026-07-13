@@ -74,11 +74,12 @@ using (true);
 
 drop policy if exists "directory_members_admin_insert" on public.directory_members;
 drop policy if exists "directory_members_member_insert" on public.directory_members;
-create policy "directory_members_member_insert"
+drop policy if exists "directory_members_public_insert" on public.directory_members;
+create policy "directory_members_public_insert"
 on public.directory_members
 for insert
-to authenticated
-with check (auth.uid() is not null);
+to anon, authenticated
+with check (true);
 
 drop policy if exists "directory_members_admin_update" on public.directory_members;
 create policy "directory_members_admin_update"

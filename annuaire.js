@@ -176,7 +176,9 @@
     const { data, error } = await supabaseClient.auth.getSession();
     if (error) console.error("Session annuaire impossible :", error);
     sessionUser = data?.session?.user || null;
-    canAdd = Boolean(sessionUser);
+    // L’ajout est volontairement ouvert à tous les visiteurs, connectés ou non.
+    // La modification et la suppression restent réservées à l’administrateur.
+    canAdd = true;
     canManage = sessionUser ? isAdminAvailable() : false;
 
     if (sessionUser && !canManage) {

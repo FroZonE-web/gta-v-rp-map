@@ -15,3 +15,10 @@ ANNUAIRE_PUBLIC_ACCESS_FIX.sql pour ouvrir la consultation publique.
 
 Les lignes vacantes ne sont pas stockées et ne sont donc jamais affichées.
 La base et l'interface limitent l'annuaire à 16 membres actifs.
+
+
+CORRECTIF AJOUT PUBLIC
+-----------------------
+Tout visiteur, connecté ou non, peut ajouter une fiche membre.
+La modification et la suppression restent réservées à l’administrateur.
+Pour une installation existante, exécuter ANNUAIRE_PUBLIC_INSERT_FIX.sql.
