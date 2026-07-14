@@ -906,12 +906,43 @@
 
     <section class="directory-panel" data-directory-panel="law" hidden>
       <div class="directory-toolbar">
-        <label class="directory-search"><span class="sr-only">Rechercher dans les forces de l’ordre</span><input type="search" placeholder="Rechercher un contact des forces de l’ordre…" disabled></label>
-        <button class="directory-action directory-toolbar-add" type="button" disabled>+ Ajouter un contact</button>
-        <div class="directory-counter">En développement</div>
-        <button class="directory-refresh" type="button" disabled>↻ Actualiser</button>
+        <label class="directory-search">
+          <span class="sr-only">Rechercher dans les forces de l’ordre</span>
+          <input id="law-search" type="search" placeholder="Rechercher un service, un matricule, un nom ou une note…" autocomplete="off">
+        </label>
+        <button id="law-add" class="directory-action directory-toolbar-add" type="button">+ Ajouter un contact</button>
+        <div id="law-counter" class="directory-counter">Chargement…</div>
+        <button id="law-refresh" class="directory-refresh" type="button">↻ Actualiser</button>
       </div>
-      <div class="directory-coming-soon"><div class="directory-state-card"><strong>Forces de l’ordre</strong><p>Cet espace sera développé lors de la prochaine étape.</p></div></div>
+      <div class="directory-sortbar">
+        <label>Trier par
+          <select id="law-sort">
+            <option value="created-desc">Ordre d’ajout</option>
+            <option value="service-asc">Service (A → Z)</option>
+            <option value="service-desc">Service (Z → A)</option>
+            <option value="badge-asc">Matricule</option>
+            <option value="last-name">Nom (A → Z)</option>
+            <option value="first-name">Prénom (A → Z)</option>
+            <option value="detective-first">Détectives en premier</option>
+          </select>
+        </label>
+        <label>Regrouper
+          <select id="law-group">
+            <option value="none">Aucun</option>
+            <option value="service">Par service</option>
+          </select>
+        </label>
+      </div>
+      <div id="law-state" class="directory-loading"><div class="directory-state-card"><strong>Chargement</strong><p>Récupération des forces de l’ordre…</p></div></div>
+      <div id="law-table-shell" class="directory-table-shell" hidden>
+        <div class="directory-table-scroll">
+          <table class="directory-table directory-law-table">
+            <thead><tr><th>Service</th><th>Matricule</th><th>Prénom</th><th>Nom</th><th>Téléphone</th><th>Adresse</th><th>Notes</th><th>Détective</th><th data-law-admin hidden>Actions</th></tr></thead>
+            <tbody id="law-body"></tbody>
+          </table>
+        </div>
+      </div>
+      <div id="law-cards" class="directory-cards" hidden></div>
     </section>
   </main>
 
@@ -963,6 +994,28 @@
         <datalist id="contacts-job-options"></datalist><datalist id="contacts-entity-options"></datalist><datalist id="contacts-person-options"><option value="Mason"><option value="Raven"><option value="Silas"></datalist>
         <p id="contacts-form-error" class="directory-error" aria-live="polite"></p>
         <div class="directory-form-actions"><button class="directory-action is-secondary" type="button" data-contacts-close>Annuler</button><button id="contacts-submit" class="directory-action" type="submit">Ajouter le contact</button></div>
+      </form>
+    </section>
+  </div>
+
+  <div id="law-modal" class="directory-modal" hidden>
+    <section class="directory-dialog" role="dialog" aria-modal="true" aria-labelledby="law-dialog-title">
+      <header class="directory-dialog-head"><h2 id="law-dialog-title">Ajouter un contact FDO</h2><button class="directory-dialog-close" type="button" data-law-close aria-label="Fermer">×</button></header>
+      <form id="law-form" class="directory-form">
+        <div class="directory-form-grid">
+          <div class="directory-field"><label for="law-service">Service</label><input id="law-service" maxlength="80" list="law-service-options" placeholder="LSPD"></div>
+          <div class="directory-field"><label for="law-badge-number">Matricule</label><input id="law-badge-number" maxlength="30" placeholder="26"></div>
+          <div class="directory-field"><label for="law-first-name">Prénom</label><input id="law-first-name" maxlength="80"></div>
+          <div class="directory-field"><label for="law-last-name">Nom</label><input id="law-last-name" maxlength="100"></div>
+          <div class="directory-field"><label for="law-phone">Téléphone</label><input id="law-phone" maxlength="40"></div>
+          <div class="directory-field is-wide"><label for="law-address">Adresse</label><input id="law-address" maxlength="220"></div>
+          <div class="directory-field is-wide"><label for="law-notes">Notes</label><textarea id="law-notes" maxlength="2000" rows="4"></textarea></div>
+          <label class="directory-checkbox-field is-wide" for="law-detective"><input id="law-detective" type="checkbox"><span>Détective</span></label>
+        </div>
+        <datalist id="law-service-options"><option value="BSCO"><option value="LSPD"><option value="SASP"><option value="LSCS"></datalist>
+        <p class="directory-form-help">Renseignez au moins une information permettant d’identifier le contact.</p>
+        <p id="law-form-error" class="directory-error" aria-live="polite"></p>
+        <div class="directory-form-actions"><button class="directory-action is-secondary" type="button" data-law-close>Annuler</button><button id="law-submit" class="directory-action" type="submit">Ajouter le contact</button></div>
       </form>
     </section>
   </div>
@@ -1508,6 +1561,7 @@
   <script src="reglement.js?v=1.1.1"></script>
   <script src="annuaire.js?v=1.2.4"></script>
   <script src="contacts.js?v=1.2.2"></script>
+  <script src="law.js?v=1.2.0"></script>
   <script src="hub.js?v=1.2.0"></script>
 </body>
 </html>

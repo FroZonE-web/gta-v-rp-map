@@ -1,0 +1,7 @@
+Ashen Wolves HUB v1.2 — Forces de l'ordre
+
+- Troisième annuaire fonctionnel.
+- Recherche, tri et regroupement par service.
+- Ajout public.
+- Modification et suppression administrateur.
+- 20 contacts initiaux issus du tableau fourni.
