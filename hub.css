@@ -7,7 +7,8 @@ body.hub-dashboard-active,
 body.hub-placeholder-active,
 body.hub-regulation-active,
 body.hub-directory-active,
-body.hub-agenda-active {
+body.hub-agenda-active,
+body.hub-stocks-active {
   display: block;
   overflow: auto;
 }

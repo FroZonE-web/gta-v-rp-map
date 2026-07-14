@@ -1,0 +1,6 @@
+Ashen Wolves HUB v1.4 fix Interface Stocks
+
+- Module Stocks utilise toute la largeur disponible.
+- Onglets repartis uniformement.
+- Barre d outils et grille responsive elargies.
+- Correction du mode body pour la route #/stocks.
