@@ -24,3 +24,28 @@
 .stocks-global-stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-bottom:14px}.stocks-global-stats article{min-width:0;padding:13px 14px;border:1px solid #2c2935;border-radius:12px;background:#14151c}.stocks-global-stats span{display:block;color:#918b9c;font-size:11px;text-transform:uppercase;letter-spacing:.04em}.stocks-global-stats strong{display:block;margin-top:6px;font-size:17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.stocks-global-toolbar{grid-template-columns:minmax(260px,1.4fr) minmax(180px,.7fr) minmax(170px,.7fr) auto auto}.stocks-global-toolbar select{width:100%;box-sizing:border-box;border:1px solid #363142;background:#15151d;color:#fff;border-radius:9px;padding:11px 12px;font:inherit}.stocks-global-list{display:grid;gap:9px}.stocks-global-row{width:100%;display:grid;grid-template-columns:52px minmax(180px,1.35fr) minmax(82px,.45fr) minmax(110px,.65fr) minmax(130px,.75fr) minmax(130px,.75fr) minmax(125px,.65fr);gap:13px;align-items:center;padding:11px 13px;border:1px solid #2b2934;border-radius:12px;background:#14151c;color:#fff;text-align:left;cursor:pointer;transition:.15s}.stocks-global-row:hover{border-color:#6945a8;background:#181720}.stocks-global-row.is-low{border-color:#7a5527;background:#1d1812}.stocks-global-row.is-rupture{border-color:#713b43;background:#1b1419}.stocks-global-image{width:46px;height:46px;display:grid;place-items:center;border-radius:9px;background:#101117;overflow:hidden;font-size:22px}.stocks-global-image img{width:100%;height:100%;object-fit:cover}.stocks-global-name{min-width:0}.stocks-global-name strong,.stocks-global-name small,.stocks-global-row>span>small,.stocks-global-row>span>strong{display:block}.stocks-global-name strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.stocks-global-name small,.stocks-global-row>span>small{color:#8f8998;margin-top:3px}.stocks-global-state{justify-self:end;display:inline-flex;align-items:center;justify-content:center;min-width:105px;padding:7px 9px;border-radius:999px;font-size:12px;font-weight:700}.stocks-global-state.ok{background:#143922;color:#7de3a0}.stocks-global-state.low{background:#4a3517;color:#ffc56b}.stocks-global-state.rupture{background:#4a2028;color:#ff9daa}.stocks-global-detail-dialog>div{padding:20px}.stocks-global-detail-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}.stocks-global-detail-summary>div{padding:12px;border:1px solid #2e2a37;border-radius:10px;background:#101117}.stocks-global-detail-summary span{display:block;color:#8f8998;font-size:11px}.stocks-global-detail-summary strong{display:block;margin-top:5px;font-size:18px}.stocks-global-detail-summary .is-ok{color:#7de3a0}.stocks-global-detail-summary .is-low{color:#ffc56b}.stocks-global-detail-summary .is-rupture{color:#ff9daa}.stocks-global-distribution{display:grid;gap:8px}.stocks-global-distribution-row{display:flex;justify-content:space-between;gap:16px;padding:11px 12px;border:1px solid #2d2935;border-radius:9px;background:#15151d}.stocks-global-no-distribution{color:#9b95a4;text-align:center;padding:25px;border:1px dashed #393342;border-radius:10px}
 @media(max-width:1200px){.stocks-global-stats{grid-template-columns:repeat(3,1fr)}.stocks-global-row{grid-template-columns:48px minmax(180px,1.2fr) 80px 110px 130px 120px}.stocks-global-row>span:nth-child(6){display:none}.stocks-global-toolbar{grid-template-columns:1fr 1fr 1fr}.stocks-global-toolbar input{grid-column:1/3}.stocks-global-toolbar .stocks-counter{grid-column:1/3}}
 @media(max-width:760px){.stocks-global-stats{grid-template-columns:repeat(2,1fr)}.stocks-global-toolbar{grid-template-columns:1fr 1fr}.stocks-global-toolbar input,.stocks-global-toolbar select{grid-column:1/-1}.stocks-global-toolbar .stocks-counter{grid-column:1}.stocks-global-row{grid-template-columns:44px 1fr auto}.stocks-global-row>span:nth-child(n+3):not(.stocks-global-state){display:none}.stocks-global-state{grid-column:2/4;justify-self:start}.stocks-global-detail-summary{grid-template-columns:1fr}}
+
+/* v1.4.7 — Statuts du stock global clairement colorés */
+.stocks-global-row .stocks-global-state{
+  border:1px solid transparent;
+  font-weight:800;
+  letter-spacing:.02em;
+}
+.stocks-global-row .stocks-global-state.ok{
+  background:#153d25 !important;
+  border-color:#2f8f52 !important;
+  color:#86efac !important;
+}
+.stocks-global-row .stocks-global-state.low{
+  background:#4a3110 !important;
+  border-color:#c57918 !important;
+  color:#ffbd59 !important;
+}
+.stocks-global-row .stocks-global-state.rupture{
+  background:#4a171d !important;
+  border-color:#bc3c4c !important;
+  color:#ff8796 !important;
+}
+.stocks-global-detail-summary .is-ok{color:#86efac !important}
+.stocks-global-detail-summary .is-low{color:#ffbd59 !important}
+.stocks-global-detail-summary .is-rupture{color:#ff8796 !important}

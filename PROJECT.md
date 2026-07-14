@@ -299,3 +299,7 @@ Le correctif important de cette version consiste à ne plus tester `window.supab
 - `Rupture` (rouge) : quantité globale égale à zéro.
 
 Le module Stocks est considéré comme disponible à partir de la v1.4.
+
+
+## Correctif v1.4.7 — couleurs des statuts Stocks
+Les badges du Stock global utilisent désormais des couleurs explicites et forcées : vert pour OK, orange pour Stock bas et rouge pour Rupture.
