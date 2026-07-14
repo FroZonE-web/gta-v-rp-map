@@ -6,6 +6,7 @@ create table if not exists public.agenda_events (
   event_date date not null,
   event_time time not null,
   location text,
+  contact text,
   description text,
   participants text,
   status text not null default 'scheduled' check (status in ('scheduled','completed')),
@@ -32,3 +33,6 @@ create policy "agenda admin delete" on public.agenda_events for delete to authen
 create or replace function public.set_agenda_updated_at() returns trigger language plpgsql as $$ begin new.updated_at=now(); return new; end; $$;
 drop trigger if exists agenda_updated_at on public.agenda_events;
 create trigger agenda_updated_at before update on public.agenda_events for each row execute function public.set_agenda_updated_at();
+
+-- Compatibilité avec une installation existante
+alter table public.agenda_events add column if not exists contact text;

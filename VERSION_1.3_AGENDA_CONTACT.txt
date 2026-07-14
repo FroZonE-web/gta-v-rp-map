@@ -1,0 +1,7 @@
+Ashen Wolves HUB v1.3 fix Contact Agenda
+
+- Conservation de l’affichage limité des événements par case.
+- Conservation de la fenêtre listant tous les événements d’une journée.
+- Ajout du champ Contact dans la création et la modification d’un événement.
+- Affichage du contact dans les détails, la liste et la fenêtre quotidienne.
+- Recherche étendue au champ Contact.

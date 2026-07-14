@@ -1,0 +1,4 @@
+Ashen Wolves HUB v1.3 fix Affichage quotidien Agenda
+- Limite à 3 événements visibles par case
+- Indication du nombre d’événements supplémentaires
+- Fenêtre listant tous les événements d’une journée

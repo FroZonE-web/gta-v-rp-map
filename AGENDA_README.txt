@@ -10,3 +10,6 @@ Permissions provisoires :
 - modification, terminaison et suppression : administrateur uniquement.
 
 Les événements passés apparaissent automatiquement dans Archives sans être supprimés.
+
+MISE À JOUR D'UNE INSTALLATION EXISTANTE
+Exécuter AGENDA_CONTACT_FIX.sql pour ajouter le champ Contact sans recréer la table.
