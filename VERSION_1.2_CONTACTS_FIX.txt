@@ -1,0 +1,7 @@
+Ashen Wolves HUB v1.2 fix Personnes rencontrées
+
+- Barre de recherche, bouton Ajouter, compteur et bouton Actualiser alignés sur la même ligne sur ordinateur.
+- Mise en page responsive conservée sur les écrans étroits.
+- Ajout de 163 contacts issus des captures transmises.
+- Script de migration idempotent : ANNUAIRE_CONTACTS_DATA.sql.
+- Le script ANNUAIRE_CONTACTS_SETUP.sql inclut également ces données pour une nouvelle installation.
