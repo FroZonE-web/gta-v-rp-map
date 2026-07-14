@@ -1,0 +1,8 @@
+Ashen Wolves HUB v1.3 — Agenda final
+
+- Agenda affiché comme Disponible sur le HUB.
+- Une case affiche les deux événements lorsqu'il y en a au maximum deux.
+- À partir de trois événements, elle affiche le premier puis « et X autres événements ».
+- Fenêtre quotidienne conservée pour consulter tous les événements du jour.
+- Champ Contact conservé dans la création, la modification, la recherche et les détails.
+- Ajout du fichier PROJECT.md à la racine du dépôt.
