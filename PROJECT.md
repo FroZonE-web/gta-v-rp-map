@@ -239,3 +239,11 @@ Prochaines phases prévues :
 
 - La route `#/stocks` ouvre directement le module Banque d’items.
 - Les versions de cache de `hub.js`, `stocks.js` et `stocks.css` sont renouvelées afin d’éviter le chargement de l’ancien placeholder par GitHub Pages ou le navigateur.
+
+### Stocks — Phase 2 : lieux de stockage
+
+La table `stock_locations` répertorie les habitations et véhicules.
+
+Champs principaux : nom, type, capacité maximale, localisation, notes et poids utilisé. Le poids utilisé reste à zéro jusqu'à la mise en place des mouvements, puis sera maintenu automatiquement par la base.
+
+Permissions provisoires : lecture, création et modification publiques ; suppression administrateur. La localisation d'un véhicule peut être modifiée directement depuis sa carte sans ouvrir le formulaire complet.

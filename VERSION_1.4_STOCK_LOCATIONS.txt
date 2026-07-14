@@ -1,0 +1,9 @@
+Ashen Wolves HUB v1.4 — Lieux de stockage
+
+- Création et modification publiques des habitations et véhicules.
+- Suppression réservée à l'administrateur.
+- Capacité maximale en poids.
+- Localisation modifiable rapidement depuis chaque carte.
+- Regroupement Habitations / Véhicules.
+- Recherche et filtre par type.
+- Visualisation du remplissage préparée pour la phase Mouvements.
