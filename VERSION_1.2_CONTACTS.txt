@@ -1,0 +1,10 @@
+Ashen Wolves HUB v1.2 — Personnes rencontrées
+
+- Deuxième annuaire fonctionnel
+- Recherche globale
+- Tri emploi, entité, nom, prénom et ordre d'ajout
+- Regroupement par emploi ou entité
+- Ajout public
+- Modification et suppression administrateur
+- Copie rapide téléphone et adresse
+- Barre d'outils harmonisée sur les trois catégories

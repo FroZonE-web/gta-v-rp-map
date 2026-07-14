@@ -826,7 +826,6 @@
         <h1 id="directory-title">Annuaire</h1>
         <p class="directory-hero-copy">Les contacts utiles du club, organisés dans trois espaces distincts. L’annuaire interne affiche uniquement les membres enregistrés et respecte l’ordre hiérarchique.</p>
       </div>
-      <button id="directory-add-member" class="directory-action" type="button" hidden>+ Ajouter un membre</button>
     </header>
 
     <div class="directory-tabs" role="tablist" aria-label="Sections de l’annuaire">
@@ -841,10 +840,9 @@
           <span class="sr-only">Rechercher un membre</span>
           <input id="directory-search" type="search" placeholder="Rechercher par nom, surnom, grade, téléphone ou quartier…" autocomplete="off">
         </label>
-        <div class="directory-toolbar-actions">
-          <div id="directory-counter" class="directory-counter">Chargement…</div>
-          <button id="directory-refresh" class="directory-refresh" type="button" aria-label="Actualiser l’annuaire" title="Actualiser l’annuaire">↻ Actualiser</button>
-        </div>
+        <button id="directory-add-member" class="directory-action directory-toolbar-add" type="button">+ Ajouter un membre</button>
+        <div id="directory-counter" class="directory-counter">Chargement…</div>
+        <button id="directory-refresh" class="directory-refresh" type="button" aria-label="Actualiser l’annuaire" title="Actualiser l’annuaire">↻ Actualiser</button>
       </div>
 
       <div id="directory-state" class="directory-loading">
@@ -865,11 +863,55 @@
     </section>
 
     <section class="directory-panel" data-directory-panel="contacts" hidden>
-      <div class="directory-coming-soon"><div class="directory-state-card"><strong>Personnes rencontrées</strong><p>Cet espace sera développé lors de la prochaine étape de l’annuaire.</p></div></div>
+      <div class="directory-toolbar directory-contacts-toolbar">
+        <label class="directory-search">
+          <span class="sr-only">Rechercher un contact</span>
+          <input id="contacts-search" type="search" placeholder="Rechercher un contact, un emploi, une entité, une note…" autocomplete="off">
+        </label>
+        <button id="contacts-add" class="directory-action directory-toolbar-add" type="button">+ Ajouter un contact</button>
+        <div id="contacts-counter" class="directory-counter">Chargement…</div>
+        <button id="contacts-refresh" class="directory-refresh" type="button">↻ Actualiser</button>
+      </div>
+      <div class="directory-sortbar">
+        <label>Trier par
+          <select id="contacts-sort">
+            <option value="created-desc">Ordre d’ajout</option>
+            <option value="job-asc">Emploi (A → Z)</option>
+            <option value="job-desc">Emploi (Z → A)</option>
+            <option value="entity-asc">Entité (A → Z)</option>
+            <option value="entity-desc">Entité (Z → A)</option>
+            <option value="last-name">Nom (A → Z)</option>
+            <option value="first-name">Prénom (A → Z)</option>
+          </select>
+        </label>
+        <label>Regrouper
+          <select id="contacts-group">
+            <option value="none">Aucun</option>
+            <option value="job">Par emploi</option>
+            <option value="entity">Par entité</option>
+          </select>
+        </label>
+      </div>
+      <div id="contacts-state" class="directory-loading"><div class="directory-state-card"><strong>Chargement</strong><p>Récupération des personnes rencontrées…</p></div></div>
+      <div id="contacts-table-shell" class="directory-table-shell" hidden>
+        <div class="directory-table-scroll">
+          <table class="directory-table directory-contacts-table">
+            <thead><tr><th>Emploi</th><th>Entité</th><th>Prénom</th><th>Nom</th><th>Surnom</th><th>Téléphone</th><th>Adresse</th><th>Intérêt & Notes</th><th>Relation</th><th>Prise de contact</th><th data-contacts-admin hidden>Actions</th></tr></thead>
+            <tbody id="contacts-body"></tbody>
+          </table>
+        </div>
+      </div>
+      <div id="contacts-cards" class="directory-cards" hidden></div>
     </section>
 
     <section class="directory-panel" data-directory-panel="law" hidden>
-      <div class="directory-coming-soon"><div class="directory-state-card"><strong>Forces de l’ordre</strong><p>Cet espace sera développé après l’annuaire des personnes rencontrées.</p></div></div>
+      <div class="directory-toolbar">
+        <label class="directory-search"><span class="sr-only">Rechercher dans les forces de l’ordre</span><input type="search" placeholder="Rechercher un contact des forces de l’ordre…" disabled></label>
+        <button class="directory-action directory-toolbar-add" type="button" disabled>+ Ajouter un contact</button>
+        <div class="directory-counter">En développement</div>
+        <button class="directory-refresh" type="button" disabled>↻ Actualiser</button>
+      </div>
+      <div class="directory-coming-soon"><div class="directory-state-card"><strong>Forces de l’ordre</strong><p>Cet espace sera développé lors de la prochaine étape.</p></div></div>
     </section>
   </main>
 
@@ -898,6 +940,29 @@
           <button class="directory-action is-secondary" type="button" data-directory-close>Annuler</button>
           <button id="directory-submit" class="directory-action" type="submit">Ajouter le membre</button>
         </div>
+      </form>
+    </section>
+  </div>
+
+  <div id="contacts-modal" class="directory-modal" hidden>
+    <section class="directory-dialog" role="dialog" aria-modal="true" aria-labelledby="contacts-dialog-title">
+      <header class="directory-dialog-head"><h2 id="contacts-dialog-title">Ajouter un contact</h2><button class="directory-dialog-close" type="button" data-contacts-close aria-label="Fermer">×</button></header>
+      <form id="contacts-form" class="directory-form">
+        <div class="directory-form-grid">
+          <div class="directory-field"><label for="contacts-job">Emploi *</label><input id="contacts-job" maxlength="100" required list="contacts-job-options"></div>
+          <div class="directory-field"><label for="contacts-entity">Entité / groupe</label><input id="contacts-entity" maxlength="120" list="contacts-entity-options"></div>
+          <div class="directory-field"><label for="contacts-first-name">Prénom *</label><input id="contacts-first-name" maxlength="80" required></div>
+          <div class="directory-field"><label for="contacts-last-name">Nom</label><input id="contacts-last-name" maxlength="100"></div>
+          <div class="directory-field"><label for="contacts-nickname">Surnom</label><input id="contacts-nickname" maxlength="80"></div>
+          <div class="directory-field"><label for="contacts-phone">Téléphone</label><input id="contacts-phone" maxlength="40"></div>
+          <div class="directory-field is-wide"><label for="contacts-address">Adresse</label><input id="contacts-address" maxlength="220"></div>
+          <div class="directory-field is-wide"><label for="contacts-notes">Intérêt & Notes</label><textarea id="contacts-notes" maxlength="2000" rows="4"></textarea></div>
+          <div class="directory-field"><label for="contacts-relation">Relation</label><input id="contacts-relation" maxlength="120"></div>
+          <div class="directory-field"><label for="contacts-contacted-by">Prise de contact</label><input id="contacts-contacted-by" maxlength="100" list="contacts-person-options"></div>
+        </div>
+        <datalist id="contacts-job-options"></datalist><datalist id="contacts-entity-options"></datalist><datalist id="contacts-person-options"><option value="Mason"><option value="Raven"><option value="Silas"></datalist>
+        <p id="contacts-form-error" class="directory-error" aria-live="polite"></p>
+        <div class="directory-form-actions"><button class="directory-action is-secondary" type="button" data-contacts-close>Annuler</button><button id="contacts-submit" class="directory-action" type="submit">Ajouter le contact</button></div>
       </form>
     </section>
   </div>
@@ -1441,7 +1506,8 @@
   <script src="config.js"></script>
   <script src="app.js?v=1.0.1"></script>
   <script src="reglement.js?v=1.1.1"></script>
-  <script src="annuaire.js?v=1.2.3"></script>
+  <script src="annuaire.js?v=1.2.4"></script>
+  <script src="contacts.js?v=1.2.0"></script>
   <script src="hub.js?v=1.2.0"></script>
 </body>
 </html>
