@@ -1,0 +1,6 @@
+ASHEN WOLVES HUB v1.4 — STOCKS
+
+Phase 1 : Banque d'items et catégories.
+
+Commit proposé : Ashen Wolves HUB v1.4 Stocks
+SQL requis : STOCKS_SETUP.sql

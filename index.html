@@ -25,6 +25,7 @@
   <link rel="stylesheet" href="reglement.css?v=1.1.1">
   <link rel="stylesheet" href="annuaire.css?v=1.2.7">
   <link rel="stylesheet" href="agenda.css?v=1.3.5">
+  <link rel="stylesheet" href="stocks.css?v=1.4.0">
 </head>
 
 <body class="hub-dashboard-active">
@@ -46,10 +47,10 @@
           <span class="hub-module-status">Disponible</span>
         </a>
         <a class="hub-module-card" href="#/comptabilite"><span class="hub-module-icon">💰</span><span class="hub-module-copy"><strong>Comptabilité</strong><small>Entrées, sorties, soldes et justificatifs</small></span><span class="hub-module-status">À venir</span></a>
-        <a class="hub-module-card" href="#/stocks"><span class="hub-module-icon">📦</span><span class="hub-module-copy"><strong>Stocks</strong><small>Articles, quantités et mouvements</small></span><span class="hub-module-status">À venir</span></a>
+        <a class="hub-module-card is-in-progress" href="#/stocks"><span class="hub-module-icon">📦</span><span class="hub-module-copy"><strong>Stocks</strong><small>Articles, quantités et mouvements</small></span><span class="hub-module-status">En cours de développement</span></a>
         <a class="hub-module-card is-available" href="#/annuaire"><span class="hub-module-icon">👥</span><span class="hub-module-copy"><strong>Annuaire</strong><small>Membres, contacts rencontrés et forces de l’ordre</small></span><span class="hub-module-status">Disponible</span></a>
         <a class="hub-module-card" href="#/plans-op"><span class="hub-module-icon">🎯</span><span class="hub-module-copy"><strong>Plans d’OP</strong><small>Préparation et comptes rendus d’opérations</small></span><span class="hub-module-status">À venir</span></a>
-        <a class="hub-module-card is-in-progress" href="#/agenda"><span class="hub-module-icon">📅</span><span class="hub-module-copy"><strong>Agenda</strong><small>Réunions, opérations et événements</small></span><span class="hub-module-status">En cours de développement</span></a>
+        <a class="hub-module-card is-available" href="#/agenda"><span class="hub-module-icon">📅</span><span class="hub-module-copy"><strong>Agenda</strong><small>Réunions, opérations et événements</small></span><span class="hub-module-status">Disponible</span></a>
         <a class="hub-module-card is-available" href="#/reglement"><span class="hub-module-icon">📜</span><span class="hub-module-copy"><strong>Règlement</strong><small>Code officiel, chapitres et recherche</small></span><span class="hub-module-status">Disponible</span></a>
         <a class="hub-module-card" href="#/calculatrice-craft"><span class="hub-module-icon">🧮</span><span class="hub-module-copy"><strong>Calculatrice de craft</strong><small>Recettes, ressources et coûts</small></span><span class="hub-module-status">À venir</span></a>
         <a class="hub-module-card" href="#/notes-grades"><span class="hub-module-icon">🔒</span><span class="hub-module-copy"><strong>Notes des gradés</strong><small>Espace privé réservé aux grades autorisés</small></span><span class="hub-module-status">À venir</span></a>
@@ -1102,6 +1103,51 @@
   <dialog id="agenda-day-dialog" class="agenda-dialog agenda-day-dialog"><div id="agenda-day-detail"></div></dialog>
 </section>
 
+
+<section id="stocks-module" class="hub-route stocks-page" hidden aria-labelledby="stocks-title">
+  <header class="stocks-topbar"><a class="stocks-brand" href="#/" aria-label="Retour au HUB"><span>AW</span><div><strong>ASHEN WOLVES HUB</strong><small>Banque d’items</small></div></a></header>
+  <main class="stocks-shell">
+    <h1 id="stocks-title" class="stocks-visually-hidden">Stocks</h1>
+    <div class="stocks-tabs"><button class="is-active" type="button">Banque d’items</button><button type="button" disabled>Lieux de stockage</button><button type="button" disabled>Stock global</button><button type="button" disabled>Mouvements</button></div>
+    <section class="stocks-toolbar">
+      <input id="stocks-search" type="search" placeholder="Rechercher un item ou une catégorie…">
+      <button id="stocks-add-item" class="stocks-primary" type="button">+ Nouvel item</button>
+      <button id="stocks-add-category" class="stocks-secondary" type="button">+ Catégorie</button>
+      <span id="stocks-counter" class="stocks-counter">0 item</span>
+      <button id="stocks-refresh" class="stocks-secondary" type="button">↻ Actualiser</button>
+    </section>
+    <div id="stocks-status" class="stocks-status" aria-live="polite"></div>
+    <section id="stocks-items-grid" class="stocks-grid"></section>
+  </main>
+  <dialog id="stocks-item-dialog" class="stocks-dialog">
+    <form id="stocks-item-form">
+      <div class="stocks-dialog-head"><div><p>Banque d’items</p><h2 id="stocks-item-dialog-title">Nouvel item</h2></div><button type="button" data-stocks-close>×</button></div>
+      <input id="stocks-item-id" type="hidden">
+      <div class="stocks-form-grid">
+        <label class="stocks-span-2">Nom<input id="stocks-item-name" required maxlength="120"></label>
+        <label>Catégorie<select id="stocks-item-category" required></select></label>
+        <label>Poids unitaire (kg)<input id="stocks-item-weight" type="number" min="0" step="0.001" required></label>
+        <label>Valeur propre ($)<input id="stocks-item-clean" type="number" min="0" step="0.01" required></label>
+        <label>Seuil critique global<input id="stocks-item-threshold" type="number" min="0" step="1" placeholder="Facultatif"></label>
+        <label>Calcul de la valeur sale<select id="stocks-dirty-mode"><option value="fixed">Valeur fixe</option><option value="multiplier">Multiplicateur</option><option value="percentage">Pourcentage de la valeur propre</option></select></label>
+        <label><span id="stocks-dirty-input-label">Valeur sale fixe ($)</span><input id="stocks-dirty-input" type="number" min="0" step="0.01" required></label>
+        <div class="stocks-dirty-preview stocks-span-2"><span>Valeur sale calculée</span><strong id="stocks-dirty-preview">0 $</strong></div>
+        <label class="stocks-span-2">Image<input id="stocks-item-image" type="file" accept="image/*"><small>PNG, JPG ou WEBP. L’image actuelle est conservée si aucun fichier n’est choisi.</small></label>
+        <div id="stocks-image-preview" class="stocks-image-preview stocks-span-2"></div>
+      </div>
+      <p id="stocks-form-error" class="stocks-error" hidden></p>
+      <div class="stocks-dialog-actions"><button type="button" class="stocks-secondary" data-stocks-close>Annuler</button><button class="stocks-primary" type="submit">Enregistrer</button></div>
+    </form>
+  </dialog>
+  <dialog id="stocks-category-dialog" class="stocks-dialog stocks-small-dialog">
+    <form id="stocks-category-form">
+      <div class="stocks-dialog-head"><div><p>Banque d’items</p><h2>Nouvelle catégorie</h2></div><button type="button" data-stocks-category-close>×</button></div>
+      <label>Nom de la catégorie<input id="stocks-category-name" required maxlength="80"></label>
+      <p id="stocks-category-error" class="stocks-error" hidden></p>
+      <div class="stocks-dialog-actions"><button type="button" class="stocks-secondary" data-stocks-category-close>Annuler</button><button class="stocks-primary" type="submit">Créer</button></div>
+    </form>
+  </dialog>
+</section>
   <div id="map-module" class="hub-route hub-map-module" aria-hidden="true">
     <a class="hub-map-home" href="#/" aria-label="Retour au tableau de bord">
       <span aria-hidden="true">⌂</span> HUB
@@ -1633,6 +1679,7 @@
   <script src="contacts.js?v=1.2.3"></script>
   <script src="law.js?v=1.2.1"></script>
   <script src="agenda.js?v=1.3.5"></script>
+  <script src="stocks.js?v=1.4.0"></script>
   <script src="hub.js?v=1.3.0"></script>
 </body>
 </html>

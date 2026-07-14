@@ -54,6 +54,7 @@ const placeholderRoute = document.getElementById("hub-placeholder");
 const regulationRoute = document.getElementById("reglement-module");
 const directoryRoute = document.getElementById("annuaire-module");
 const agendaRoute = document.getElementById("agenda-module");
+const stocksRoute = document.getElementById("stocks-module");
 const placeholderIcon = document.getElementById("hub-placeholder-icon");
 const placeholderTitle = document.getElementById("hub-placeholder-title");
 const placeholderDescription = document.getElementById("hub-placeholder-description");
@@ -89,14 +90,16 @@ function displayHubRoute() {
   const showRegulation = route === "reglement";
   const showDirectory = route === "annuaire";
   const showAgenda = route === "agenda";
-  const showPlaceholder = Boolean(module) && !showRegulation && !showDirectory && !showAgenda;
-  const showDashboard = !showMap && !showRegulation && !showDirectory && !showAgenda && !showPlaceholder;
+  const showStocks = route === "stocks";
+  const showPlaceholder = Boolean(module) && !showRegulation && !showDirectory && !showAgenda && !showStocks;
+  const showDashboard = !showMap && !showRegulation && !showDirectory && !showAgenda && !showStocks && !showPlaceholder;
 
   dashboardRoute.hidden = !showDashboard;
   placeholderRoute.hidden = !showPlaceholder;
   regulationRoute.hidden = !showRegulation;
   directoryRoute.hidden = !showDirectory;
   agendaRoute.hidden = !showAgenda;
+  stocksRoute.hidden = !showStocks;
 
   mapRoute.classList.toggle("is-active", showMap);
   mapRoute.setAttribute("aria-hidden", String(!showMap));
@@ -107,6 +110,7 @@ function displayHubRoute() {
   document.body.classList.toggle("hub-regulation-active", showRegulation);
   document.body.classList.toggle("hub-directory-active", showDirectory);
   document.body.classList.toggle("hub-agenda-active", showAgenda);
+  document.body.classList.toggle("hub-stocks-active", showStocks);
 
   if (showRegulation) {
     document.title = "Règlement — Ashen Wolves HUB";
@@ -120,6 +124,9 @@ function displayHubRoute() {
   } else if (showAgenda) {
     document.title = "Agenda — Ashen Wolves HUB";
     window.dispatchEvent(new CustomEvent("hub:agenda-visible"));
+  } else if (showStocks) {
+    document.title = "Stocks — Ashen Wolves HUB";
+    window.dispatchEvent(new CustomEvent("hub:stocks-visible"));
   } else if (showPlaceholder) {
     placeholderIcon.textContent = module.icon;
     placeholderTitle.textContent = module.title;

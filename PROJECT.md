@@ -198,3 +198,38 @@ Pour chaque mise à jour :
 Prochain module : **Stocks**.
 
 La définition fonctionnelle sera précisée avant le développement. Aucun choix métier ne doit être inventé sans validation.
+
+## Version 1.4 — Stocks
+
+### Phase 1 : Banque d'items
+
+Le module Stocks est développé par étapes afin de protéger la stabilité du HUB.
+
+La première phase introduit les tables `stock_categories` et `stock_items`, ainsi que le bucket Storage public `stock-items`.
+
+Chaque item possède :
+
+- un nom unique ;
+- une image facultative ;
+- un poids unitaire en kilogrammes ;
+- une catégorie ;
+- une valeur propre ;
+- une valeur sale calculée par valeur fixe, multiplicateur ou pourcentage ;
+- un seuil critique facultatif, destiné à être évalué ultérieurement sur le stock global.
+
+Permissions provisoires validées :
+
+- lecture, création et modification des items : tous ;
+- suppression des items : administrateur ;
+- lecture, création et modification des catégories : tous ;
+- suppression des catégories : administrateur.
+
+Les quantités ne sont pas encore gérées dans cette phase. Elles seront exclusivement modifiées par des mouvements atomiques lors des prochaines phases.
+
+Prochaines phases prévues :
+
+1. lieux de stockage ;
+2. mouvements d'entrée et de sortie ;
+3. stock global et répartition par lieu ;
+4. capacité, poids et alertes critiques ;
+5. synchronisation Realtime.
