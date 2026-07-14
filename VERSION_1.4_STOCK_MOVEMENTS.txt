@@ -1,0 +1,8 @@
+Ashen Wolves HUB v1.4 — Mouvements de stock
+
+- Dépôts et retraits atomiques
+- Contrôle du stock disponible
+- Contrôle de la capacité en poids
+- Historique des mouvements
+- Mise à jour automatique via Supabase Realtime
+- Recalcul du poids lors de la modification du poids d'un item

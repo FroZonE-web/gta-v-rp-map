@@ -13,3 +13,7 @@ Les administrateurs peuvent ajouter, choisir comme principale et supprimer des i
 
 ## Ashen Wolves HUB v1.2 fix Badges Annuaire
 Couleurs personnalisées des badges, tableau Contacts compacté et création de nouveaux emplois/entités avec choix de couleur. Voir ANNUAIRE_BADGES_README.txt.
+
+## Stocks — Mouvements
+
+Pour activer les dépôts, retraits et l'historique, exécuter `STOCK_MOVEMENTS_SETUP.sql` dans l'éditeur SQL Supabase après les scripts Stocks précédents.

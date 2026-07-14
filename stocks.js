@@ -3,16 +3,22 @@
   const $ = (id) => document.getElementById(id);
   const els = {
     module: $("stocks-module"), brandSubtitle: $("stocks-brand-subtitle"),
-    itemsPanel: $("stocks-items-panel"), locationsPanel: $("stocks-locations-panel"),
+    itemsPanel: $("stocks-items-panel"), locationsPanel: $("stocks-locations-panel"), movementsPanel: $("stocks-movements-panel"),
     grid: $("stocks-items-grid"), search: $("stocks-search"), counter: $("stocks-counter"), refresh: $("stocks-refresh"), status: $("stocks-status"),
     addItem: $("stocks-add-item"), addCategory: $("stocks-add-category"), itemDialog: $("stocks-item-dialog"), itemForm: $("stocks-item-form"), categoryDialog: $("stocks-category-dialog"), categoryForm: $("stocks-category-form"),
-    locationSearch: $("stocks-location-search"), locationFilter: $("stocks-location-type-filter"), locationCounter: $("stocks-location-counter"), locationRefresh: $("stocks-location-refresh"), locationStatus: $("stocks-location-status"), locationsContent: $("stocks-locations-content"), addLocation: $("stocks-add-location"), locationDialog: $("stocks-location-dialog"), locationForm: $("stocks-location-form"), quickDialog: $("stocks-location-quick-dialog"), quickForm: $("stocks-location-quick-form")
+    locationSearch: $("stocks-location-search"), locationFilter: $("stocks-location-type-filter"), locationCounter: $("stocks-location-counter"), locationRefresh: $("stocks-location-refresh"), locationStatus: $("stocks-location-status"), locationsContent: $("stocks-locations-content"), addLocation: $("stocks-add-location"), locationDialog: $("stocks-location-dialog"), locationForm: $("stocks-location-form"), quickDialog: $("stocks-location-quick-dialog"), quickForm: $("stocks-location-quick-form"),
+    movementSearch: $("stocks-movement-search"), movementTypeFilter: $("stocks-movement-type-filter"), movementLocationFilter: $("stocks-movement-location-filter"), movementCounter: $("stocks-movement-counter"), movementStatus: $("stocks-movement-status"), movementsList: $("stocks-movements-list"), addMovement: $("stocks-add-movement"), movementDialog: $("stocks-movement-dialog"), movementForm: $("stocks-movement-form")
   };
-  let items = [], categories = [], locations = [], editingItemId = null, editingLocationId = null, quickLocationId = null;
-  let itemsLoaded = false, locationsLoaded = false, isAdmin = false, activeTab = "items";
+
+  let items = [], categories = [], locations = [], movements = [], balances = [];
+  let editingItemId = null, editingLocationId = null, quickLocationId = null;
+  let itemsLoaded = false, locationsLoaded = false, movementsLoaded = false, isAdmin = false, activeTab = "items";
+  let realtimeChannel = null;
+
   const esc = (v) => String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const money = (v) => new Intl.NumberFormat("fr-FR", { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(Number(v || 0));
   const kg = (v) => `${Number(v || 0).toLocaleString("fr-FR", { maximumFractionDigits: 3 })} kg`;
+  const dt = (v) => new Intl.DateTimeFormat("fr-FR", { dateStyle: "short", timeStyle: "short" }).format(new Date(v));
 
   function dirtyValue(item) {
     const clean = Number(item.clean_value || 0), input = Number(item.dirty_input || 0);
@@ -39,8 +45,11 @@
     document.querySelectorAll("[data-stocks-tab]").forEach(button => button.classList.toggle("is-active", button.dataset.stocksTab === tab));
     els.itemsPanel.hidden = tab !== "items";
     els.locationsPanel.hidden = tab !== "locations";
-    els.brandSubtitle.textContent = tab === "items" ? "Banque d’items" : "Lieux de stockage";
-    if (tab === "items") loadItems(); else loadLocations();
+    els.movementsPanel.hidden = tab !== "movements";
+    els.brandSubtitle.textContent = tab === "items" ? "Banque d’items" : tab === "locations" ? "Lieux de stockage" : "Mouvements de stock";
+    if (tab === "items") loadItems();
+    else if (tab === "locations") loadLocations();
+    else loadMovements();
   }
 
   async function loadItems(force = false) {
@@ -116,6 +125,51 @@
     }).join("");
   }
 
+  async function loadMovements(force = false) {
+    if (movementsLoaded && !force) return renderMovements();
+    els.movementStatus.textContent = "Chargement…";
+    try {
+      const [itemsRes, locationsRes, movementsRes, balancesRes] = await Promise.all([
+        supabaseClient.from("stock_items").select("*, stock_categories(name)").order("name"),
+        supabaseClient.from("stock_locations").select("*").order("name"),
+        supabaseClient.from("stock_movements").select("*, stock_items(name,image_url,unit_weight), stock_locations(name,type)").order("created_at", { ascending: false }).limit(500),
+        supabaseClient.from("stock_balances").select("*")
+      ]);
+      for (const result of [itemsRes, locationsRes, movementsRes, balancesRes]) if (result.error) throw result.error;
+      items = itemsRes.data || []; locations = locationsRes.data || []; movements = movementsRes.data || []; balances = balancesRes.data || [];
+      itemsLoaded = locationsLoaded = movementsLoaded = true;
+      els.movementStatus.textContent = "";
+      fillMovementFilters(); renderMovements();
+    } catch (error) {
+      console.error(error); els.movementStatus.textContent = "Impossible de charger les mouvements. Exécute STOCK_MOVEMENTS_SETUP.sql dans Supabase.";
+    }
+  }
+  function fillMovementFilters() {
+    const selected = els.movementLocationFilter.value;
+    els.movementLocationFilter.innerHTML = '<option value="all">Tous les lieux</option>' + locations.map(l => `<option value="${l.id}">${esc(l.name)}</option>`).join("");
+    els.movementLocationFilter.value = locations.some(l => String(l.id) === selected) ? selected : "all";
+  }
+  function renderMovements() {
+    const q = els.movementSearch.value.trim().toLowerCase();
+    const type = els.movementTypeFilter.value, locationId = els.movementLocationFilter.value;
+    const rows = movements.filter(m => {
+      const matchesText = !q || [m.stock_items?.name, m.stock_locations?.name, m.created_by_label].some(v => String(v || "").toLowerCase().includes(q));
+      return matchesText && (type === "all" || m.movement_type === type) && (locationId === "all" || String(m.location_id) === locationId);
+    });
+    els.movementCounter.textContent = `${rows.length} mouvement${rows.length > 1 ? "s" : ""}`;
+    if (!rows.length) { els.movementsList.innerHTML = '<div class="stocks-empty">Aucun mouvement à afficher.</div>'; return; }
+    els.movementsList.innerHTML = rows.map(m => {
+      const deposit = m.movement_type === "deposit";
+      return `<article class="stocks-movement-row">
+        <div class="stocks-movement-image">${m.stock_items?.image_url ? `<img src="${esc(m.stock_items.image_url)}" alt="">` : "📦"}</div>
+        <div class="stocks-movement-main"><div><span class="stocks-movement-kind ${deposit ? "deposit" : "withdraw"}">${deposit ? "Dépôt" : "Retrait"}</span><strong>${esc(m.stock_items?.name || "Item supprimé")}</strong></div><small>${dt(m.created_at)}${m.created_by_label ? ` · ${esc(m.created_by_label)}` : ""}</small></div>
+        <div class="stocks-movement-place"><span>Lieu</span><strong>${esc(m.stock_locations?.name || "Lieu supprimé")}</strong></div>
+        <div class="stocks-movement-qty"><span>Quantité</span><strong>${deposit ? "+" : "−"}${m.quantity}</strong></div>
+        <div class="stocks-movement-weight"><span>Poids</span><strong>${deposit ? "+" : "−"}${kg(m.total_weight)}</strong></div>
+      </article>`;
+    }).join("");
+  }
+
   function fillCategories(selected = "") {
     const sel = $("stocks-item-category");
     sel.innerHTML = '<option value="">Sélectionner…</option>' + categories.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join("");
@@ -143,6 +197,30 @@
     $("stocks-location-quick-value").value = location.location || ""; $("stocks-location-quick-error").hidden = true; els.quickDialog.showModal();
     requestAnimationFrame(() => $("stocks-location-quick-value").focus());
   }
+  async function openMovement() {
+    if (!itemsLoaded || !locationsLoaded) await loadMovements(true);
+    $("stocks-movement-item").innerHTML = '<option value="">Sélectionner un item…</option>' + items.map(i => `<option value="${i.id}">${esc(i.name)}</option>`).join("");
+    $("stocks-movement-location").innerHTML = '<option value="">Sélectionner un lieu…</option>' + locations.map(l => `<option value="${l.id}">${esc(l.name)}</option>`).join("");
+    $("stocks-movement-type").value = "deposit"; $("stocks-movement-quantity").value = 1; $("stocks-movement-actor").value = "";
+    $("stocks-movement-error").hidden = true; updateMovementPreview(); els.movementDialog.showModal();
+  }
+  function selectedMovementItem() { return items.find(i => String(i.id) === $("stocks-movement-item").value); }
+  function selectedMovementLocation() { return locations.find(l => String(l.id) === $("stocks-movement-location").value); }
+  function currentBalance(itemId, locationId) { return Number(balances.find(b => String(b.item_id) === String(itemId) && String(b.location_id) === String(locationId))?.quantity || 0); }
+  function updateMovementPreview() {
+    const item = selectedMovementItem(), location = selectedMovementLocation();
+    const quantity = Math.max(0, Number($("stocks-movement-quantity").value || 0));
+    const type = $("stocks-movement-type").value;
+    $("stocks-movement-item-preview").innerHTML = item ? `${item.image_url ? `<img src="${esc(item.image_url)}" alt="">` : '<span>📦</span>'}<div><strong>${esc(item.name)}</strong><small>${kg(item.unit_weight)} par unité</small></div>` : '<span class="stocks-movement-preview-empty">Sélectionne un item</span>';
+    const delta = item ? Number(item.unit_weight || 0) * quantity : 0;
+    const available = item && location ? currentBalance(item.id, location.id) : 0;
+    const used = Number(location?.used_weight || 0), capacity = Number(location?.capacity_weight || 0);
+    const after = type === "deposit" ? used + delta : Math.max(0, used - delta);
+    $("stocks-movement-preview").innerHTML = `
+      <div><span>Poids du mouvement</span><strong>${kg(delta)}</strong></div>
+      <div><span>Disponible dans ce lieu</span><strong>${available} unité${available > 1 ? "s" : ""}</strong></div>
+      <div><span>Poids après mouvement</span><strong>${location ? `${kg(after)} / ${kg(capacity)}` : "—"}</strong></div>`;
+  }
 
   async function uploadImage(file) {
     if (!file) return null;
@@ -158,7 +236,7 @@
       const payload = { name: $("stocks-item-name").value.trim(), category_id: $("stocks-item-category").value, unit_weight: Number($("stocks-item-weight").value), clean_value: Number($("stocks-item-clean").value), dirty_mode: $("stocks-dirty-mode").value, dirty_input: Number($("stocks-dirty-input").value), critical_threshold: $("stocks-item-threshold").value === "" ? null : Number($("stocks-item-threshold").value), image_url: imageUrl };
       const query = editingItemId ? supabaseClient.from("stock_items").update(payload).eq("id", editingItemId) : supabaseClient.from("stock_items").insert(payload);
       const { error } = await query; if (error) throw error;
-      els.itemDialog.close(); itemsLoaded = false; await loadItems(true);
+      els.itemDialog.close(); invalidateAll(); await loadItems(true);
     } catch (error) { $("stocks-form-error").textContent = error.message || "Enregistrement impossible."; $("stocks-form-error").hidden = false; }
   }
   async function saveCategory(e) {
@@ -172,39 +250,80 @@
       const payload = { name: $("stocks-location-name").value.trim(), type: $("stocks-location-type").value, capacity_weight: Number($("stocks-location-capacity").value), location: $("stocks-location-address").value.trim() || null, notes: $("stocks-location-notes").value.trim() || null };
       const query = editingLocationId ? supabaseClient.from("stock_locations").update(payload).eq("id", editingLocationId) : supabaseClient.from("stock_locations").insert(payload);
       const { error } = await query; if (error) throw error;
-      els.locationDialog.close(); locationsLoaded = false; await loadLocations(true);
+      els.locationDialog.close(); invalidateAll(); await loadLocations(true);
     } catch (error) { $("stocks-location-form-error").textContent = error.message || "Enregistrement impossible."; $("stocks-location-form-error").hidden = false; }
   }
   async function saveQuickLocation(e) {
     e.preventDefault(); try {
       const { error } = await supabaseClient.from("stock_locations").update({ location: $("stocks-location-quick-value").value.trim() }).eq("id", quickLocationId);
-      if (error) throw error; els.quickDialog.close(); locationsLoaded = false; await loadLocations(true);
+      if (error) throw error; els.quickDialog.close(); invalidateAll(); await loadLocations(true);
     } catch (error) { $("stocks-location-quick-error").textContent = error.message || "Mise à jour impossible."; $("stocks-location-quick-error").hidden = false; }
   }
+  async function saveMovement(e) {
+    e.preventDefault();
+    const submit = els.movementForm.querySelector('[type="submit"]'); submit.disabled = true;
+    try {
+      const payload = {
+        p_item_id: $("stocks-movement-item").value,
+        p_location_id: $("stocks-movement-location").value,
+        p_movement_type: $("stocks-movement-type").value,
+        p_quantity: Number($("stocks-movement-quantity").value),
+        p_actor_label: $("stocks-movement-actor").value.trim() || null
+      };
+      const { error } = await supabaseClient.rpc("create_stock_movement", payload);
+      if (error) throw error;
+      els.movementDialog.close(); invalidateAll(); await loadMovements(true);
+    } catch (error) {
+      $("stocks-movement-error").textContent = error.message || "Mouvement impossible."; $("stocks-movement-error").hidden = false;
+    } finally { submit.disabled = false; }
+  }
+  function invalidateAll() { itemsLoaded = locationsLoaded = movementsLoaded = false; }
   async function removeItem(id) {
     if (!isAdmin || !confirm("Supprimer définitivement cet item ?")) return;
     const { error } = await supabaseClient.from("stock_items").delete().eq("id", id); if (error) return alert(error.message);
-    itemsLoaded = false; await loadItems(true);
+    invalidateAll(); await loadItems(true);
   }
   async function removeLocation(id) {
     if (!isAdmin || !confirm("Supprimer définitivement ce lieu de stockage ?")) return;
     const { error } = await supabaseClient.from("stock_locations").delete().eq("id", id); if (error) return alert(error.message);
-    locationsLoaded = false; await loadLocations(true);
+    invalidateAll(); await loadLocations(true);
+  }
+
+  function setupRealtime() {
+    if (realtimeChannel || !window.supabaseClient?.channel) return;
+    realtimeChannel = supabaseClient.channel("stocks-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "stock_movements" }, () => refreshActive())
+      .on("postgres_changes", { event: "*", schema: "public", table: "stock_balances" }, () => refreshActive())
+      .on("postgres_changes", { event: "*", schema: "public", table: "stock_locations" }, () => refreshActive())
+      .subscribe();
+  }
+  let refreshTimer = null;
+  function refreshActive() {
+    clearTimeout(refreshTimer);
+    refreshTimer = setTimeout(() => {
+      invalidateAll();
+      if (activeTab === "items") loadItems(true);
+      else if (activeTab === "locations") loadLocations(true);
+      else loadMovements(true);
+    }, 180);
   }
 
   document.querySelectorAll("[data-stocks-tab]").forEach(button => button.onclick = () => switchTab(button.dataset.stocksTab));
   els.addItem.onclick = () => openItem(); els.addCategory.onclick = () => { $("stocks-category-error").hidden = true; els.categoryDialog.showModal(); };
-  els.addLocation.onclick = () => openLocation();
+  els.addLocation.onclick = () => openLocation(); els.addMovement.onclick = openMovement;
   els.refresh.onclick = () => { itemsLoaded = false; loadItems(true); }; els.search.oninput = renderItems;
   els.locationRefresh.onclick = () => { locationsLoaded = false; loadLocations(true); }; els.locationSearch.oninput = renderLocations; els.locationFilter.onchange = renderLocations;
+  els.movementSearch.oninput = renderMovements; els.movementTypeFilter.onchange = renderMovements; els.movementLocationFilter.onchange = renderMovements;
   $("stocks-dirty-mode").onchange = previewDirty; $("stocks-dirty-input").oninput = previewDirty; $("stocks-item-clean").oninput = previewDirty;
+  ["stocks-movement-item", "stocks-movement-location", "stocks-movement-type", "stocks-movement-quantity"].forEach(id => $(id).addEventListener("input", updateMovementPreview));
   $("stocks-item-image").onchange = e => { const f = e.target.files[0]; $("stocks-image-preview").innerHTML = f ? `<img src="${URL.createObjectURL(f)}" alt="Aperçu">` : "Aucune image sélectionnée"; };
-  els.itemForm.addEventListener("submit", saveItem); els.categoryForm.addEventListener("submit", saveCategory); els.locationForm.addEventListener("submit", saveLocation); els.quickForm.addEventListener("submit", saveQuickLocation);
+  els.itemForm.addEventListener("submit", saveItem); els.categoryForm.addEventListener("submit", saveCategory); els.locationForm.addEventListener("submit", saveLocation); els.quickForm.addEventListener("submit", saveQuickLocation); els.movementForm.addEventListener("submit", saveMovement);
   document.querySelectorAll("[data-stocks-close]").forEach(b => b.onclick = () => els.itemDialog.close());
   document.querySelectorAll("[data-stocks-category-close]").forEach(b => b.onclick = () => els.categoryDialog.close());
   document.querySelectorAll("[data-stocks-location-close]").forEach(b => b.onclick = () => els.locationDialog.close());
   document.querySelectorAll("[data-stocks-quick-close]").forEach(b => b.onclick = () => els.quickDialog.close());
-  [els.itemDialog, els.categoryDialog, els.locationDialog, els.quickDialog].forEach(d => d.addEventListener("click", e => { if (e.target === d) d.close(); }));
+  document.querySelectorAll("[data-stocks-movement-close]").forEach(b => b.onclick = () => els.movementDialog.close());
+  [els.itemDialog, els.categoryDialog, els.locationDialog, els.quickDialog, els.movementDialog].forEach(d => d.addEventListener("click", e => { if (e.target === d) d.close(); }));
   els.grid.addEventListener("click", e => {
     const edit = e.target.closest("[data-edit-item]"), del = e.target.closest("[data-delete-item]");
     if (edit) openItem(items.find(i => String(i.id) === edit.dataset.editItem)); if (del) removeItem(del.dataset.deleteItem);
@@ -215,6 +334,6 @@
     if (del) removeLocation(del.dataset.deleteLocation);
     if (quick) openQuickLocation(locations.find(l => String(l.id) === quick.dataset.quickLocation));
   });
-  window.addEventListener("hub:stocks-visible", async () => { await detectAdmin(); activeTab === "items" ? loadItems() : loadLocations(); });
+  window.addEventListener("hub:stocks-visible", async () => { await detectAdmin(); setupRealtime(); activeTab === "items" ? loadItems() : activeTab === "locations" ? loadLocations() : loadMovements(); });
   if (window.supabaseClient?.auth) supabaseClient.auth.onAuthStateChange(async () => { await detectAdmin(); renderItems(); renderLocations(); });
 })();

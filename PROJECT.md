@@ -247,3 +247,25 @@ La table `stock_locations` répertorie les habitations et véhicules.
 Champs principaux : nom, type, capacité maximale, localisation, notes et poids utilisé. Le poids utilisé reste à zéro jusqu'à la mise en place des mouvements, puis sera maintenu automatiquement par la base.
 
 Permissions provisoires : lecture, création et modification publiques ; suppression administrateur. La localisation d'un véhicule peut être modifiée directement depuis sa carte sans ouvrir le formulaire complet.
+
+### Stocks — Phase 3 : mouvements
+
+Les quantités sont stockées dans `stock_balances` et ne sont jamais modifiées directement par l'interface.
+Chaque dépôt ou retrait passe par la fonction RPC atomique `create_stock_movement`.
+
+La fonction vérifie :
+
+- que l'item et le lieu existent ;
+- que la quantité est strictement positive ;
+- qu'un retrait ne dépasse pas le stock disponible ;
+- qu'un dépôt ne dépasse pas la capacité en poids du lieu.
+
+Chaque opération met à jour dans une même transaction :
+
+- la quantité de l'item dans le lieu ;
+- le poids utilisé du lieu ;
+- l'historique `stock_movements`.
+
+Les tables `stock_balances`, `stock_movements` et `stock_locations` sont écoutées avec Supabase Realtime. Les vues ouvertes se mettent donc à jour automatiquement après un mouvement, sans bouton d'actualisation.
+
+Le changement du poids unitaire d'un item déclenche également un recalcul des poids utilisés dans les lieux concernés.

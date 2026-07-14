@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="reglement.css?v=1.1.1">
   <link rel="stylesheet" href="annuaire.css?v=1.2.7">
   <link rel="stylesheet" href="agenda.css?v=1.3.5">
-  <link rel="stylesheet" href="stocks.css?v=1.4.3">
+  <link rel="stylesheet" href="stocks.css?v=1.4.4">
 </head>
 
 <body class="hub-dashboard-active">
@@ -1112,7 +1112,7 @@
       <button class="is-active" type="button" data-stocks-tab="items">Banque d’items</button>
       <button type="button" data-stocks-tab="locations">Lieux de stockage</button>
       <button type="button" disabled>Stock global</button>
-      <button type="button" disabled>Mouvements</button>
+      <button type="button" data-stocks-tab="movements">Mouvements</button>
     </div>
 
     <section id="stocks-items-panel" class="stocks-panel">
@@ -1137,6 +1137,18 @@
       </section>
       <div id="stocks-location-status" class="stocks-status" aria-live="polite"></div>
       <div id="stocks-locations-content" class="stocks-location-groups"></div>
+    </section>
+
+    <section id="stocks-movements-panel" class="stocks-panel" hidden>
+      <section class="stocks-toolbar stocks-movements-toolbar">
+        <input id="stocks-movement-search" type="search" placeholder="Rechercher un item, un lieu ou un auteur…">
+        <button id="stocks-add-movement" class="stocks-primary" type="button">+ Nouveau mouvement</button>
+        <select id="stocks-movement-type-filter" aria-label="Filtrer par type"><option value="all">Tous les mouvements</option><option value="deposit">Dépôts</option><option value="withdrawal">Retraits</option></select>
+        <select id="stocks-movement-location-filter" aria-label="Filtrer par lieu"><option value="all">Tous les lieux</option></select>
+        <span id="stocks-movement-counter" class="stocks-counter">0 mouvement</span>
+      </section>
+      <div id="stocks-movement-status" class="stocks-status" aria-live="polite"></div>
+      <div id="stocks-movements-list" class="stocks-movements-list"></div>
     </section>
   </main>
 
@@ -1190,6 +1202,24 @@
       <label>Localisation<input id="stocks-location-quick-value" required maxlength="220"></label>
       <p id="stocks-location-quick-error" class="stocks-error" hidden></p>
       <div class="stocks-dialog-actions"><button type="button" class="stocks-secondary" data-stocks-quick-close>Annuler</button><button class="stocks-primary" type="submit">Mettre à jour</button></div>
+    </form>
+  </dialog>
+
+
+  <dialog id="stocks-movement-dialog" class="stocks-dialog">
+    <form id="stocks-movement-form">
+      <div class="stocks-dialog-head"><div><p>Mouvements de stock</p><h2>Nouveau mouvement</h2></div><button type="button" data-stocks-movement-close>×</button></div>
+      <div class="stocks-form-grid">
+        <label>Type de mouvement<select id="stocks-movement-type" required><option value="deposit">Dépôt</option><option value="withdrawal">Retrait</option></select></label>
+        <label>Quantité<input id="stocks-movement-quantity" type="number" min="1" step="1" value="1" required></label>
+        <label class="stocks-span-2">Item<select id="stocks-movement-item" required></select></label>
+        <div id="stocks-movement-item-preview" class="stocks-movement-item-preview stocks-span-2"></div>
+        <label class="stocks-span-2">Lieu de stockage<select id="stocks-movement-location" required></select></label>
+        <label class="stocks-span-2">Nom / identifiant de la personne (facultatif)<input id="stocks-movement-actor" maxlength="100" placeholder="Ex. Raven Blackwood"></label>
+        <div id="stocks-movement-preview" class="stocks-movement-preview stocks-span-2"></div>
+      </div>
+      <p id="stocks-movement-error" class="stocks-error" hidden></p>
+      <div class="stocks-dialog-actions"><button type="button" class="stocks-secondary" data-stocks-movement-close>Annuler</button><button class="stocks-primary" type="submit">Enregistrer le mouvement</button></div>
     </form>
   </dialog>
 </section>
@@ -1724,7 +1754,7 @@
   <script src="contacts.js?v=1.2.3"></script>
   <script src="law.js?v=1.2.1"></script>
   <script src="agenda.js?v=1.3.5"></script>
-  <script src="stocks.js?v=1.4.3"></script>
-  <script src="hub.js?v=1.4.3"></script>
+  <script src="stocks.js?v=1.4.4"></script>
+  <script src="hub.js?v=1.4.4"></script>
 </body>
 </html>
