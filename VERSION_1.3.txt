@@ -1,0 +1,8 @@
+ASHEN WOLVES HUB v1.3 — AGENDA
+
+- Annuaire indiqué comme disponible sur le HUB.
+- Agenda mensuel, vue liste et archives.
+- Ajout public d'événements.
+- Modification, terminaison et suppression administrateur.
+- Types colorés, dont RDV Crimi.
+- Recherche, filtre et actualisation manuelle.

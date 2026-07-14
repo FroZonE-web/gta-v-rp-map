@@ -53,6 +53,7 @@ const mapRoute = document.getElementById("map-module");
 const placeholderRoute = document.getElementById("hub-placeholder");
 const regulationRoute = document.getElementById("reglement-module");
 const directoryRoute = document.getElementById("annuaire-module");
+const agendaRoute = document.getElementById("agenda-module");
 const placeholderIcon = document.getElementById("hub-placeholder-icon");
 const placeholderTitle = document.getElementById("hub-placeholder-title");
 const placeholderDescription = document.getElementById("hub-placeholder-description");
@@ -87,13 +88,15 @@ function displayHubRoute() {
   const showMap = route === "carte";
   const showRegulation = route === "reglement";
   const showDirectory = route === "annuaire";
-  const showPlaceholder = Boolean(module) && !showRegulation && !showDirectory;
-  const showDashboard = !showMap && !showRegulation && !showDirectory && !showPlaceholder;
+  const showAgenda = route === "agenda";
+  const showPlaceholder = Boolean(module) && !showRegulation && !showDirectory && !showAgenda;
+  const showDashboard = !showMap && !showRegulation && !showDirectory && !showAgenda && !showPlaceholder;
 
   dashboardRoute.hidden = !showDashboard;
   placeholderRoute.hidden = !showPlaceholder;
   regulationRoute.hidden = !showRegulation;
   directoryRoute.hidden = !showDirectory;
+  agendaRoute.hidden = !showAgenda;
 
   mapRoute.classList.toggle("is-active", showMap);
   mapRoute.setAttribute("aria-hidden", String(!showMap));
@@ -103,6 +106,7 @@ function displayHubRoute() {
   document.body.classList.toggle("hub-placeholder-active", showPlaceholder);
   document.body.classList.toggle("hub-regulation-active", showRegulation);
   document.body.classList.toggle("hub-directory-active", showDirectory);
+  document.body.classList.toggle("hub-agenda-active", showAgenda);
 
   if (showRegulation) {
     document.title = "Règlement — Ashen Wolves HUB";
@@ -113,6 +117,9 @@ function displayHubRoute() {
   } else if (showDirectory) {
     document.title = "Annuaire — Ashen Wolves HUB";
     window.dispatchEvent(new CustomEvent("hub:directory-visible"));
+  } else if (showAgenda) {
+    document.title = "Agenda — Ashen Wolves HUB";
+    window.dispatchEvent(new CustomEvent("hub:agenda-visible"));
   } else if (showPlaceholder) {
     placeholderIcon.textContent = module.icon;
     placeholderTitle.textContent = module.title;

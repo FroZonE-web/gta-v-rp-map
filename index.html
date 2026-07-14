@@ -24,6 +24,7 @@
   <link rel="stylesheet" href="hub.css?v=1.1.0">
   <link rel="stylesheet" href="reglement.css?v=1.1.1">
   <link rel="stylesheet" href="annuaire.css?v=1.2.7">
+  <link rel="stylesheet" href="agenda.css?v=1.3.0">
 </head>
 
 <body class="hub-dashboard-active">
@@ -46,15 +47,15 @@
         </a>
         <a class="hub-module-card" href="#/comptabilite"><span class="hub-module-icon">💰</span><span class="hub-module-copy"><strong>Comptabilité</strong><small>Entrées, sorties, soldes et justificatifs</small></span><span class="hub-module-status">À venir</span></a>
         <a class="hub-module-card" href="#/stocks"><span class="hub-module-icon">📦</span><span class="hub-module-copy"><strong>Stocks</strong><small>Articles, quantités et mouvements</small></span><span class="hub-module-status">À venir</span></a>
-        <a class="hub-module-card is-in-progress" href="#/annuaire"><span class="hub-module-icon">👥</span><span class="hub-module-copy"><strong>Annuaire</strong><small>Membres, contacts rencontrés et forces de l’ordre</small></span><span class="hub-module-status">En cours de développement</span></a>
+        <a class="hub-module-card is-available" href="#/annuaire"><span class="hub-module-icon">👥</span><span class="hub-module-copy"><strong>Annuaire</strong><small>Membres, contacts rencontrés et forces de l’ordre</small></span><span class="hub-module-status">Disponible</span></a>
         <a class="hub-module-card" href="#/plans-op"><span class="hub-module-icon">🎯</span><span class="hub-module-copy"><strong>Plans d’OP</strong><small>Préparation et comptes rendus d’opérations</small></span><span class="hub-module-status">À venir</span></a>
-        <a class="hub-module-card" href="#/agenda"><span class="hub-module-icon">📅</span><span class="hub-module-copy"><strong>Agenda</strong><small>Réunions, opérations et événements</small></span><span class="hub-module-status">À venir</span></a>
+        <a class="hub-module-card is-in-progress" href="#/agenda"><span class="hub-module-icon">📅</span><span class="hub-module-copy"><strong>Agenda</strong><small>Réunions, opérations et événements</small></span><span class="hub-module-status">En cours de développement</span></a>
         <a class="hub-module-card is-available" href="#/reglement"><span class="hub-module-icon">📜</span><span class="hub-module-copy"><strong>Règlement</strong><small>Code officiel, chapitres et recherche</small></span><span class="hub-module-status">Disponible</span></a>
         <a class="hub-module-card" href="#/calculatrice-craft"><span class="hub-module-icon">🧮</span><span class="hub-module-copy"><strong>Calculatrice de craft</strong><small>Recettes, ressources et coûts</small></span><span class="hub-module-status">À venir</span></a>
         <a class="hub-module-card" href="#/notes-grades"><span class="hub-module-icon">🔒</span><span class="hub-module-copy"><strong>Notes des gradés</strong><small>Espace privé réservé aux grades autorisés</small></span><span class="hub-module-status">À venir</span></a>
       </nav>
 
-      <footer class="hub-dashboard-footer">Ashen Wolves HUB <span>v1.2</span></footer>
+      <footer class="hub-dashboard-footer">Ashen Wolves HUB <span>v1.3</span></footer>
     </div>
   </section>
 
@@ -1050,6 +1051,59 @@
     </div>
   </section>
 
+
+<section id="agenda-module" class="hub-route agenda-page" hidden aria-labelledby="agenda-title">
+  <header class="agenda-topbar">
+    <a class="agenda-home-link" href="#/">← HUB</a>
+    <div class="agenda-brand"><span class="agenda-brand-mark">AW</span><div><strong>ASHEN WOLVES HUB</strong><small>Agenda du groupe</small></div></div>
+    <span></span>
+  </header>
+  <main class="agenda-shell">
+    <header class="agenda-hero">
+      <div><p class="agenda-kicker">Module v1.3</p><h1 id="agenda-title">Agenda</h1><p>Réunions, opérations, rendez-vous et événements du club.</p></div>
+      <button id="agenda-add" class="agenda-primary" type="button">+ Ajouter un événement</button>
+    </header>
+    <div class="agenda-tabs" role="tablist">
+      <button class="agenda-tab is-active" data-agenda-view="calendar" type="button">Calendrier</button>
+      <button class="agenda-tab" data-agenda-view="list" type="button">Liste</button>
+      <button class="agenda-tab" data-agenda-view="archives" type="button">Archives</button>
+    </div>
+    <section class="agenda-toolbar">
+      <label class="agenda-search"><input id="agenda-search" type="search" placeholder="Rechercher par titre, type, lieu ou date…"></label>
+      <select id="agenda-type-filter" aria-label="Filtrer par type"><option value="">Tous les types</option></select>
+      <span id="agenda-counter" class="agenda-counter">0 événement</span>
+      <button id="agenda-refresh" class="agenda-secondary" type="button">↻ Actualiser</button>
+    </section>
+    <div id="agenda-status" class="agenda-status" aria-live="polite"></div>
+    <section id="agenda-calendar-view" class="agenda-view">
+      <div class="agenda-calendar-head"><button id="agenda-prev-month" type="button">‹</button><h2 id="agenda-month-label"></h2><button id="agenda-next-month" type="button">›</button></div>
+      <div class="agenda-weekdays"><span>Lun</span><span>Mar</span><span>Mer</span><span>Jeu</span><span>Ven</span><span>Sam</span><span>Dim</span></div>
+      <div id="agenda-calendar" class="agenda-calendar"></div>
+    </section>
+    <section id="agenda-list-view" class="agenda-view" hidden><div id="agenda-list" class="agenda-list"></div></section>
+    <section id="agenda-archives-view" class="agenda-view" hidden><div id="agenda-archives" class="agenda-list"></div></section>
+  </main>
+
+  <dialog id="agenda-dialog" class="agenda-dialog">
+    <form id="agenda-form" method="dialog">
+      <div class="agenda-dialog-head"><div><p>Agenda</p><h2 id="agenda-dialog-title">Ajouter un événement</h2></div><button id="agenda-dialog-close" type="button" aria-label="Fermer">×</button></div>
+      <input id="agenda-id" type="hidden">
+      <div class="agenda-form-grid">
+        <label class="agenda-span-2">Titre<input id="agenda-event-title" required maxlength="120"></label>
+        <label>Type<select id="agenda-event-type" required></select></label>
+        <label>Lieu<input id="agenda-location" maxlength="160"></label>
+        <label>Date<input id="agenda-date" type="date" required></label>
+        <label>Heure<input id="agenda-time" type="time" required></label>
+        <label class="agenda-span-2">Participants<input id="agenda-participants" maxlength="500" placeholder="Noms séparés par des virgules"></label>
+        <label class="agenda-span-2">Description<textarea id="agenda-description" rows="5" maxlength="4000"></textarea></label>
+      </div>
+      <p id="agenda-form-error" class="agenda-form-error" hidden></p>
+      <div class="agenda-dialog-actions"><button id="agenda-cancel" class="agenda-secondary" type="button">Annuler</button><button class="agenda-primary" type="submit">Enregistrer</button></div>
+    </form>
+  </dialog>
+  <dialog id="agenda-detail-dialog" class="agenda-dialog agenda-detail-dialog"><div id="agenda-detail"></div></dialog>
+</section>
+
   <div id="map-module" class="hub-route hub-map-module" aria-hidden="true">
     <a class="hub-map-home" href="#/" aria-label="Retour au tableau de bord">
       <span aria-hidden="true">⌂</span> HUB
@@ -1580,6 +1634,7 @@
   <script src="annuaire.js?v=1.2.4"></script>
   <script src="contacts.js?v=1.2.3"></script>
   <script src="law.js?v=1.2.1"></script>
-  <script src="hub.js?v=1.2.0"></script>
+  <script src="agenda.js?v=1.3.0"></script>
+  <script src="hub.js?v=1.3.0"></script>
 </body>
 </html>
