@@ -252,3 +252,13 @@ begin
   begin alter publication supabase_realtime add table public.stock_movements; exception when duplicate_object then null; end;
   begin alter publication supabase_realtime add table public.stock_locations; exception when duplicate_object then null; end;
 end $$;
+
+-- v1.4.5 — Publication Realtime complète du module Stocks.
+do $$
+begin
+  begin alter publication supabase_realtime add table public.stock_categories; exception when duplicate_object then null; end;
+  begin alter publication supabase_realtime add table public.stock_items; exception when duplicate_object then null; end;
+  begin alter publication supabase_realtime add table public.stock_locations; exception when duplicate_object then null; end;
+  begin alter publication supabase_realtime add table public.stock_balances; exception when duplicate_object then null; end;
+  begin alter publication supabase_realtime add table public.stock_movements; exception when duplicate_object then null; end;
+end $$;

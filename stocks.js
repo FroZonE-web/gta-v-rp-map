@@ -3,16 +3,17 @@
   const $ = (id) => document.getElementById(id);
   const els = {
     module: $("stocks-module"), brandSubtitle: $("stocks-brand-subtitle"),
-    itemsPanel: $("stocks-items-panel"), locationsPanel: $("stocks-locations-panel"), movementsPanel: $("stocks-movements-panel"),
+    itemsPanel: $("stocks-items-panel"), locationsPanel: $("stocks-locations-panel"), globalPanel: $("stocks-global-panel"), movementsPanel: $("stocks-movements-panel"),
     grid: $("stocks-items-grid"), search: $("stocks-search"), counter: $("stocks-counter"), refresh: $("stocks-refresh"), status: $("stocks-status"),
     addItem: $("stocks-add-item"), addCategory: $("stocks-add-category"), itemDialog: $("stocks-item-dialog"), itemForm: $("stocks-item-form"), categoryDialog: $("stocks-category-dialog"), categoryForm: $("stocks-category-form"),
     locationSearch: $("stocks-location-search"), locationFilter: $("stocks-location-type-filter"), locationCounter: $("stocks-location-counter"), locationRefresh: $("stocks-location-refresh"), locationStatus: $("stocks-location-status"), locationsContent: $("stocks-locations-content"), addLocation: $("stocks-add-location"), locationDialog: $("stocks-location-dialog"), locationForm: $("stocks-location-form"), quickDialog: $("stocks-location-quick-dialog"), quickForm: $("stocks-location-quick-form"),
-    movementSearch: $("stocks-movement-search"), movementTypeFilter: $("stocks-movement-type-filter"), movementLocationFilter: $("stocks-movement-location-filter"), movementCounter: $("stocks-movement-counter"), movementStatus: $("stocks-movement-status"), movementsList: $("stocks-movements-list"), addMovement: $("stocks-add-movement"), movementDialog: $("stocks-movement-dialog"), movementForm: $("stocks-movement-form")
+    movementSearch: $("stocks-movement-search"), movementTypeFilter: $("stocks-movement-type-filter"), movementLocationFilter: $("stocks-movement-location-filter"), movementCounter: $("stocks-movement-counter"), movementStatus: $("stocks-movement-status"), movementsList: $("stocks-movements-list"), addMovement: $("stocks-add-movement"), movementDialog: $("stocks-movement-dialog"), movementForm: $("stocks-movement-form"),
+    globalSearch: $("stocks-global-search"), globalCategoryFilter: $("stocks-global-category-filter"), globalStateFilter: $("stocks-global-state-filter"), globalCounter: $("stocks-global-counter"), globalRefresh: $("stocks-global-refresh"), globalStatus: $("stocks-global-status"), globalList: $("stocks-global-list"), globalDetailDialog: $("stocks-global-detail-dialog"), globalDetail: $("stocks-global-detail")
   };
 
   let items = [], categories = [], locations = [], movements = [], balances = [];
   let editingItemId = null, editingLocationId = null, quickLocationId = null;
-  let itemsLoaded = false, locationsLoaded = false, movementsLoaded = false, isAdmin = false, activeTab = "items";
+  let itemsLoaded = false, locationsLoaded = false, globalLoaded = false, movementsLoaded = false, isAdmin = false, activeTab = "items";
   let realtimeChannel = null;
 
   const esc = (v) => String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -45,10 +46,12 @@
     document.querySelectorAll("[data-stocks-tab]").forEach(button => button.classList.toggle("is-active", button.dataset.stocksTab === tab));
     els.itemsPanel.hidden = tab !== "items";
     els.locationsPanel.hidden = tab !== "locations";
+    els.globalPanel.hidden = tab !== "global";
     els.movementsPanel.hidden = tab !== "movements";
-    els.brandSubtitle.textContent = tab === "items" ? "Banque d’items" : tab === "locations" ? "Lieux de stockage" : "Mouvements de stock";
+    els.brandSubtitle.textContent = tab === "items" ? "Banque d’items" : tab === "locations" ? "Lieux de stockage" : tab === "global" ? "Stock global" : "Mouvements de stock";
     if (tab === "items") loadItems();
     else if (tab === "locations") loadLocations();
+    else if (tab === "global") loadGlobal();
     else loadMovements();
   }
 
@@ -123,6 +126,84 @@
       if (!groupRows.length) return "";
       return `<section class="stocks-location-group"><header><div><span>${icon}</span><h2>${title}</h2></div><small>${groupRows.length} lieu${groupRows.length > 1 ? "x" : ""}</small></header><div class="stocks-locations-grid">${groupRows.map(locationCard).join("")}</div></section>`;
     }).join("");
+  }
+
+  async function loadGlobal(force = false) {
+    if (globalLoaded && !force) return renderGlobal();
+    els.globalStatus.textContent = "Chargement…"; els.globalRefresh.disabled = true;
+    try {
+      const [itemsRes, categoriesRes, locationsRes, balancesRes] = await Promise.all([
+        supabaseClient.from("stock_items").select("*, stock_categories(name)").order("name"),
+        supabaseClient.from("stock_categories").select("*").order("name"),
+        supabaseClient.from("stock_locations").select("*").order("name"),
+        supabaseClient.from("stock_balances").select("*")
+      ]);
+      for (const result of [itemsRes, categoriesRes, locationsRes, balancesRes]) if (result.error) throw result.error;
+      items = itemsRes.data || []; categories = categoriesRes.data || []; locations = locationsRes.data || []; balances = balancesRes.data || [];
+      itemsLoaded = locationsLoaded = globalLoaded = true;
+      fillGlobalFilters(); els.globalStatus.textContent = ""; renderGlobal();
+    } catch (error) {
+      console.error(error); els.globalStatus.textContent = "Impossible de charger le stock global. Vérifie que STOCK_MOVEMENTS_SETUP.sql a été exécuté.";
+    } finally { els.globalRefresh.disabled = false; }
+  }
+  function fillGlobalFilters() {
+    const selected = els.globalCategoryFilter.value;
+    els.globalCategoryFilter.innerHTML = '<option value="all">Toutes les catégories</option>' + categories.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join("");
+    els.globalCategoryFilter.value = categories.some(c => String(c.id) === selected) ? selected : "all";
+  }
+  function globalRows() {
+    return items.map(item => {
+      const itemBalances = balances.filter(b => String(b.item_id) === String(item.id) && Number(b.quantity) > 0);
+      const quantity = itemBalances.reduce((sum, b) => sum + Number(b.quantity || 0), 0);
+      const totalWeight = quantity * Number(item.unit_weight || 0);
+      const cleanTotal = quantity * Number(item.clean_value || 0);
+      const dirtyTotal = quantity * dirtyValue(item);
+      const threshold = item.critical_threshold == null ? null : Number(item.critical_threshold);
+      const critical = threshold != null && quantity <= threshold;
+      return { item, itemBalances, quantity, totalWeight, cleanTotal, dirtyTotal, threshold, critical };
+    });
+  }
+  function renderGlobal() {
+    const q = els.globalSearch.value.trim().toLowerCase(), category = els.globalCategoryFilter.value, state = els.globalStateFilter.value;
+    const all = globalRows();
+    const rows = all.filter(row => {
+      const matchesText = !q || [row.item.name, row.item.stock_categories?.name].some(v => String(v || "").toLowerCase().includes(q));
+      const matchesCategory = category === "all" || String(row.item.category_id) === category;
+      const matchesState = state === "all" || (state === "critical" && row.critical) || (state === "present" && row.quantity > 0) || (state === "empty" && row.quantity === 0);
+      return matchesText && matchesCategory && matchesState;
+    });
+    const totals = all.reduce((acc, row) => ({
+      weight: acc.weight + row.totalWeight, clean: acc.clean + row.cleanTotal, dirty: acc.dirty + row.dirtyTotal, alerts: acc.alerts + (row.critical ? 1 : 0)
+    }), { weight: 0, clean: 0, dirty: 0, alerts: 0 });
+    $("stocks-global-items-stat").textContent = items.length;
+    $("stocks-global-locations-stat").textContent = locations.length;
+    $("stocks-global-alerts-stat").textContent = totals.alerts;
+    $("stocks-global-weight-stat").textContent = kg(totals.weight);
+    $("stocks-global-clean-stat").textContent = money(totals.clean);
+    $("stocks-global-dirty-stat").textContent = money(totals.dirty);
+    els.globalCounter.textContent = `${rows.length} item${rows.length > 1 ? "s" : ""}`;
+    if (!rows.length) { els.globalList.innerHTML = '<div class="stocks-empty">Aucun item à afficher.</div>'; return; }
+    els.globalList.innerHTML = rows.map(row => `<button class="stocks-global-row ${row.critical ? "is-critical" : ""}" type="button" data-global-item="${row.item.id}">
+      <span class="stocks-global-image">${row.item.image_url ? `<img src="${esc(row.item.image_url)}" alt="">` : "📦"}</span>
+      <span class="stocks-global-name"><strong>${esc(row.item.name)}</strong><small>${esc(row.item.stock_categories?.name || "Sans catégorie")}</small></span>
+      <span><small>Quantité</small><strong>${row.quantity}</strong></span>
+      <span><small>Poids total</small><strong>${kg(row.totalWeight)}</strong></span>
+      <span><small>Valeur propre</small><strong>${money(row.cleanTotal)}</strong></span>
+      <span><small>Valeur sale</small><strong>${money(row.dirtyTotal)}</strong></span>
+      <span class="stocks-global-state ${row.critical ? "critical" : row.quantity ? "normal" : "empty"}">${row.critical ? `Critique · seuil ${row.threshold}` : row.quantity ? "Normal" : "Absent"}</span>
+    </button>`).join("");
+  }
+  function openGlobalDetail(itemId) {
+    const row = globalRows().find(r => String(r.item.id) === String(itemId)); if (!row) return;
+    const distribution = row.itemBalances.map(balance => {
+      const location = locations.find(l => String(l.id) === String(balance.location_id));
+      return `<div class="stocks-global-distribution-row"><span>${location?.type === "vehicle" ? "🚗" : "🏠"} ${esc(location?.name || "Lieu supprimé")}</span><strong>${Number(balance.quantity || 0)}</strong></div>`;
+    }).join("") || '<p class="stocks-global-no-distribution">Cet item n’est présent dans aucun lieu.</p>';
+    els.globalDetail.innerHTML = `<div class="stocks-dialog-head"><div><p>Répartition du stock</p><h2>${esc(row.item.name)}</h2></div><button type="button" data-global-detail-close>×</button></div>
+      <div class="stocks-global-detail-summary"><div><span>Stock global</span><strong>${row.quantity}</strong></div><div><span>Poids total</span><strong>${kg(row.totalWeight)}</strong></div><div><span>État</span><strong class="${row.critical ? "is-danger" : ""}">${row.critical ? "Critique" : "Normal"}</strong></div></div>
+      <div class="stocks-global-distribution">${distribution}</div>`;
+    els.globalDetail.querySelector("[data-global-detail-close]").onclick = () => els.globalDetailDialog.close();
+    els.globalDetailDialog.showModal();
   }
 
   async function loadMovements(force = false) {
@@ -277,7 +358,7 @@
       $("stocks-movement-error").textContent = error.message || "Mouvement impossible."; $("stocks-movement-error").hidden = false;
     } finally { submit.disabled = false; }
   }
-  function invalidateAll() { itemsLoaded = locationsLoaded = movementsLoaded = false; }
+  function invalidateAll() { itemsLoaded = locationsLoaded = globalLoaded = movementsLoaded = false; }
   async function removeItem(id) {
     if (!isAdmin || !confirm("Supprimer définitivement cet item ?")) return;
     const { error } = await supabaseClient.from("stock_items").delete().eq("id", id); if (error) return alert(error.message);
@@ -290,12 +371,19 @@
   }
 
   function setupRealtime() {
-    if (realtimeChannel || !window.supabaseClient?.channel) return;
-    realtimeChannel = supabaseClient.channel("stocks-live")
-      .on("postgres_changes", { event: "*", schema: "public", table: "stock_movements" }, () => refreshActive())
-      .on("postgres_changes", { event: "*", schema: "public", table: "stock_balances" }, () => refreshActive())
-      .on("postgres_changes", { event: "*", schema: "public", table: "stock_locations" }, () => refreshActive())
-      .subscribe();
+    if (realtimeChannel || typeof supabaseClient === "undefined" || typeof supabaseClient.channel !== "function") return;
+    realtimeChannel = supabaseClient.channel(`stocks-live-${crypto.randomUUID()}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "stock_movements" }, refreshActive)
+      .on("postgres_changes", { event: "*", schema: "public", table: "stock_balances" }, refreshActive)
+      .on("postgres_changes", { event: "*", schema: "public", table: "stock_locations" }, refreshActive)
+      .on("postgres_changes", { event: "*", schema: "public", table: "stock_items" }, refreshActive)
+      .on("postgres_changes", { event: "*", schema: "public", table: "stock_categories" }, refreshActive)
+      .subscribe(status => {
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+          realtimeChannel = null;
+          setTimeout(setupRealtime, 1500);
+        }
+      });
   }
   let refreshTimer = null;
   function refreshActive() {
@@ -304,6 +392,7 @@
       invalidateAll();
       if (activeTab === "items") loadItems(true);
       else if (activeTab === "locations") loadLocations(true);
+      else if (activeTab === "global") loadGlobal(true);
       else loadMovements(true);
     }, 180);
   }
@@ -313,6 +402,7 @@
   els.addLocation.onclick = () => openLocation(); els.addMovement.onclick = openMovement;
   els.refresh.onclick = () => { itemsLoaded = false; loadItems(true); }; els.search.oninput = renderItems;
   els.locationRefresh.onclick = () => { locationsLoaded = false; loadLocations(true); }; els.locationSearch.oninput = renderLocations; els.locationFilter.onchange = renderLocations;
+  els.globalRefresh.onclick = () => { globalLoaded = false; loadGlobal(true); }; els.globalSearch.oninput = renderGlobal; els.globalCategoryFilter.onchange = renderGlobal; els.globalStateFilter.onchange = renderGlobal;
   els.movementSearch.oninput = renderMovements; els.movementTypeFilter.onchange = renderMovements; els.movementLocationFilter.onchange = renderMovements;
   $("stocks-dirty-mode").onchange = previewDirty; $("stocks-dirty-input").oninput = previewDirty; $("stocks-item-clean").oninput = previewDirty;
   ["stocks-movement-item", "stocks-movement-location", "stocks-movement-type", "stocks-movement-quantity"].forEach(id => $(id).addEventListener("input", updateMovementPreview));
@@ -323,7 +413,7 @@
   document.querySelectorAll("[data-stocks-location-close]").forEach(b => b.onclick = () => els.locationDialog.close());
   document.querySelectorAll("[data-stocks-quick-close]").forEach(b => b.onclick = () => els.quickDialog.close());
   document.querySelectorAll("[data-stocks-movement-close]").forEach(b => b.onclick = () => els.movementDialog.close());
-  [els.itemDialog, els.categoryDialog, els.locationDialog, els.quickDialog, els.movementDialog].forEach(d => d.addEventListener("click", e => { if (e.target === d) d.close(); }));
+  [els.itemDialog, els.categoryDialog, els.locationDialog, els.quickDialog, els.globalDetailDialog, els.movementDialog].forEach(d => d.addEventListener("click", e => { if (e.target === d) d.close(); }));
   els.grid.addEventListener("click", e => {
     const edit = e.target.closest("[data-edit-item]"), del = e.target.closest("[data-delete-item]");
     if (edit) openItem(items.find(i => String(i.id) === edit.dataset.editItem)); if (del) removeItem(del.dataset.deleteItem);
@@ -334,6 +424,7 @@
     if (del) removeLocation(del.dataset.deleteLocation);
     if (quick) openQuickLocation(locations.find(l => String(l.id) === quick.dataset.quickLocation));
   });
-  window.addEventListener("hub:stocks-visible", async () => { await detectAdmin(); setupRealtime(); activeTab === "items" ? loadItems() : activeTab === "locations" ? loadLocations() : loadMovements(); });
-  if (window.supabaseClient?.auth) supabaseClient.auth.onAuthStateChange(async () => { await detectAdmin(); renderItems(); renderLocations(); });
+  els.globalList.addEventListener("click", e => { const row = e.target.closest("[data-global-item]"); if (row) openGlobalDetail(row.dataset.globalItem); });
+  window.addEventListener("hub:stocks-visible", async () => { await detectAdmin(); setupRealtime(); activeTab === "items" ? loadItems() : activeTab === "locations" ? loadLocations() : activeTab === "global" ? loadGlobal() : loadMovements(); });
+  if (typeof supabaseClient !== "undefined" && supabaseClient.auth) supabaseClient.auth.onAuthStateChange(async () => { await detectAdmin(); renderItems(); renderLocations(); });
 })();

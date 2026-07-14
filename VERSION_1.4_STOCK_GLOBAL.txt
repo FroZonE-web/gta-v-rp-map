@@ -1,0 +1,7 @@
+Ashen Wolves HUB v1.4 — Stock global et temps réel
+
+- Vue Stock global avec quantités, poids, valeurs et alertes.
+- Répartition de chaque item par lieu de stockage.
+- Recherche et filtres par catégorie et état.
+- Statistiques globales.
+- Correction de l'abonnement Supabase Realtime entre plusieurs utilisateurs.

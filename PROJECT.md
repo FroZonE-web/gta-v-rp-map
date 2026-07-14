@@ -269,3 +269,24 @@ Chaque opération met à jour dans une même transaction :
 Les tables `stock_balances`, `stock_movements` et `stock_locations` sont écoutées avec Supabase Realtime. Les vues ouvertes se mettent donc à jour automatiquement après un mouvement, sans bouton d'actualisation.
 
 Le changement du poids unitaire d'un item déclenche également un recalcul des poids utilisés dans les lieux concernés.
+
+## Stocks — Stock global et synchronisation (v1.4.5)
+
+La vue Stock global agrège `stock_balances` pour chaque item et affiche :
+
+- quantité globale ;
+- poids total ;
+- valeur propre totale ;
+- valeur sale totale ;
+- état par rapport au seuil critique global ;
+- répartition par lieu de stockage.
+
+La synchronisation entre les navigateurs repose sur un canal Supabase Realtime écoutant :
+
+- `stock_categories` ;
+- `stock_items` ;
+- `stock_locations` ;
+- `stock_balances` ;
+- `stock_movements`.
+
+Le correctif important de cette version consiste à ne plus tester `window.supabaseClient`, car le client est déclaré par `const supabaseClient` dans `config.js` et n'est pas exposé comme propriété de `window`. Ce test empêchait auparavant l'abonnement Realtime de démarrer.

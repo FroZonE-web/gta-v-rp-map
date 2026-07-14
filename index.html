@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="reglement.css?v=1.1.1">
   <link rel="stylesheet" href="annuaire.css?v=1.2.7">
   <link rel="stylesheet" href="agenda.css?v=1.3.5">
-  <link rel="stylesheet" href="stocks.css?v=1.4.4">
+  <link rel="stylesheet" href="stocks.css?v=1.4.5">
 </head>
 
 <body class="hub-dashboard-active">
@@ -1111,7 +1111,7 @@
     <div class="stocks-tabs" role="tablist" aria-label="Sections des stocks">
       <button class="is-active" type="button" data-stocks-tab="items">Banque d’items</button>
       <button type="button" data-stocks-tab="locations">Lieux de stockage</button>
-      <button type="button" disabled>Stock global</button>
+      <button type="button" data-stocks-tab="global">Stock global</button>
       <button type="button" data-stocks-tab="movements">Mouvements</button>
     </div>
 
@@ -1137,6 +1137,32 @@
       </section>
       <div id="stocks-location-status" class="stocks-status" aria-live="polite"></div>
       <div id="stocks-locations-content" class="stocks-location-groups"></div>
+    </section>
+
+
+    <section id="stocks-global-panel" class="stocks-panel" hidden>
+      <section class="stocks-global-stats" aria-label="Résumé du stock global">
+        <article><span>Items référencés</span><strong id="stocks-global-items-stat">0</strong></article>
+        <article><span>Lieux de stockage</span><strong id="stocks-global-locations-stat">0</strong></article>
+        <article><span>Alertes critiques</span><strong id="stocks-global-alerts-stat">0</strong></article>
+        <article><span>Poids total</span><strong id="stocks-global-weight-stat">0 kg</strong></article>
+        <article><span>Valeur propre</span><strong id="stocks-global-clean-stat">0 $</strong></article>
+        <article><span>Valeur sale</span><strong id="stocks-global-dirty-stat">0 $</strong></article>
+      </section>
+      <section class="stocks-toolbar stocks-global-toolbar">
+        <input id="stocks-global-search" type="search" placeholder="Rechercher un item ou une catégorie…">
+        <select id="stocks-global-category-filter" aria-label="Filtrer par catégorie"><option value="all">Toutes les catégories</option></select>
+        <select id="stocks-global-state-filter" aria-label="Filtrer par état">
+          <option value="all">Tous les états</option>
+          <option value="critical">Items en alerte</option>
+          <option value="present">Items présents</option>
+          <option value="empty">Items absents</option>
+        </select>
+        <span id="stocks-global-counter" class="stocks-counter">0 item</span>
+        <button id="stocks-global-refresh" class="stocks-secondary" type="button">↻ Actualiser</button>
+      </section>
+      <div id="stocks-global-status" class="stocks-status" aria-live="polite"></div>
+      <div id="stocks-global-list" class="stocks-global-list"></div>
     </section>
 
     <section id="stocks-movements-panel" class="stocks-panel" hidden>
@@ -1205,6 +1231,10 @@
     </form>
   </dialog>
 
+
+  <dialog id="stocks-global-detail-dialog" class="stocks-dialog stocks-global-detail-dialog">
+    <div id="stocks-global-detail"></div>
+  </dialog>
 
   <dialog id="stocks-movement-dialog" class="stocks-dialog">
     <form id="stocks-movement-form">
@@ -1754,7 +1784,7 @@
   <script src="contacts.js?v=1.2.3"></script>
   <script src="law.js?v=1.2.1"></script>
   <script src="agenda.js?v=1.3.5"></script>
-  <script src="stocks.js?v=1.4.4"></script>
+  <script src="stocks.js?v=1.4.5"></script>
   <script src="hub.js?v=1.4.4"></script>
 </body>
 </html>
