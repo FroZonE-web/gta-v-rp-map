@@ -1,0 +1,4 @@
+Ashen Wolves HUB v1.3 fix Dates Agenda
+
+- Correction du décalage UTC dans le calendrier.
+- Fermeture des fenêtres Agenda par clic sur l’arrière-plan.
