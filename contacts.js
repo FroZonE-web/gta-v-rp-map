@@ -154,8 +154,12 @@
   async function load({ force = false } = {}) {
     if (loaded && !force) { render(); return; }
     await resolveAdmin();
-    setState("loading", "Chargement", "Récupération des personnes rencontrées…");
+    refresh.disabled = true;
+    refresh.textContent = "Actualisation…";
+    if (!contacts.length) setState("loading", "Chargement", "Récupération des personnes rencontrées…");
     const { data, error } = await supabaseClient.from("directory_contacts").select("id, job, entity, first_name, last_name, nickname, phone, address, notes, relation, contacted_by, created_at, updated_at").order("created_at", { ascending: false });
+    refresh.disabled = false;
+    refresh.textContent = "↻ Actualiser";
     if (error) { console.error(error); setState("restricted", "Annuaire indisponible", "La table Supabase des personnes rencontrées n’est pas encore installée."); return; }
     contacts = data || []; loaded = true; updateLists(); render();
   }
