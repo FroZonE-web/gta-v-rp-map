@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="style.css?v=1.0.1">
   <link rel="stylesheet" href="hub.css?v=1.1.0">
   <link rel="stylesheet" href="reglement.css?v=1.1.1">
-  <link rel="stylesheet" href="annuaire.css?v=1.2.6">
+  <link rel="stylesheet" href="annuaire.css?v=1.2.7">
 </head>
 
 <body class="hub-dashboard-active">
@@ -980,8 +980,8 @@
       <header class="directory-dialog-head"><h2 id="contacts-dialog-title">Ajouter un contact</h2><button class="directory-dialog-close" type="button" data-contacts-close aria-label="Fermer">×</button></header>
       <form id="contacts-form" class="directory-form">
         <div class="directory-form-grid">
-          <div class="directory-field"><label for="contacts-job">Emploi *</label><input id="contacts-job" maxlength="100" required list="contacts-job-options"></div>
-          <div class="directory-field"><label for="contacts-entity">Entité / groupe</label><input id="contacts-entity" maxlength="120" list="contacts-entity-options"></div>
+          <div class="directory-field"><label for="contacts-job">Emploi *</label><div class="directory-field-with-action"><input id="contacts-job" maxlength="100" required list="contacts-job-options"><button class="directory-mini-action" id="contacts-new-job" type="button">+ Nouveau</button></div></div>
+          <div class="directory-field"><label for="contacts-entity">Entité / groupe</label><div class="directory-field-with-action"><input id="contacts-entity" maxlength="120" list="contacts-entity-options"><button class="directory-mini-action" id="contacts-new-entity" type="button">+ Nouvelle</button></div></div>
           <div class="directory-field"><label for="contacts-first-name">Prénom *</label><input id="contacts-first-name" maxlength="80" required></div>
           <div class="directory-field"><label for="contacts-last-name">Nom</label><input id="contacts-last-name" maxlength="100"></div>
           <div class="directory-field"><label for="contacts-nickname">Surnom</label><input id="contacts-nickname" maxlength="80"></div>
@@ -994,6 +994,24 @@
         <datalist id="contacts-job-options"></datalist><datalist id="contacts-entity-options"></datalist><datalist id="contacts-person-options"><option value="Mason"><option value="Raven"><option value="Silas"></datalist>
         <p id="contacts-form-error" class="directory-error" aria-live="polite"></p>
         <div class="directory-form-actions"><button class="directory-action is-secondary" type="button" data-contacts-close>Annuler</button><button id="contacts-submit" class="directory-action" type="submit">Ajouter le contact</button></div>
+      </form>
+    </section>
+  </div>
+
+
+  <div id="contact-label-modal" class="directory-modal" hidden>
+    <section class="directory-dialog directory-label-dialog" role="dialog" aria-modal="true" aria-labelledby="contact-label-dialog-title">
+      <header class="directory-dialog-head"><h2 id="contact-label-dialog-title">Nouvelle valeur</h2><button class="directory-dialog-close" type="button" data-contact-label-close aria-label="Fermer">×</button></header>
+      <form id="contact-label-form" class="directory-form">
+        <input id="contact-label-type" type="hidden">
+        <div class="directory-form-grid">
+          <div class="directory-field is-wide"><label for="contact-label-name">Nom *</label><input id="contact-label-name" maxlength="120" required placeholder="Ex. Entreprise ou groupe"></div>
+          <div class="directory-field"><label for="contact-label-color">Couleur de la pastille</label><input id="contact-label-color" type="color" value="#7c3aed"></div>
+          <div class="directory-field"><label for="contact-label-text-color">Couleur du texte</label><input id="contact-label-text-color" type="color" value="#ffffff"></div>
+          <div class="directory-field is-wide"><span class="directory-field-label">Aperçu</span><div class="directory-label-preview-wrap"><span id="contact-label-preview" class="directory-contact-badge">APERÇU</span></div></div>
+        </div>
+        <p id="contact-label-error" class="directory-error" aria-live="polite"></p>
+        <div class="directory-form-actions"><button class="directory-action is-secondary" type="button" data-contact-label-close>Annuler</button><button id="contact-label-submit" class="directory-action" type="submit">Créer la valeur</button></div>
       </form>
     </section>
   </div>
@@ -1560,8 +1578,8 @@
   <script src="app.js?v=1.0.1"></script>
   <script src="reglement.js?v=1.1.1"></script>
   <script src="annuaire.js?v=1.2.4"></script>
-  <script src="contacts.js?v=1.2.2"></script>
-  <script src="law.js?v=1.2.0"></script>
+  <script src="contacts.js?v=1.2.3"></script>
+  <script src="law.js?v=1.2.1"></script>
   <script src="hub.js?v=1.2.0"></script>
 </body>
 </html>

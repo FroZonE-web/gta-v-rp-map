@@ -9,3 +9,7 @@ Atlas RP v0.5 - recherche, favoris et administration Supabase.
 
 ## v0.8.0 — Médias
 Les administrateurs peuvent ajouter, choisir comme principale et supprimer des images sur les marqueurs et polyzones via Supabase Storage (`atlas-media`) et la table `atlas_media`.
+
+
+## Ashen Wolves HUB v1.2 fix Badges Annuaire
+Couleurs personnalisées des badges, tableau Contacts compacté et création de nouveaux emplois/entités avec choix de couleur. Voir ANNUAIRE_BADGES_README.txt.

@@ -48,10 +48,18 @@
   const display = (value) => value === null || value === undefined || value === "" ? "—" : escapeHtml(value);
   const normalize = (value) => String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
-  function badgeClass(value) {
-    let hash = 0;
-    for (const char of String(value || "")) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
-    return `directory-contact-badge badge-${hash % 8}`;
+  const SERVICE_STYLES = {
+    LSPD: ["#375a8f", "#ffffff"],
+    BSCO: ["#39722d", "#ffffff"],
+    LSCS: ["#8a7200", "#ffffff"],
+    SASP: ["#8f5937", "#ffffff"]
+  };
+
+  function serviceBadge(value) {
+    if (!value) return "—";
+    const key = String(value).trim().toUpperCase();
+    const [background, color] = SERVICE_STYLES[key] || ["#52525b", "#ffffff"];
+    return `<span class="directory-contact-badge" style="--badge-bg:${background};--badge-color:${color}">${escapeHtml(value)}</span>`;
   }
 
   async function resolveAdmin() {
@@ -113,7 +121,7 @@
 
   function row(record) {
     return `<tr>
-      <td>${record.service ? `<span class="${badgeClass(record.service)}">${escapeHtml(record.service)}</span>` : "—"}</td>
+      <td>${serviceBadge(record.service)}</td>
       <td>${display(record.badge_number)}</td>
       <td class="directory-name">${display(record.first_name)}</td>
       <td class="directory-name">${display(record.last_name)}</td>
@@ -169,7 +177,7 @@
       body.innerHTML = visible.map(row).join("");
     }
 
-    cards.innerHTML = visible.map((record) => `<article class="directory-member-card"><div class="directory-member-card-head"><span class="${badgeClass(record.service)}">${display(record.service)}</span><h3>${display([record.first_name, record.last_name].filter(Boolean).join(" "))}</h3></div><dl><dt>Matricule</dt><dd>${display(record.badge_number)}</dd><dt>Téléphone</dt><dd>${display(record.phone)}</dd><dt>Adresse</dt><dd>${display(record.address)}</dd><dt>Détective</dt><dd>${record.is_detective ? "Oui" : "Non"}</dd><dt>Notes</dt><dd>${display(record.notes)}</dd></dl>${canManage ? `<div class="directory-member-card-actions">${actions(record)}</div>` : ""}</article>`).join("");
+    cards.innerHTML = visible.map((record) => `<article class="directory-member-card"><div class="directory-member-card-head">${serviceBadge(record.service)}<h3>${display([record.first_name, record.last_name].filter(Boolean).join(" "))}</h3></div><dl><dt>Matricule</dt><dd>${display(record.badge_number)}</dd><dt>Téléphone</dt><dd>${display(record.phone)}</dd><dt>Adresse</dt><dd>${display(record.address)}</dd><dt>Détective</dt><dd>${record.is_detective ? "Oui" : "Non"}</dd><dt>Notes</dt><dd>${display(record.notes)}</dd></dl>${canManage ? `<div class="directory-member-card-actions">${actions(record)}</div>` : ""}</article>`).join("");
     bindRenderedActions();
   }
 

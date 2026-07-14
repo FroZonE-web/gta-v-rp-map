@@ -1,0 +1,6 @@
+Ashen Wolves HUB v1.2 fix Badges Annuaire
+
+- Colonne Intérêt & Notes compactée afin de réduire le défilement horizontal.
+- Couleurs officielles appliquées aux emplois, entités et services FDO.
+- Création publique de nouveaux emplois et de nouvelles entités avec choix des couleurs.
+- Modification et suppression des contacts inchangées : administrateur uniquement.

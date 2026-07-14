@@ -708,3 +708,76 @@
   font-weight: 750;
 }
 .directory-checkbox-field input { width: 18px; height: 18px; accent-color: #8b5cf6; }
+
+/* v1.2 — ajustements badges et largeur du tableau Contacts */
+.directory-contact-badge,
+.directory-entity-badge {
+  color: var(--badge-color, #fff) !important;
+  background: var(--badge-bg, #52525b) !important;
+  border-color: color-mix(in srgb, var(--badge-color, #fff) 22%, transparent) !important;
+}
+
+.directory-contacts-table {
+  width: 100%;
+  min-width: 1180px;
+  table-layout: fixed;
+}
+.directory-contacts-table th:nth-child(1), .directory-contacts-table td:nth-child(1) { width: 76px; }
+.directory-contacts-table th:nth-child(2), .directory-contacts-table td:nth-child(2) { width: 78px; }
+.directory-contacts-table th:nth-child(3), .directory-contacts-table td:nth-child(3) { width: 78px; }
+.directory-contacts-table th:nth-child(4), .directory-contacts-table td:nth-child(4) { width: 105px; }
+.directory-contacts-table th:nth-child(5), .directory-contacts-table td:nth-child(5) { width: 82px; }
+.directory-contacts-table th:nth-child(6), .directory-contacts-table td:nth-child(6) { width: 70px; }
+.directory-contacts-table th:nth-child(7), .directory-contacts-table td:nth-child(7) { width: 165px; }
+.directory-contacts-table th:nth-child(8), .directory-contacts-table td:nth-child(8) { width: 155px; }
+.directory-contacts-table th:nth-child(9), .directory-contacts-table td:nth-child(9) { width: 112px; }
+.directory-contacts-table th:nth-child(10), .directory-contacts-table td:nth-child(10) { width: 95px; }
+.directory-contacts-table th:nth-child(11), .directory-contacts-table td:nth-child(11) { width: 76px; }
+.directory-contacts-table td { overflow: hidden; text-overflow: ellipsis; }
+.directory-notes-cell {
+  min-width: 0 !important;
+  max-width: none !important;
+  white-space: nowrap !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.directory-field-with-action { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+.directory-mini-action {
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid rgba(168, 85, 247, .32);
+  border-radius: 10px;
+  color: #d8b4fe;
+  background: rgba(124, 58, 237, .12);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.directory-mini-action:hover { background: rgba(124, 58, 237, .22); }
+.directory-label-dialog { width: min(560px, 100%); }
+.directory-field input[type="color"] {
+  width: 100%;
+  min-height: 46px;
+  padding: 5px;
+  cursor: pointer;
+}
+.directory-field-label { display: block; margin-bottom: 7px; color: #929db1; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+.directory-label-preview-wrap {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid rgba(131, 145, 170, .18);
+  border-radius: 12px;
+  background: rgba(6, 9, 15, .5);
+}
+
+@media (max-width: 1350px) {
+  .directory-contacts-table { min-width: 1120px; }
+  .directory-contacts-table th, .directory-contacts-table td { padding-left: 8px; padding-right: 8px; }
+}
+@media (max-width: 640px) {
+  .directory-field-with-action { grid-template-columns: 1fr; }
+}
