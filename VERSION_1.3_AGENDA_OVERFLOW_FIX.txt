@@ -1,0 +1,6 @@
+Ashen Wolves HUB v1.3 fix Affichage Agenda
+
+- 1 événement : affichage de l’événement.
+- 2 événements : affichage des deux événements.
+- 3 événements ou plus : affichage du premier événement puis de « et X autres événements ».
+- Mise à jour du cache des ressources Agenda vers v1.3.5.
