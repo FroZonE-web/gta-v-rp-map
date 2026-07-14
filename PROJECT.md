@@ -290,3 +290,12 @@ La synchronisation entre les navigateurs repose sur un canal Supabase Realtime �
 - `stock_movements`.
 
 Le correctif important de cette version consiste à ne plus tester `window.supabaseClient`, car le client est déclaré par `const supabaseClient` dans `config.js` et n'est pas exposé comme propriété de `window`. Ce test empêchait auparavant l'abonnement Realtime de démarrer.
+
+
+## Statuts du stock global
+
+- `OK` (vert) : quantité globale supérieure au seuil critique, ou aucun seuil défini avec une quantité positive.
+- `Stock bas` (orange) : quantité globale positive et inférieure ou égale au seuil critique.
+- `Rupture` (rouge) : quantité globale égale à zéro.
+
+Le module Stocks est considéré comme disponible à partir de la v1.4.

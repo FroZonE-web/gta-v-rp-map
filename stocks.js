@@ -159,8 +159,11 @@
       const cleanTotal = quantity * Number(item.clean_value || 0);
       const dirtyTotal = quantity * dirtyValue(item);
       const threshold = item.critical_threshold == null ? null : Number(item.critical_threshold);
-      const critical = threshold != null && quantity <= threshold;
-      return { item, itemBalances, quantity, totalWeight, cleanTotal, dirtyTotal, threshold, critical };
+      const stockState = quantity === 0
+        ? "rupture"
+        : (threshold != null && quantity <= threshold ? "low" : "ok");
+      const critical = stockState !== "ok";
+      return { item, itemBalances, quantity, totalWeight, cleanTotal, dirtyTotal, threshold, critical, stockState };
     });
   }
   function renderGlobal() {
@@ -183,15 +186,19 @@
     $("stocks-global-dirty-stat").textContent = money(totals.dirty);
     els.globalCounter.textContent = `${rows.length} item${rows.length > 1 ? "s" : ""}`;
     if (!rows.length) { els.globalList.innerHTML = '<div class="stocks-empty">Aucun item à afficher.</div>'; return; }
-    els.globalList.innerHTML = rows.map(row => `<button class="stocks-global-row ${row.critical ? "is-critical" : ""}" type="button" data-global-item="${row.item.id}">
+    els.globalList.innerHTML = rows.map(row => {
+      const stateLabel = row.stockState === "rupture" ? "Rupture" : row.stockState === "low" ? "Stock bas" : "OK";
+      const thresholdLabel = row.stockState === "low" && row.threshold != null ? ` · seuil ${row.threshold}` : "";
+      return `<button class="stocks-global-row is-${row.stockState}" type="button" data-global-item="${row.item.id}">
       <span class="stocks-global-image">${row.item.image_url ? `<img src="${esc(row.item.image_url)}" alt="">` : "📦"}</span>
       <span class="stocks-global-name"><strong>${esc(row.item.name)}</strong><small>${esc(row.item.stock_categories?.name || "Sans catégorie")}</small></span>
       <span><small>Quantité</small><strong>${row.quantity}</strong></span>
       <span><small>Poids total</small><strong>${kg(row.totalWeight)}</strong></span>
       <span><small>Valeur propre</small><strong>${money(row.cleanTotal)}</strong></span>
       <span><small>Valeur sale</small><strong>${money(row.dirtyTotal)}</strong></span>
-      <span class="stocks-global-state ${row.critical ? "critical" : row.quantity ? "normal" : "empty"}">${row.critical ? `Critique · seuil ${row.threshold}` : row.quantity ? "Normal" : "Absent"}</span>
-    </button>`).join("");
+      <span class="stocks-global-state ${row.stockState}">${stateLabel}${thresholdLabel}</span>
+    </button>`;
+    }).join("");
   }
   function openGlobalDetail(itemId) {
     const row = globalRows().find(r => String(r.item.id) === String(itemId)); if (!row) return;
@@ -199,8 +206,9 @@
       const location = locations.find(l => String(l.id) === String(balance.location_id));
       return `<div class="stocks-global-distribution-row"><span>${location?.type === "vehicle" ? "🚗" : "🏠"} ${esc(location?.name || "Lieu supprimé")}</span><strong>${Number(balance.quantity || 0)}</strong></div>`;
     }).join("") || '<p class="stocks-global-no-distribution">Cet item n’est présent dans aucun lieu.</p>';
+    const detailStateLabel = row.stockState === "rupture" ? "Rupture" : row.stockState === "low" ? "Stock bas" : "OK";
     els.globalDetail.innerHTML = `<div class="stocks-dialog-head"><div><p>Répartition du stock</p><h2>${esc(row.item.name)}</h2></div><button type="button" data-global-detail-close>×</button></div>
-      <div class="stocks-global-detail-summary"><div><span>Stock global</span><strong>${row.quantity}</strong></div><div><span>Poids total</span><strong>${kg(row.totalWeight)}</strong></div><div><span>État</span><strong class="${row.critical ? "is-danger" : ""}">${row.critical ? "Critique" : "Normal"}</strong></div></div>
+      <div class="stocks-global-detail-summary"><div><span>Stock global</span><strong>${row.quantity}</strong></div><div><span>Poids total</span><strong>${kg(row.totalWeight)}</strong></div><div><span>État</span><strong class="is-${row.stockState}">${detailStateLabel}</strong></div></div>
       <div class="stocks-global-distribution">${distribution}</div>`;
     els.globalDetail.querySelector("[data-global-detail-close]").onclick = () => els.globalDetailDialog.close();
     els.globalDetailDialog.showModal();

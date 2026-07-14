@@ -1,0 +1,7 @@
+Ashen Wolves HUB v1.4 fix Statuts Stocks
+
+- Stock supérieur au seuil : OK (vert)
+- Stock compris entre 1 et le seuil : Stock bas (orange)
+- Stock égal à 0 : Rupture (rouge)
+- Module Stocks affiché comme Disponible sur le HUB
+- Aucune migration Supabase nécessaire
