@@ -233,3 +233,9 @@ Prochaines phases prévues :
 3. stock global et répartition par lieu ;
 4. capacité, poids et alertes critiques ;
 5. synchronisation Realtime.
+
+
+## Correctif v1.4 — Routage Stocks
+
+- La route `#/stocks` ouvre directement le module Banque d’items.
+- Les versions de cache de `hub.js`, `stocks.js` et `stocks.css` sont renouvelées afin d’éviter le chargement de l’ancien placeholder par GitHub Pages ou le navigateur.

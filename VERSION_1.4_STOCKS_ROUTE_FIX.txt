@@ -1,0 +1,4 @@
+Ashen Wolves HUB v1.4 fix Routage Stocks
+
+La route #/stocks ouvre directement la Banque d’items.
+Aucune migration Supabase supplémentaire.
