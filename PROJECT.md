@@ -324,3 +324,9 @@ Les badges du Stock global utilisent désormais des couleurs explicites et forc�
 - Opérations récentes regroupées par date.
 - Actions rapides et transferts présents comme maquette interactive uniquement.
 - Aucune table, donnée ou permission Supabase ajoutée dans cette phase.
+
+### v1.5 fix Interface Comptabilité
+
+- Le module Comptabilité utilise désormais le mode de page pleine largeur du HUB.
+- Le tableau de bord Fleeca est centré dans la fenêtre.
+- Le bloc IBAN a été retiré de la maquette.

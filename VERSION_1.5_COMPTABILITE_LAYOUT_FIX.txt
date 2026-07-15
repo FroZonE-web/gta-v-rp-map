@@ -1,0 +1,6 @@
+Ashen Wolves HUB v1.5 fix Interface Comptabilité
+
+- Centrage du module Comptabilité sur toute la largeur disponible.
+- Ajout de la classe de route comptabilité au mode d'affichage du HUB.
+- Suppression du bloc IBAN et de sa logique de copie.
+- Aucun changement Supabase.
