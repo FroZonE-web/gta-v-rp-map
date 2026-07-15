@@ -1,0 +1,8 @@
+Ashen Wolves HUB v1.4.1 — Fix cartes Banque d'items
+
+- Images affichées entièrement avec object-fit: contain.
+- Zone d'image fixe et centrée.
+- Hauteur identique pour toutes les cartes.
+- Actions maintenues en bas des cartes.
+- Totaux Valeur propre / Valeur sale colorés dans Stock global.
+- Cache des ressources Stocks passé en v1.4.9.
