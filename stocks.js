@@ -77,7 +77,7 @@
     if (!rows.length) { els.grid.innerHTML = '<div class="stocks-empty">Aucun item à afficher.</div>'; return; }
     els.grid.innerHTML = rows.map(i => `
       <article class="stocks-card">
-        <div class="stocks-card-image">${i.image_url ? `<img src="${esc(i.image_url)}" alt="${esc(i.name)}">` : '<span class="stocks-card-placeholder">📦</span>'}</div>
+        <div class="stocks-card-image">${i.image_url ? `<img src="${esc(i.image_url)}" alt="${esc(i.name)}" style="width:auto;height:auto;max-width:calc(100% - 16px);max-height:calc(100% - 16px);object-fit:contain;object-position:center;">` : '<span class="stocks-card-placeholder">📦</span>'}</div>
         <div class="stocks-card-body">
           <div class="stocks-card-head"><h3>${esc(i.name)}</h3><span class="stocks-badge">${esc(i.stock_categories?.name || "Sans catégorie")}</span></div>
           <div class="stocks-card-data">
@@ -323,18 +323,29 @@
       <div><span>Poids après mouvement</span><strong>${location ? `${kg(after)} / ${kg(capacity)}` : "—"}</strong></div>`;
   }
 
-  function openLocationDetail(locationId) {
+  function openLocationDetail(locationId, selectedCategory = "all") {
     const location = locations.find(l => String(l.id) === String(locationId)); if (!location) return;
-    const rows = balances.filter(b => String(b.location_id) === String(location.id) && Number(b.quantity) > 0).map(b => {
+    const allRows = balances.filter(b => String(b.location_id) === String(location.id) && Number(b.quantity) > 0).map(b => {
       const item = items.find(i => String(i.id) === String(b.item_id));
       const quantity = Number(b.quantity || 0);
       return item ? { item, quantity, weight: quantity * Number(item.unit_weight || 0), clean: quantity * Number(item.clean_value || 0), dirty: quantity * dirtyValue(item) } : null;
-    }).filter(Boolean).sort((a,b)=>a.item.name.localeCompare(b.item.name,"fr",{sensitivity:"base"}));
+    }).filter(Boolean);
+    const categoryNames = [...new Set(allRows.map(r => r.item.stock_categories?.name || "Sans catégorie"))]
+      .sort((a,b)=>a.localeCompare(b,"fr",{sensitivity:"base"}));
+    const rows = allRows
+      .filter(r => selectedCategory === "all" || (r.item.stock_categories?.name || "Sans catégorie") === selectedCategory)
+      .sort((a,b) => {
+        const categoryCompare = (a.item.stock_categories?.name || "Sans catégorie").localeCompare(b.item.stock_categories?.name || "Sans catégorie", "fr", {sensitivity:"base"});
+        return categoryCompare || a.item.name.localeCompare(b.item.name,"fr",{sensitivity:"base"});
+      });
     const used = Number(location.used_weight || 0), capacity = Number(location.capacity_weight || 0), percent = capacity ? Math.min(100, used/capacity*100) : 0;
-    const list = rows.length ? rows.map(r => `<div class="stocks-location-detail-row"><span class="stocks-global-image">${r.item.image_url ? `<img src="${esc(r.item.image_url)}" alt="">` : "📦"}</span><span class="stocks-global-name"><strong>${esc(r.item.name)}</strong><small>${esc(r.item.stock_categories?.name || "Sans catégorie")}</small></span><span><small>Quantité</small><strong>${r.quantity}</strong></span><span><small>Poids</small><strong>${kg(r.weight)}</strong></span><span><small>Propre</small><strong class="money-clean">${money(r.clean)}</strong></span><span><small>Sale</small><strong class="money-dirty">${money(r.dirty)}</strong></span></div>`).join("") : '<p class="stocks-global-no-distribution">Ce lieu ne contient aucun item.</p>';
-    els.locationDetail.innerHTML = `<div class="stocks-dialog-head"><div><p>Contenu du stockage</p><h2>${esc(location.name)}</h2></div><button type="button" data-location-detail-close>×</button></div><div class="stocks-global-detail-summary"><div><span>Utilisé</span><strong>${kg(used)}</strong></div><div><span>Restant</span><strong>${kg(Math.max(0,capacity-used))}</strong></div><div><span>Remplissage</span><strong>${Math.round(percent)} %</strong></div></div><div class="stocks-location-detail-list">${list}</div>`;
+    const categoryOptions = ['<option value="all">Toutes les catégories</option>']
+      .concat(categoryNames.map(name => `<option value="${esc(name)}"${selectedCategory === name ? " selected" : ""}>${esc(name)}</option>`)).join("");
+    const list = rows.length ? rows.map(r => `<div class="stocks-location-detail-row"><span class="stocks-global-image">${r.item.image_url ? `<img src="${esc(r.item.image_url)}" alt="">` : "📦"}</span><span class="stocks-global-name"><strong>${esc(r.item.name)}</strong><small>${esc(r.item.stock_categories?.name || "Sans catégorie")}</small></span><span><small>Quantité</small><strong>${r.quantity}</strong></span><span><small>Poids</small><strong>${kg(r.weight)}</strong></span><span><small>Propre</small><strong class="money-clean">${money(r.clean)}</strong></span><span><small>Sale</small><strong class="money-dirty">${money(r.dirty)}</strong></span></div>`).join("") : '<p class="stocks-global-no-distribution">Aucun item dans cette catégorie.</p>';
+    els.locationDetail.innerHTML = `<div class="stocks-dialog-head"><div><p>Contenu du stockage</p><h2>${esc(location.name)}</h2></div><button type="button" data-location-detail-close>×</button></div><div class="stocks-global-detail-summary"><div><span>Utilisé</span><strong>${kg(used)}</strong></div><div><span>Restant</span><strong>${kg(Math.max(0,capacity-used))}</strong></div><div><span>Remplissage</span><strong>${Math.round(percent)} %</strong></div></div><div class="stocks-location-detail-toolbar"><label>Catégorie<select data-location-category-filter>${categoryOptions}</select></label><span>${rows.length} item${rows.length > 1 ? "s" : ""}</span></div><div class="stocks-location-detail-list">${list}</div>`;
     els.locationDetail.querySelector("[data-location-detail-close]").onclick=()=>els.locationDetailDialog.close();
-    els.locationDetailDialog.showModal();
+    els.locationDetail.querySelector("[data-location-category-filter]").onchange=(event)=>openLocationDetail(locationId,event.target.value);
+    if (!els.locationDetailDialog.open) els.locationDetailDialog.showModal();
   }
 
   function bulkLineTemplate() {

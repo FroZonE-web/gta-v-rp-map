@@ -120,3 +120,13 @@
   .stocks-card{height:365px}
   .stocks-card-image{flex-basis:122px;height:122px!important;min-height:122px!important}
 }
+
+
+/* v1.4.10 — Images entièrement visibles et filtre par catégorie dans un lieu */
+.stocks-card-image{display:flex!important;align-items:center!important;justify-content:center!important;padding:10px!important}
+.stocks-card-image img{width:auto!important;height:auto!important;max-width:calc(100% - 4px)!important;max-height:calc(100% - 4px)!important;object-fit:contain!important;object-position:center!important;flex:none!important}
+.stocks-location-detail-toolbar{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:0 0 12px}
+.stocks-location-detail-toolbar label{display:grid;gap:6px;color:#9a94a3;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.stocks-location-detail-toolbar select{min-width:230px;border:1px solid #363142;background:#15151d;color:#fff;border-radius:9px;padding:10px 12px;font:inherit;text-transform:none;letter-spacing:normal}
+.stocks-location-detail-toolbar>span{padding:8px 11px;border:1px solid #352c49;border-radius:999px;background:#1b1724;color:#ddd4ea;white-space:nowrap}
+@media(max-width:620px){.stocks-location-detail-toolbar{align-items:stretch;flex-direction:column}.stocks-location-detail-toolbar select{width:100%;min-width:0}.stocks-location-detail-toolbar>span{align-self:flex-start}}

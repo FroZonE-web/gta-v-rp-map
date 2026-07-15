@@ -1,0 +1,5 @@
+Ashen Wolves HUB v1.4.1 fix Images et tri des lieux
+
+- Images de la Banque d'items entièrement visibles sans rognage.
+- Taille des cartes conservée.
+- Filtre par catégorie dans le détail d'un lieu de stockage.
