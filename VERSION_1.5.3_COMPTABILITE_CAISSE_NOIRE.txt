@@ -1,0 +1,9 @@
+Ashen Wolves HUB v1.5.3 — Caisse noire et valeurs théoriques
+
+- Prototype visuel de la Caisse noire.
+- Ajout d'argent sans raison obligatoire.
+- Retrait avec raison obligatoire.
+- Argent propre uniquement.
+- Valeur théorique propre/sale calculée depuis la Banque d'items.
+- Interface Comptabilité assombrie localement.
+- Aucune écriture Supabase réelle dans cette phase.

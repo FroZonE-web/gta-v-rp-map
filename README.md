@@ -21,3 +21,7 @@ Pour activer les dépôts, retraits et l'historique, exécuter `STOCK_MOVEMENTS_
 ## Ashen Wolves HUB v1.4.1 — Amélioration Stocks
 
 Pour une base Supabase existante, exécuter `STOCK_BULK_MOVEMENTS_SETUP.sql` afin d’activer les mouvements multiples atomiques. Les autres changements sont uniquement côté interface.
+
+## Comptabilité v1.5.3
+
+Cette version ajoute le prototype de la Caisse noire, le calcul des valeurs théoriques des opérations d'items et un thème local plus sombre pour la Comptabilité. Aucune migration SQL n'est nécessaire : les validations restent simulées.

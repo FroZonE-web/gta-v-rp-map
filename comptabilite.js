@@ -7,6 +7,13 @@
   const esc = (value) => String(value ?? "").replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
   const money = (value) => new Intl.NumberFormat("fr-FR", { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(Number(value || 0));
   const kg = (value) => `${Number(value || 0).toLocaleString("fr-FR", { maximumFractionDigits: 3 })} kg`;
+  const dirtyValue = (item) => {
+    const clean = Number(item?.clean_value || 0);
+    const input = Number(item?.dirty_input || 0);
+    if (item?.dirty_mode === "multiplier") return clean * input;
+    if (item?.dirty_mode === "percentage") return clean * (input / 100);
+    return input;
+  };
   const toast = (message) => { document.querySelector(".compta-toast")?.remove(); const el=document.createElement("div"); el.className="compta-toast"; el.textContent=message; document.body.appendChild(el); setTimeout(()=>el.remove(),2600); };
 
   async function loadReferenceData(force=false) {
@@ -62,14 +69,40 @@
   }
   function updateAllLines(kind){ $(kind==="sale"?"compta-sale-lines":"compta-purchase-lines").querySelectorAll(".compta-complex-line").forEach(updateLine); }
   function updateSummary(kind){
-    const container=$(kind==="sale"?"compta-sale-lines":"compta-purchase-lines"), summary=$(kind==="sale"?"compta-sale-summary":"compta-purchase-summary"); let units=0, weight=0, valid=true;
-    container.querySelectorAll(".compta-complex-line").forEach(line=>{const item=state.items.find(i=>String(i.id)===line.querySelector(".compta-line-item").value), qty=Number(line.querySelector(".compta-line-qty").value||0), allocated=[...line.querySelectorAll(".compta-allocation input")].reduce((s,i)=>s+Number(i.value||0),0); units+=qty; if(item) weight+=qty*Number(item.unit_weight||0); if(!item||qty<=0||allocated!==qty) valid=false;});
-    summary.innerHTML=`<div><span>Unités</span><strong>${units}</strong></div><div><span>Poids total</span><strong>${kg(weight)}</strong></div><div><span>Répartition</span><strong class="${valid?"is-valid":""}">${valid?"Complète":"À compléter"}</strong></div>`;
+    const container=$(kind==="sale"?"compta-sale-lines":"compta-purchase-lines");
+    const summary=$(kind==="sale"?"compta-sale-summary":"compta-purchase-summary");
+    const moneyType=$(kind==="sale"?"compta-sale-money":"compta-purchase-money")?.value || "clean";
+    let units=0, weight=0, theoretical=0, valid=true;
+    container.querySelectorAll(".compta-complex-line").forEach(line=>{
+      const item=state.items.find(i=>String(i.id)===line.querySelector(".compta-line-item").value);
+      const qty=Number(line.querySelector(".compta-line-qty").value||0);
+      const allocated=[...line.querySelectorAll(".compta-allocation input")].reduce((sum,input)=>sum+Number(input.value||0),0);
+      units+=qty;
+      if(item){
+        weight+=qty*Number(item.unit_weight||0);
+        theoretical+=qty*(moneyType==="dirty"?dirtyValue(item):Number(item.clean_value||0));
+      }
+      if(!item||qty<=0||allocated!==qty) valid=false;
+    });
+    const theoreticalClass=moneyType==="dirty"?"is-dirty":"is-clean";
+    const theoreticalLabel=moneyType==="dirty"?"Valeur théorique sale":"Valeur théorique propre";
+    summary.innerHTML=`<div><span>Unités</span><strong>${units}</strong></div><div><span>Poids total</span><strong>${kg(weight)}</strong></div><div><span>${theoreticalLabel}</span><strong class="${theoreticalClass}">${money(theoretical)}</strong></div><div><span>Répartition</span><strong class="${valid?"is-valid":""}">${valid?"Complète":"À compléter"}</strong></div>`;
   }
   function simulateComplex(kind){ const label=kind==="sale"?"Vente simulée":"Achat simulé"; toast(`${label} — aucune donnée ni aucun stock n’a été modifié.`); }
+  function switchBlackOperation(operation){
+    const withdrawal=operation==="withdrawal";
+    $("compta-black-operation").value=operation;
+    page.querySelectorAll("[data-compta-black-operation]").forEach(button=>button.classList.toggle("is-active",button.dataset.comptaBlackOperation===operation));
+    $("compta-black-reason-field").hidden=!withdrawal;
+    $("compta-black-reason").required=withdrawal;
+    $("compta-black-hint").textContent=withdrawal?"La raison est obligatoire pour tout retrait.":"Aucune raison n’est demandée pour un ajout.";
+    $("compta-black-form").querySelector("button[type=submit]").textContent=withdrawal?"Simuler le retrait":"Simuler l’ajout";
+  }
 
   page.querySelectorAll("[data-compta-view]").forEach(btn=>btn.addEventListener("click",()=>switchView(btn.dataset.comptaView)));
   page.querySelectorAll("[data-compta-operation]").forEach(btn=>btn.addEventListener("click",()=>switchOperation(btn.dataset.comptaOperation)));
+  page.querySelectorAll("[data-compta-black-operation]").forEach(btn=>btn.addEventListener("click",()=>switchBlackOperation(btn.dataset.comptaBlackOperation)));
+  ["compta-sale-money","compta-purchase-money"].forEach(id=>$(id)?.addEventListener("change",()=>updateSummary(id.includes("sale")?"sale":"purchase")));
   page.querySelector("[data-compta-add-sale-line]").addEventListener("click",()=>addLine("sale"));
   page.querySelector("[data-compta-add-purchase-line]").addEventListener("click",()=>addLine("purchase"));
   page.addEventListener("input",event=>{const line=event.target.closest(".compta-complex-line"); if(line) updateLine(line);});
@@ -78,6 +111,15 @@
   $("compta-sale-form").addEventListener("submit",event=>{event.preventDefault(); simulateComplex("sale");});
   $("compta-purchase-form").addEventListener("submit",event=>{event.preventDefault(); simulateComplex("purchase");});
   $("compta-service-form").addEventListener("submit",event=>{event.preventDefault(); toast("Dépense de service simulée — aucune écriture réelle.");});
+  $("compta-black-form").addEventListener("submit",event=>{
+    event.preventDefault();
+    const operation=$("compta-black-operation").value;
+    const amount=Number($("compta-black-amount").value||0);
+    const reason=$("compta-black-reason").value.trim();
+    if(amount<=0){ toast("Saisis un montant valide."); return; }
+    if(operation==="withdrawal"&&!reason){ toast("La raison du retrait est obligatoire."); $("compta-black-reason").focus(); return; }
+    toast(`${operation==="withdrawal"?"Retrait":"Ajout"} de ${money(amount)} simulé — aucune écriture réelle.`);
+  });
   page.querySelectorAll("[data-compta-demo]").forEach(btn=>btn.addEventListener("click",()=>toast("Prototype visuel — aucune écriture comptable réelle.")));
   loadReferenceData();
 })();

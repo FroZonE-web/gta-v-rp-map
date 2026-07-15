@@ -338,3 +338,12 @@ Les badges du Stock global utilisent désormais des couleurs explicites et forc�
 - Les références sont lues depuis les tables existantes Stocks et Annuaire.
 - Aucune écriture Supabase ni modification de stock/solde dans cette phase.
 - La prochaine phase ajoutera les RPC atomiques et l’historique comptable.
+
+## Comptabilité v1.5.3 — prototype Caisse noire
+
+- La Caisse noire ne contient que de l'argent propre.
+- Deux actions : ajout sans motif obligatoire et retrait avec motif obligatoire.
+- Les ventes et achats d'items affichent une valeur théorique calculée depuis `stock_items`.
+- Le calcul utilise uniquement la valeur propre ou la valeur sale selon le compte sélectionné.
+- Cette étape reste un prototype sans écriture comptable ni modification de stock.
+- L'interface Comptabilité utilise temporairement des panneaux plus sombres pour le confort visuel ; l'harmonisation globale reste prévue en fin de projet.
