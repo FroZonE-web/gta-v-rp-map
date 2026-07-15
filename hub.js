@@ -55,6 +55,7 @@ const regulationRoute = document.getElementById("reglement-module");
 const directoryRoute = document.getElementById("annuaire-module");
 const agendaRoute = document.getElementById("agenda-module");
 const stocksRoute = document.getElementById("stocks-module");
+const accountingRoute = document.getElementById("comptabilite-module");
 const placeholderIcon = document.getElementById("hub-placeholder-icon");
 const placeholderTitle = document.getElementById("hub-placeholder-title");
 const placeholderDescription = document.getElementById("hub-placeholder-description");
@@ -91,8 +92,9 @@ function displayHubRoute() {
   const showDirectory = route === "annuaire";
   const showAgenda = route === "agenda";
   const showStocks = route === "stocks";
-  const showPlaceholder = Boolean(module) && !showRegulation && !showDirectory && !showAgenda && !showStocks;
-  const showDashboard = !showMap && !showRegulation && !showDirectory && !showAgenda && !showStocks && !showPlaceholder;
+  const showAccounting = route === "comptabilite";
+  const showPlaceholder = Boolean(module) && !showRegulation && !showDirectory && !showAgenda && !showStocks && !showAccounting;
+  const showDashboard = !showMap && !showRegulation && !showDirectory && !showAgenda && !showStocks && !showAccounting && !showPlaceholder;
 
   dashboardRoute.hidden = !showDashboard;
   placeholderRoute.hidden = !showPlaceholder;
@@ -100,6 +102,7 @@ function displayHubRoute() {
   directoryRoute.hidden = !showDirectory;
   agendaRoute.hidden = !showAgenda;
   stocksRoute.hidden = !showStocks;
+  accountingRoute.hidden = !showAccounting;
 
   mapRoute.classList.toggle("is-active", showMap);
   mapRoute.setAttribute("aria-hidden", String(!showMap));
@@ -111,6 +114,7 @@ function displayHubRoute() {
   document.body.classList.toggle("hub-directory-active", showDirectory);
   document.body.classList.toggle("hub-agenda-active", showAgenda);
   document.body.classList.toggle("hub-stocks-active", showStocks);
+  document.body.classList.toggle("hub-accounting-active", showAccounting);
 
   if (showRegulation) {
     document.title = "Règlement — Ashen Wolves HUB";
@@ -124,6 +128,8 @@ function displayHubRoute() {
   } else if (showAgenda) {
     document.title = "Agenda — Ashen Wolves HUB";
     window.dispatchEvent(new CustomEvent("hub:agenda-visible"));
+  } else if (showAccounting) {
+    document.title = "Comptabilité — Ashen Wolves HUB";
   } else if (showStocks) {
     document.title = "Stocks — Ashen Wolves HUB";
     window.dispatchEvent(new CustomEvent("hub:stocks-visible"));

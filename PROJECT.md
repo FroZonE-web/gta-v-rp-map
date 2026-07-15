@@ -313,3 +313,14 @@ Les badges du Stock global utilisent désormais des couleurs explicites et forc�
 - Valeurs propres en vert et valeurs sales en rouge.
 - Stock global triable par catégorie puis nom.
 - Sélection des catégories d’items par saisie avec suggestions.
+
+## v1.5 — Comptabilité (phase visuelle)
+
+- Route : `#/comptabilite`
+- Fichiers : `comptabilite.css`, `comptabilite.js`
+- Interface inspirée du tableau de bord Fleeca, adaptée au thème noir et violet du HUB.
+- Comptes prévus : Compte du club et Caisse noire.
+- Soldes affichés : argent propre et argent sale.
+- Opérations récentes regroupées par date.
+- Actions rapides et transferts présents comme maquette interactive uniquement.
+- Aucune table, donnée ou permission Supabase ajoutée dans cette phase.

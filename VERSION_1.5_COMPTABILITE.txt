@@ -1,0 +1,2 @@
+Ashen Wolves HUB v1.5 Comptabilité
+Phase visuelle uniquement, sans SQL ni écriture Supabase.

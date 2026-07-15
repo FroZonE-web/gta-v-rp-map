@@ -26,6 +26,7 @@
   <link rel="stylesheet" href="annuaire.css?v=1.2.7">
   <link rel="stylesheet" href="agenda.css?v=1.3.5">
   <link rel="stylesheet" href="stocks.css?v=1.4.11">
+  <link rel="stylesheet" href="comptabilite.css?v=1.5.0">
 </head>
 
 <body class="hub-dashboard-active">
@@ -46,7 +47,7 @@
           <span class="hub-module-copy"><strong>Carte</strong><small>Lieux, zones, médias et informations RP</small></span>
           <span class="hub-module-status">Disponible</span>
         </a>
-        <a class="hub-module-card" href="#/comptabilite"><span class="hub-module-icon">💰</span><span class="hub-module-copy"><strong>Comptabilité</strong><small>Entrées, sorties, soldes et justificatifs</small></span><span class="hub-module-status">À venir</span></a>
+        <a class="hub-module-card is-developing" href="#/comptabilite"><span class="hub-module-icon">💰</span><span class="hub-module-copy"><strong>Comptabilité</strong><small>Entrées, sorties, soldes et justificatifs</small></span><span class="hub-module-status">En cours de développement</span></a>
         <a class="hub-module-card is-available" href="#/stocks"><span class="hub-module-icon">📦</span><span class="hub-module-copy"><strong>Stocks</strong><small>Articles, quantités et mouvements</small></span><span class="hub-module-status">Disponible</span></a>
         <a class="hub-module-card is-available" href="#/annuaire"><span class="hub-module-icon">👥</span><span class="hub-module-copy"><strong>Annuaire</strong><small>Membres, contacts rencontrés et forces de l’ordre</small></span><span class="hub-module-status">Disponible</span></a>
         <a class="hub-module-card" href="#/plans-op"><span class="hub-module-icon">🎯</span><span class="hub-module-copy"><strong>Plans d’OP</strong><small>Préparation et comptes rendus d’opérations</small></span><span class="hub-module-status">À venir</span></a>
@@ -56,7 +57,7 @@
         <a class="hub-module-card" href="#/notes-grades"><span class="hub-module-icon">🔒</span><span class="hub-module-copy"><strong>Notes des gradés</strong><small>Espace privé réservé aux grades autorisés</small></span><span class="hub-module-status">À venir</span></a>
       </nav>
 
-      <footer class="hub-dashboard-footer">Ashen Wolves HUB <span>v1.3</span></footer>
+      <footer class="hub-dashboard-footer">Ashen Wolves HUB <span>v1.5</span></footer>
     </div>
   </section>
 
@@ -1104,6 +1105,48 @@
 </section>
 
 
+
+<section id="comptabilite-module" class="hub-route compta-page" hidden aria-labelledby="compta-title">
+  <div class="compta-shell">
+    <header class="compta-header">
+      <div class="fleeca-logo" aria-label="Fleeca">FL<span>EE</span>CA</div>
+      <div class="compta-heading"><p>Comptabilité du club</p><h1 id="compta-title">TABLEAU DE BORD</h1></div>
+      <div class="compta-user"><div><strong>ASHEN WOLVES HUB</strong><small style="display:block;color:#c7bfd8">Compte du club</small></div><span class="compta-user-mark">AW</span></div>
+    </header>
+    <div class="compta-grid">
+      <aside class="compta-panel compta-nav">
+        <div class="compta-nav-title">COMPTE DU CLUB</div>
+        <button class="is-active" data-compta-tab>⌂ &nbsp; Tableau de bord</button>
+        <button data-compta-tab>▣ &nbsp; Historique</button>
+        <div class="compta-nav-label">COMPTES</div>
+        <button data-compta-tab>● &nbsp; Compte du club</button>
+        <button data-compta-tab>● &nbsp; Caisse noire</button>
+        <a class="compta-home" href="#/">← Retour au HUB</a>
+      </aside>
+      <main class="compta-center">
+        <div class="compta-balances">
+          <article class="compta-panel compta-balance clean"><span>SOLDE PROPRE</span><strong>20 044 $US</strong></article>
+          <article class="compta-panel compta-balance dirty"><span>ARGENT SALE</span><strong>12 580 $US</strong></article>
+        </div>
+        <section class="compta-panel compta-transactions"><h2>TRANSACTIONS RÉCENTES</h2><div class="compta-transactions-scroll">
+          <div class="compta-date">Mercredi 15 juillet 2026</div>
+          <article class="compta-transaction"><span class="compta-transaction-icon">▣</span><div><strong>Paiement de Michel Transport Petrol</strong><small>Versement d’une livraison</small></div><span class="compta-amount positive">+ 4 500 $</span></article>
+          <article class="compta-transaction"><span class="compta-transaction-icon">▣</span><div><strong>Paiement à Los Santos Medical Center</strong><small>Achat de matériel médical</small></div><span class="compta-amount negative">− 3 300 $</span></article>
+          <article class="compta-transaction"><span class="compta-transaction-icon">▣</span><div><strong>Versement au compte du club</strong><small>Cotisations hebdomadaires</small></div><span class="compta-amount positive">+ 1 250 $</span></article>
+          <article class="compta-transaction"><span class="compta-transaction-icon">▣</span><div><strong>Paiement au Gouvernement</strong><small>Frais administratifs</small></div><span class="compta-amount negative">− 960 $</span></article>
+          <div class="compta-date">Mardi 14 juillet 2026</div>
+          <article class="compta-transaction"><span class="compta-transaction-icon">▣</span><div><strong>Vente de marchandises</strong><small>Recette enregistrée au Club House</small></div><span class="compta-amount positive">+ 7 800 $</span></article>
+        </div></section>
+      </main>
+      <aside class="compta-right">
+        <section class="compta-panel"><h3>ACTIONS RAPIDES</h3><div class="compta-action-tabs"><button class="is-active">Retirer</button><button>Déposer</button></div><input class="compta-field" type="number" placeholder="$  Montant"><button class="compta-action-button" data-compta-demo>Retirer</button><p class="compta-demo-note">Aucune opération réelle n’est enregistrée dans cette phase.</p></section>
+        <section class="compta-panel"><h3>TRANSFERT D’ARGENT</h3><select class="compta-field"><option>Compte du club → Caisse noire</option><option>Caisse noire → Compte du club</option></select><input class="compta-field" type="number" placeholder="$  Montant"><input class="compta-field" placeholder="Libellé du transfert (optionnel)"><button class="compta-action-button" data-compta-demo>Transférer</button></section>
+        <section class="compta-panel compta-iban">IBAN : 900Z8057T432 <button id="compta-copy-iban" title="Copier">▣</button></section>
+      </aside>
+    </div>
+  </div>
+</section>
+
 <section id="stocks-module" class="hub-route stocks-page" hidden aria-labelledby="stocks-title">
   <header class="stocks-topbar"><a class="stocks-brand" href="#/" aria-label="Retour au HUB"><span>AW</span><div><strong>ASHEN WOLVES HUB</strong><small id="stocks-brand-subtitle">Banque d’items</small></div></a></header>
   <main class="stocks-shell">
@@ -1805,6 +1848,7 @@
   <script src="law.js?v=1.2.1"></script>
   <script src="agenda.js?v=1.3.5"></script>
   <script src="stocks.js?v=1.4.11"></script>
-  <script src="hub.js?v=1.4.5"></script>
+  <script src="comptabilite.js?v=1.5.0"></script>
+  <script src="hub.js?v=1.5.0"></script>
 </body>
 </html>
