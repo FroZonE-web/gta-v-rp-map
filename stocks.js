@@ -262,9 +262,10 @@
     if (!rows.length) { els.movementsList.innerHTML = '<div class="stocks-empty">Aucun mouvement à afficher.</div>'; return; }
     els.movementsList.innerHTML = rows.map(m => {
       const deposit = m.movement_type === "deposit";
+      const movementLabel = m.source_type === "purchase" ? "Achat" : m.source_type === "resale" ? "Revente" : (deposit ? "Dépôt" : "Retrait");
       return `<article class="stocks-movement-row">
         <div class="stocks-movement-image">${m.stock_items?.image_url ? `<img src="${esc(m.stock_items.image_url)}" alt="">` : "📦"}</div>
-        <div class="stocks-movement-main"><div><span class="stocks-movement-kind ${deposit ? "deposit" : "withdraw"}">${deposit ? "Dépôt" : "Retrait"}</span><strong>${esc(m.stock_items?.name || "Item supprimé")}</strong></div><small>${dt(m.created_at)}${m.created_by_label ? ` · ${esc(m.created_by_label)}` : ""}</small></div>
+        <div class="stocks-movement-main"><div><span class="stocks-movement-kind ${deposit ? "deposit" : "withdraw"}">${movementLabel}</span><strong>${esc(m.stock_items?.name || "Item supprimé")}</strong></div><small>${dt(m.created_at)}${m.created_by_label ? ` · ${esc(m.created_by_label)}` : ""}</small></div>
         <div class="stocks-movement-place"><span>Lieu</span><strong>${esc(m.stock_locations?.name || "Lieu supprimé")}</strong></div>
         <div class="stocks-movement-qty"><span>Quantité</span><strong>${deposit ? "+" : "−"}${m.quantity}</strong></div>
         <div class="stocks-movement-weight"><span>Poids</span><strong>${deposit ? "+" : "−"}${kg(m.total_weight)}</strong></div>

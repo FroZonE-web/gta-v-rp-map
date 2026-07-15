@@ -22,7 +22,10 @@
     black_transfer_out: "Transfert vers la caisse noire",
     black_transfer_in: "Ajout à la caisse noire",
     black_deposit: "Ajout à la caisse noire",
-    black_withdrawal: "Retrait de la caisse noire"
+    black_withdrawal: "Retrait de la caisse noire",
+    item_sale: "Vente d’items",
+    item_purchase: "Achat d’items",
+    service_expense: "Achat de service"
   };
   const signedAmount = (row) => (row.direction === "credit" ? 1 : -1) * Number(row.amount || 0);
   const formatDateHeading = (value) => new Intl.DateTimeFormat("fr-FR", { weekday:"long", day:"numeric", month:"long", year:"numeric" }).format(new Date(value));
@@ -83,8 +86,15 @@
   }
   function setupRealtime() {
     if(state.realtimeChannel) return;
-    state.realtimeChannel = supabaseClient.channel("accounting-live-v154")
+    const refreshReferences = () => loadReferenceData(true).then(() => {
+      updateAllLines("sale");
+      updateAllLines("purchase");
+    });
+    state.realtimeChannel = supabaseClient.channel("accounting-live-v155")
       .on("postgres_changes", { event:"*", schema:"public", table:"accounting_transactions" }, () => loadAccounting())
+      .on("postgres_changes", { event:"*", schema:"public", table:"stock_balances" }, refreshReferences)
+      .on("postgres_changes", { event:"*", schema:"public", table:"stock_locations" }, refreshReferences)
+      .on("postgres_changes", { event:"*", schema:"public", table:"stock_items" }, refreshReferences)
       .subscribe();
   }
 
@@ -131,16 +141,25 @@
   }
   function addLine(kind) { const container=$(kind==="sale"?"compta-sale-lines":"compta-purchase-lines"); container.insertAdjacentHTML("beforeend",lineTemplate(kind)); updateAllLines(kind); }
   function currentQty(itemId, locationId) { return Number(state.balances.find(b=>String(b.item_id)===String(itemId)&&String(b.location_id)===String(locationId))?.quantity||0); }
-  function updateLine(line) {
-    const kind=line.dataset.kind, item=state.items.find(i=>String(i.id)===line.querySelector(".compta-line-item").value), requested=Math.max(0,Number(line.querySelector(".compta-line-qty").value||0));
+  function updateLine(line, rebuildAllocations=false) {
+    const kind=line.dataset.kind;
+    const item=state.items.find(i=>String(i.id)===line.querySelector(".compta-line-item").value);
+    const requested=Math.max(0,Number(line.querySelector(".compta-line-qty").value||0));
     const preview=line.querySelector(".compta-line-item-preview"), allocation=line.querySelector(".compta-allocation-list"), status=line.querySelector(".compta-line-status");
-    if(!item){ preview.innerHTML='<span>📦</span><div><strong>Sélectionne un item</strong><small>La disponibilité et les lieux apparaîtront ici.</small></div>'; allocation.innerHTML=""; status.textContent=""; updateSummary(kind); return; }
+    if(!item){
+      preview.innerHTML='<span>📦</span><div><strong>Sélectionne un item</strong><small>La disponibilité et les lieux apparaîtront ici.</small></div>';
+      allocation.innerHTML=""; status.textContent=""; updateSummary(kind); return;
+    }
     preview.innerHTML=`${item.image_url?`<img src="${esc(item.image_url)}" alt="">`:'<span>📦</span>'}<div><strong>${esc(item.name)}</strong><small>${esc(item.stock_categories?.name||"Sans catégorie")} · ${kg(item.unit_weight)} par unité</small></div>`;
-    allocation.innerHTML=state.locations.map(location=>{const available=currentQty(item.id,location.id); return `<label class="compta-allocation"><span><strong>${esc(location.name)}</strong><small>${kind==="sale"?`${available} disponible${available>1?"s":""}`:`Capacité : ${kg(location.capacity_weight)}`}</small></span><input type="number" min="0" step="1" value="0" data-location-id="${location.id}" ${kind==="sale"?`max="${available}"`:""}></label>`;}).join("") || '<p class="compta-empty-inline">Aucun lieu de stockage disponible.</p>';
+    if(rebuildAllocations || !allocation.children.length){
+      allocation.innerHTML=state.locations.map(location=>{const available=currentQty(item.id,location.id); return `<label class="compta-allocation"><span><strong>${esc(location.name)}</strong><small>${kind==="sale"?`${available} disponible${available>1?"s":""}`:`Capacité : ${kg(location.capacity_weight)}`}</small></span><input type="number" min="0" step="1" value="0" data-location-id="${location.id}" ${kind==="sale"?`max="${available}"`:""}></label>`;}).join("") || '<p class="compta-empty-inline">Aucun lieu de stockage disponible.</p>';
+    }
     const total=[...allocation.querySelectorAll("input")].reduce((sum,input)=>sum+Number(input.value||0),0);
-    status.textContent=`Répartition : ${total} / ${requested}`; status.classList.toggle("is-valid",total===requested&&requested>0); updateSummary(kind);
+    status.textContent=`Répartition : ${total} / ${requested}`;
+    status.classList.toggle("is-valid",total===requested&&requested>0);
+    updateSummary(kind);
   }
-  function updateAllLines(kind){ $(kind==="sale"?"compta-sale-lines":"compta-purchase-lines").querySelectorAll(".compta-complex-line").forEach(updateLine); }
+  function updateAllLines(kind){ $(kind==="sale"?"compta-sale-lines":"compta-purchase-lines").querySelectorAll(".compta-complex-line").forEach(line=>updateLine(line,true)); }
   function updateSummary(kind){
     const container=$(kind==="sale"?"compta-sale-lines":"compta-purchase-lines");
     const summary=$(kind==="sale"?"compta-sale-summary":"compta-purchase-summary");
@@ -161,7 +180,35 @@
     const theoreticalLabel=moneyType==="dirty"?"Valeur théorique sale":"Valeur théorique propre";
     summary.innerHTML=`<div><span>Unités</span><strong>${units}</strong></div><div><span>Poids total</span><strong>${kg(weight)}</strong></div><div><span>${theoreticalLabel}</span><strong class="${theoreticalClass}">${money(theoretical)}</strong></div><div><span>Répartition</span><strong class="${valid?"is-valid":""}">${valid?"Complète":"À compléter"}</strong></div>`;
   }
-  function simulateComplex(kind){ const label=kind==="sale"?"Vente simulée":"Achat simulé"; toast(`${label} — aucune donnée ni aucun stock n’a été modifié.`); }
+  function collectComplexLines(kind) {
+    const container=$(kind==="sale"?"compta-sale-lines":"compta-purchase-lines");
+    return [...container.querySelectorAll(".compta-complex-line")].map(line=>({
+      item_id: line.querySelector(".compta-line-item").value,
+      quantity: Number(line.querySelector(".compta-line-qty").value||0),
+      allocations: [...line.querySelectorAll(".compta-allocation input")]
+        .map(input=>({location_id:input.dataset.locationId,quantity:Number(input.value||0)}))
+        .filter(entry=>entry.quantity>0)
+    }));
+  }
+  function validateComplexLines(lines) {
+    if(!lines.length) throw new Error("Ajoute au moins un item.");
+    lines.forEach(line=>{
+      if(!line.item_id || line.quantity<=0) throw new Error("Vérifie les items et les quantités.");
+      const allocated=line.allocations.reduce((sum,a)=>sum+a.quantity,0);
+      if(allocated!==line.quantity) throw new Error("La répartition de chaque item doit correspondre à sa quantité.");
+    });
+  }
+  async function createComplexOperation(payload) {
+    const {error}=await supabaseClient.rpc("create_complex_accounting_operation",payload);
+    if(error) throw error;
+    await Promise.all([loadAccounting(),loadReferenceData(true)]);
+  }
+  function resetComplexForm(kind) {
+    const form=$(kind==="sale"?"compta-sale-form":"compta-purchase-form");
+    form.reset();
+    const container=$(kind==="sale"?"compta-sale-lines":"compta-purchase-lines");
+    container.innerHTML=""; addLine(kind); updateSummary(kind);
+  }
   function switchBlackOperation(operation){
     const withdrawal=operation==="withdrawal";
     $("compta-black-operation").value=operation;
@@ -178,12 +225,32 @@
   ["compta-sale-money","compta-purchase-money"].forEach(id=>$(id)?.addEventListener("change",()=>updateSummary(id.includes("sale")?"sale":"purchase")));
   page.querySelector("[data-compta-add-sale-line]").addEventListener("click",()=>addLine("sale"));
   page.querySelector("[data-compta-add-purchase-line]").addEventListener("click",()=>addLine("purchase"));
-  page.addEventListener("input",event=>{const line=event.target.closest(".compta-complex-line"); if(line) updateLine(line);});
-  page.addEventListener("change",event=>{const line=event.target.closest(".compta-complex-line"); if(line) updateLine(line);});
+  page.addEventListener("input",event=>{const line=event.target.closest(".compta-complex-line"); if(line) updateLine(line,false);});
+  page.addEventListener("change",event=>{const line=event.target.closest(".compta-complex-line"); if(line) updateLine(line,event.target.classList.contains("compta-line-item"));});
   page.addEventListener("click",event=>{const remove=event.target.closest(".compta-line-remove"); if(remove){const line=remove.closest(".compta-complex-line"),kind=line.dataset.kind; line.remove(); if(!$(kind==="sale"?"compta-sale-lines":"compta-purchase-lines").children.length)addLine(kind); updateSummary(kind);}});
-  $("compta-sale-form").addEventListener("submit",event=>{event.preventDefault(); simulateComplex("sale");});
-  $("compta-purchase-form").addEventListener("submit",event=>{event.preventDefault(); simulateComplex("purchase");});
-  $("compta-service-form").addEventListener("submit",event=>{event.preventDefault(); toast("Dépense de service simulée — aucune écriture réelle.");});
+  $("compta-sale-form").addEventListener("submit",async event=>{
+    event.preventDefault(); const button=event.submitter; button.disabled=true;
+    try{
+      const lines=collectComplexLines("sale"); validateComplexLines(lines);
+      await createComplexOperation({p_operation:"item_sale",p_money_type:$("compta-sale-money").value,p_amount:Number($("compta-sale-amount").value||0),p_counterparty:$("compta-sale-contact").value.trim(),p_label:$("compta-sale-label").value.trim()||null,p_lines:lines,p_service_name:null});
+      resetComplexForm("sale"); toast("Vente enregistrée : stocks et comptabilité mis à jour.");
+    }catch(error){toast(error.message||"Impossible d’enregistrer la vente.");}finally{button.disabled=false;}
+  });
+  $("compta-purchase-form").addEventListener("submit",async event=>{
+    event.preventDefault(); const button=event.submitter; button.disabled=true;
+    try{
+      const lines=collectComplexLines("purchase"); validateComplexLines(lines);
+      await createComplexOperation({p_operation:"item_purchase",p_money_type:$("compta-purchase-money").value,p_amount:Number($("compta-purchase-amount").value||0),p_counterparty:$("compta-purchase-contact").value.trim(),p_label:$("compta-purchase-label").value.trim()||null,p_lines:lines,p_service_name:null});
+      resetComplexForm("purchase"); toast("Achat enregistré : stocks et comptabilité mis à jour.");
+    }catch(error){toast(error.message||"Impossible d’enregistrer l’achat.");}finally{button.disabled=false;}
+  });
+  $("compta-service-form").addEventListener("submit",async event=>{
+    event.preventDefault(); const button=event.submitter; button.disabled=true;
+    try{
+      await createComplexOperation({p_operation:"service_expense",p_money_type:$("compta-service-money").value,p_amount:Number($("compta-service-amount").value||0),p_counterparty:$("compta-service-contact").value.trim(),p_label:$("compta-service-notes").value.trim()||null,p_lines:[],p_service_name:$("compta-service-name").value.trim()});
+      event.target.reset(); toast("Dépense de service enregistrée.");
+    }catch(error){toast(error.message||"Impossible d’enregistrer la dépense.");}finally{button.disabled=false;}
+  });
   $("compta-quick-income-form").addEventListener("submit", async event=>{
     event.preventDefault();
     const amount=Number($("compta-quick-income-amount").value||0); if(amount<=0) return toast("Saisis un montant valide.");
@@ -214,6 +281,5 @@
   });
   $("compta-history-search")?.addEventListener("input",renderHistory);
   $("compta-history-account")?.addEventListener("change",renderHistory);
-  page.querySelectorAll("[data-compta-demo]").forEach(btn=>btn.addEventListener("click",()=>toast("Cette opération complexe sera connectée lors de la prochaine phase.")));
   loadReferenceData(); loadAccounting(); setupRealtime();
 })();

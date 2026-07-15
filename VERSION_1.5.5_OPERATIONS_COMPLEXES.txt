@@ -1,0 +1,6 @@
+Ashen Wolves HUB v1.5.5 — Opérations complexes
+
+- Vente d’items reliée atomiquement aux Stocks et à la Comptabilité.
+- Achat d’items relié atomiquement aux Stocks et à la Comptabilité.
+- Achat de service relié au solde et à l’historique.
+- Historique Stocks enrichi avec les motifs Achat et Revente.

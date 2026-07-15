@@ -355,3 +355,9 @@ Les opérations comptables simples sont stockées dans `accounting_transactions`
 La fonction RPC `create_simple_accounting_operation` gère les recettes rapides, paiements aux membres, transferts vers la caisse noire, ajouts et retraits de caisse noire. Les transferts vers la caisse noire créent deux écritures liées dans une seule transaction.
 
 Les opérations complexes liées aux Stocks restent volontairement en mode prototype jusqu'à la prochaine phase.
+
+## Comptabilité v1.5.5 — opérations complexes
+
+Les ventes et achats d’items utilisent la RPC `create_complex_accounting_operation` afin de modifier les soldes, quantités, poids des lieux et historiques dans une seule transaction SQL. Une erreur annule intégralement l’opération.
+
+Les mouvements physiques conservent `deposit` / `withdrawal` et utilisent `source_type` pour distinguer `manual`, `purchase` et `resale`.
