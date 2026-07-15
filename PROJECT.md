@@ -330,3 +330,11 @@ Les badges du Stock global utilisent désormais des couleurs explicites et forc�
 - Le module Comptabilité utilise désormais le mode de page pleine largeur du HUB.
 - Le tableau de bord Fleeca est centré dans la fenêtre.
 - Le bloc IBAN a été retiré de la maquette.
+
+
+## Comptabilité v1.5.2 — Prototype Compte du club
+
+- Trois parcours visuels : vente d’items, achat d’items et achat de service.
+- Les références sont lues depuis les tables existantes Stocks et Annuaire.
+- Aucune écriture Supabase ni modification de stock/solde dans cette phase.
+- La prochaine phase ajoutera les RPC atomiques et l’historique comptable.

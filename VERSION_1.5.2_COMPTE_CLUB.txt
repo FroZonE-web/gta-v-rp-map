@@ -1,0 +1,8 @@
+ASHEN WOLVES HUB v1.5.2 — COMPTE DU CLUB
+
+Prototype fonctionnel sans écriture Supabase :
+- vente d'items avec répartition par stockage ;
+- achat d'items avec répartition vers les stockages ;
+- achat de service ;
+- chargement des items, lieux, quantités, membres et contacts existants ;
+- aucune validation ne modifie encore les stocks ni les soldes.
