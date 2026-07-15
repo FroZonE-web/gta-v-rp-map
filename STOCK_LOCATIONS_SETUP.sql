@@ -4,7 +4,7 @@
 create table if not exists public.stock_locations (
   id uuid primary key default gen_random_uuid(),
   name text not null unique check (char_length(trim(name)) between 1 and 120),
-  type text not null check (type in ('home', 'vehicle')),
+  type text not null check (type in ('home', 'vehicle', 'fridge')),
   capacity_weight numeric(14,3) not null check (capacity_weight > 0),
   location text check (location is null or char_length(trim(location)) <= 220),
   notes text check (notes is null or char_length(notes) <= 800),

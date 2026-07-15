@@ -1,0 +1,6 @@
+Ashen Wolves HUB v1.4.1 — Type de stockage Frigo
+
+- Ajout du type Frigo dans le formulaire de lieu de stockage.
+- Ajout du filtre Frigos.
+- Regroupement dédié avec icône ❄️.
+- Migration Supabase pour étendre la contrainte de type.

@@ -107,8 +107,14 @@
   function locationCard(location) {
     const used = Number(location.used_weight || 0), capacity = Number(location.capacity_weight || 0);
     const percent = capacity > 0 ? Math.min(100, Math.max(0, used / capacity * 100)) : 0;
-    const typeName = location.type === "vehicle" ? "Véhicule" : "Habitation";
-    const icon = location.type === "vehicle" ? "🚗" : "🏠";
+    const locationTypes = {
+      home: { name: "Habitation", icon: "🏠" },
+      vehicle: { name: "Véhicule", icon: "🚗" },
+      fridge: { name: "Frigo", icon: "❄️" }
+    };
+    const currentType = locationTypes[location.type] || locationTypes.home;
+    const typeName = currentType.name;
+    const icon = currentType.icon;
     const fillColor = percent >= 95 ? "#d84a5b" : percent >= 80 ? "#e08f23" : `hsl(${272 - (percent/80)*242} 62% 55%)`;
     return `<article class="stocks-location-card" data-location-detail="${location.id}">
       <div class="stocks-location-card-head"><div class="stocks-location-icon">${icon}</div><div><span class="stocks-location-type">${typeName}</span><h3>${esc(location.name)}</h3></div></div>
@@ -125,7 +131,7 @@
     const rows = locations.filter(l => (type === "all" || l.type === type) && (!q || [l.name, l.location, l.notes].some(v => String(v || "").toLowerCase().includes(q))));
     els.locationCounter.textContent = `${rows.length} lieu${rows.length > 1 ? "x" : ""}`;
     if (!rows.length) { els.locationsContent.innerHTML = '<div class="stocks-empty">Aucun lieu de stockage à afficher.</div>'; return; }
-    const groups = [["home", "Habitations", "🏠"], ["vehicle", "Véhicules", "🚗"]];
+    const groups = [["home", "Habitations", "🏠"], ["vehicle", "Véhicules", "🚗"], ["fridge", "Frigos", "❄️"]];
     els.locationsContent.innerHTML = groups.map(([key, title, icon]) => {
       const groupRows = rows.filter(l => l.type === key);
       if (!groupRows.length) return "";

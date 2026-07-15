@@ -242,11 +242,11 @@ Prochaines phases prévues :
 
 ### Stocks — Phase 2 : lieux de stockage
 
-La table `stock_locations` répertorie les habitations et véhicules.
+La table `stock_locations` répertorie les habitations, véhicules et frigos.
 
 Champs principaux : nom, type, capacité maximale, localisation, notes et poids utilisé. Le poids utilisé reste à zéro jusqu'à la mise en place des mouvements, puis sera maintenu automatiquement par la base.
 
-Permissions provisoires : lecture, création et modification publiques ; suppression administrateur. La localisation d'un véhicule peut être modifiée directement depuis sa carte sans ouvrir le formulaire complet.
+Permissions provisoires : lecture, création et modification publiques ; suppression administrateur. La localisation d'un véhicule peut être modifiée directement depuis sa carte sans ouvrir le formulaire complet. Les frigos utilisent la même logique de capacité, de contenu et de mouvements que les autres lieux.
 
 ### Stocks — Phase 3 : mouvements
 
