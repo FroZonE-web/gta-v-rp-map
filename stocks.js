@@ -7,8 +7,8 @@
     grid: $("stocks-items-grid"), search: $("stocks-search"), counter: $("stocks-counter"), refresh: $("stocks-refresh"), status: $("stocks-status"),
     addItem: $("stocks-add-item"), addCategory: $("stocks-add-category"), itemDialog: $("stocks-item-dialog"), itemForm: $("stocks-item-form"), categoryDialog: $("stocks-category-dialog"), categoryForm: $("stocks-category-form"),
     locationSearch: $("stocks-location-search"), locationFilter: $("stocks-location-type-filter"), locationCounter: $("stocks-location-counter"), locationRefresh: $("stocks-location-refresh"), locationStatus: $("stocks-location-status"), locationsContent: $("stocks-locations-content"), addLocation: $("stocks-add-location"), locationDialog: $("stocks-location-dialog"), locationForm: $("stocks-location-form"), quickDialog: $("stocks-location-quick-dialog"), quickForm: $("stocks-location-quick-form"),
-    movementSearch: $("stocks-movement-search"), movementTypeFilter: $("stocks-movement-type-filter"), movementLocationFilter: $("stocks-movement-location-filter"), movementCounter: $("stocks-movement-counter"), movementStatus: $("stocks-movement-status"), movementsList: $("stocks-movements-list"), addMovement: $("stocks-add-movement"), movementDialog: $("stocks-movement-dialog"), movementForm: $("stocks-movement-form"),
-    globalSearch: $("stocks-global-search"), globalCategoryFilter: $("stocks-global-category-filter"), globalStateFilter: $("stocks-global-state-filter"), globalCounter: $("stocks-global-counter"), globalRefresh: $("stocks-global-refresh"), globalStatus: $("stocks-global-status"), globalList: $("stocks-global-list"), globalDetailDialog: $("stocks-global-detail-dialog"), globalDetail: $("stocks-global-detail")
+    movementSearch: $("stocks-movement-search"), bulkMovement: $("stocks-add-bulk-movement"), bulkDialog: $("stocks-bulk-movement-dialog"), bulkForm: $("stocks-bulk-movement-form"), movementTypeFilter: $("stocks-movement-type-filter"), movementLocationFilter: $("stocks-movement-location-filter"), movementCounter: $("stocks-movement-counter"), movementStatus: $("stocks-movement-status"), movementsList: $("stocks-movements-list"), addMovement: $("stocks-add-movement"), movementDialog: $("stocks-movement-dialog"), movementForm: $("stocks-movement-form"),
+    globalSearch: $("stocks-global-search"), globalCategoryFilter: $("stocks-global-category-filter"), globalSort: $("stocks-global-sort"), globalStateFilter: $("stocks-global-state-filter"), globalCounter: $("stocks-global-counter"), globalRefresh: $("stocks-global-refresh"), globalStatus: $("stocks-global-status"), globalList: $("stocks-global-list"), globalDetailDialog: $("stocks-global-detail-dialog"), globalDetail: $("stocks-global-detail"), locationDetailDialog: $("stocks-location-detail-dialog"), locationDetail: $("stocks-location-detail")
   };
 
   let items = [], categories = [], locations = [], movements = [], balances = [];
@@ -82,7 +82,7 @@
           <div class="stocks-card-head"><h3>${esc(i.name)}</h3><span class="stocks-badge">${esc(i.stock_categories?.name || "Sans catégorie")}</span></div>
           <div class="stocks-card-data">
             <div><span>Poids</span><strong>${kg(i.unit_weight)}</strong></div><div><span>Seuil global</span><strong>${i.critical_threshold ?? "—"}</strong></div>
-            <div><span>Valeur propre</span><strong>${money(i.clean_value)}</strong></div><div><span>Valeur sale</span><strong>${money(dirtyValue(i))}</strong></div>
+            <div><span>Valeur propre</span><strong class="money-clean">${money(i.clean_value)}</strong></div><div><span>Valeur sale</span><strong class="money-dirty">${money(dirtyValue(i))}</strong></div>
           </div>
           <div class="stocks-card-actions"><button data-edit-item="${i.id}">Modifier</button>${isAdmin ? `<button class="danger" data-delete-item="${i.id}">Supprimer</button>` : ""}</div>
         </div>
@@ -93,9 +93,13 @@
     if (locationsLoaded && !force) return renderLocations();
     els.locationStatus.textContent = "Chargement…"; els.locationRefresh.disabled = true;
     try {
-      const { data, error } = await supabaseClient.from("stock_locations").select("*").order("type").order("name");
-      if (error) throw error;
-      locations = data || []; locationsLoaded = true; els.locationStatus.textContent = ""; renderLocations();
+      const [locationsRes, itemsRes, balancesRes] = await Promise.all([
+        supabaseClient.from("stock_locations").select("*").order("type").order("name"),
+        supabaseClient.from("stock_items").select("*, stock_categories(name)").order("name"),
+        supabaseClient.from("stock_balances").select("*")
+      ]);
+      for (const result of [locationsRes, itemsRes, balancesRes]) if (result.error) throw result.error;
+      locations = locationsRes.data || []; items = itemsRes.data || []; balances = balancesRes.data || []; itemsLoaded = locationsLoaded = true; els.locationStatus.textContent = ""; renderLocations();
     } catch (error) {
       console.error(error); els.locationStatus.textContent = "Impossible de charger les lieux. Exécute STOCK_LOCATIONS_SETUP.sql dans Supabase.";
     } finally { els.locationRefresh.disabled = false; }
@@ -105,12 +109,13 @@
     const percent = capacity > 0 ? Math.min(100, Math.max(0, used / capacity * 100)) : 0;
     const typeName = location.type === "vehicle" ? "Véhicule" : "Habitation";
     const icon = location.type === "vehicle" ? "🚗" : "🏠";
-    return `<article class="stocks-location-card">
+    const fillColor = percent >= 95 ? "#d84a5b" : percent >= 80 ? "#e08f23" : `hsl(${272 - (percent/80)*242} 62% 55%)`;
+    return `<article class="stocks-location-card" data-location-detail="${location.id}">
       <div class="stocks-location-card-head"><div class="stocks-location-icon">${icon}</div><div><span class="stocks-location-type">${typeName}</span><h3>${esc(location.name)}</h3></div></div>
       <button class="stocks-location-address" data-quick-location="${location.id}" title="Modifier rapidement la localisation"><span>📍</span><strong>${esc(location.location || "Localisation non renseignée")}</strong><small>Modifier</small></button>
       <div class="stocks-capacity-row"><span>Remplissage</span><strong>${kg(used)} / ${kg(capacity)}</strong></div>
-      <div class="stocks-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(percent)}"><span style="width:${percent}%"></span></div>
-      <div class="stocks-location-metrics"><div><span>Utilisé</span><strong>${kg(used)}</strong></div><div><span>Restant</span><strong>${kg(Math.max(0, capacity-used))}</strong></div><div><span>Rempli</span><strong>${Math.round(percent)} %</strong></div></div>
+      <div class="stocks-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(percent)}"><span style="width:${percent}%;background:${fillColor}"></span></div>
+      <div class="stocks-location-metrics"><div><span>Utilisé</span><strong>${kg(used)}</strong></div><div><span>Restant</span><strong>${kg(Math.max(0, capacity-used))}</strong></div><div><span>Rempli</span><strong style="color:${fillColor}">${Math.round(percent)} %</strong></div></div>
       ${location.notes ? `<p class="stocks-location-notes">${esc(location.notes)}</p>` : ""}
       <div class="stocks-card-actions"><button data-edit-location="${location.id}">Modifier</button>${isAdmin ? `<button class="danger" data-delete-location="${location.id}">Supprimer</button>` : ""}</div>
     </article>`;
@@ -174,7 +179,9 @@
       const matchesCategory = category === "all" || String(row.item.category_id) === category;
       const matchesState = state === "all" || (state === "critical" && row.critical) || (state === "present" && row.quantity > 0) || (state === "empty" && row.quantity === 0);
       return matchesText && matchesCategory && matchesState;
-    });
+    }).sort((a,b) => els.globalSort.value === "category"
+      ? String(a.item.stock_categories?.name || "").localeCompare(String(b.item.stock_categories?.name || ""), "fr", {sensitivity:"base"}) || a.item.name.localeCompare(b.item.name, "fr", {sensitivity:"base"})
+      : a.item.name.localeCompare(b.item.name, "fr", {sensitivity:"base"}));
     const totals = all.reduce((acc, row) => ({
       weight: acc.weight + row.totalWeight, clean: acc.clean + row.cleanTotal, dirty: acc.dirty + row.dirtyTotal, alerts: acc.alerts + (row.critical ? 1 : 0)
     }), { weight: 0, clean: 0, dirty: 0, alerts: 0 });
@@ -194,8 +201,8 @@
       <span class="stocks-global-name"><strong>${esc(row.item.name)}</strong><small>${esc(row.item.stock_categories?.name || "Sans catégorie")}</small></span>
       <span><small>Quantité</small><strong>${row.quantity}</strong></span>
       <span><small>Poids total</small><strong>${kg(row.totalWeight)}</strong></span>
-      <span><small>Valeur propre</small><strong>${money(row.cleanTotal)}</strong></span>
-      <span><small>Valeur sale</small><strong>${money(row.dirtyTotal)}</strong></span>
+      <span><small>Valeur propre</small><strong class="money-clean">${money(row.cleanTotal)}</strong></span>
+      <span><small>Valeur sale</small><strong class="money-dirty">${money(row.dirtyTotal)}</strong></span>
       <span class="stocks-global-state ${row.stockState}">${stateLabel}${thresholdLabel}</span>
     </button>`;
     }).join("");
@@ -260,9 +267,14 @@
   }
 
   function fillCategories(selected = "") {
-    const sel = $("stocks-item-category");
-    sel.innerHTML = '<option value="">Sélectionner…</option>' + categories.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join("");
-    sel.value = selected || "";
+    const input = $("stocks-item-category"), list = $("stocks-item-category-list");
+    list.innerHTML = categories.map(c => `<option value="${esc(c.name)}"></option>`).join("");
+    const category = categories.find(c => String(c.id) === String(selected));
+    input.value = category?.name || "";
+  }
+  function selectedCategoryId() {
+    const name = $("stocks-item-category").value.trim().toLowerCase();
+    return categories.find(c => c.name.trim().toLowerCase() === name)?.id || null;
   }
   function openItem(item = null) {
     editingItemId = item?.id || null;
@@ -300,7 +312,7 @@
     const item = selectedMovementItem(), location = selectedMovementLocation();
     const quantity = Math.max(0, Number($("stocks-movement-quantity").value || 0));
     const type = $("stocks-movement-type").value;
-    $("stocks-movement-item-preview").innerHTML = item ? `${item.image_url ? `<img src="${esc(item.image_url)}" alt="">` : '<span>📦</span>'}<div><strong>${esc(item.name)}</strong><small>${kg(item.unit_weight)} par unité</small></div>` : '<span class="stocks-movement-preview-empty">Sélectionne un item</span>';
+    $("stocks-movement-item-preview").innerHTML = item ? `${item.image_url ? `<img src="${esc(item.image_url)}" alt="">` : '<span>📦</span>'}<div><strong>${esc(item.name)}</strong><small>${esc(item.stock_categories?.name || "Sans catégorie")} · ${kg(item.unit_weight)} par unité</small></div>` : '<span class="stocks-movement-preview-empty">Sélectionne un item</span>';
     const delta = item ? Number(item.unit_weight || 0) * quantity : 0;
     const available = item && location ? currentBalance(item.id, location.id) : 0;
     const used = Number(location?.used_weight || 0), capacity = Number(location?.capacity_weight || 0);
@@ -309,6 +321,46 @@
       <div><span>Poids du mouvement</span><strong>${kg(delta)}</strong></div>
       <div><span>Disponible dans ce lieu</span><strong>${available} unité${available > 1 ? "s" : ""}</strong></div>
       <div><span>Poids après mouvement</span><strong>${location ? `${kg(after)} / ${kg(capacity)}` : "—"}</strong></div>`;
+  }
+
+  function openLocationDetail(locationId) {
+    const location = locations.find(l => String(l.id) === String(locationId)); if (!location) return;
+    const rows = balances.filter(b => String(b.location_id) === String(location.id) && Number(b.quantity) > 0).map(b => {
+      const item = items.find(i => String(i.id) === String(b.item_id));
+      const quantity = Number(b.quantity || 0);
+      return item ? { item, quantity, weight: quantity * Number(item.unit_weight || 0), clean: quantity * Number(item.clean_value || 0), dirty: quantity * dirtyValue(item) } : null;
+    }).filter(Boolean).sort((a,b)=>a.item.name.localeCompare(b.item.name,"fr",{sensitivity:"base"}));
+    const used = Number(location.used_weight || 0), capacity = Number(location.capacity_weight || 0), percent = capacity ? Math.min(100, used/capacity*100) : 0;
+    const list = rows.length ? rows.map(r => `<div class="stocks-location-detail-row"><span class="stocks-global-image">${r.item.image_url ? `<img src="${esc(r.item.image_url)}" alt="">` : "📦"}</span><span class="stocks-global-name"><strong>${esc(r.item.name)}</strong><small>${esc(r.item.stock_categories?.name || "Sans catégorie")}</small></span><span><small>Quantité</small><strong>${r.quantity}</strong></span><span><small>Poids</small><strong>${kg(r.weight)}</strong></span><span><small>Propre</small><strong class="money-clean">${money(r.clean)}</strong></span><span><small>Sale</small><strong class="money-dirty">${money(r.dirty)}</strong></span></div>`).join("") : '<p class="stocks-global-no-distribution">Ce lieu ne contient aucun item.</p>';
+    els.locationDetail.innerHTML = `<div class="stocks-dialog-head"><div><p>Contenu du stockage</p><h2>${esc(location.name)}</h2></div><button type="button" data-location-detail-close>×</button></div><div class="stocks-global-detail-summary"><div><span>Utilisé</span><strong>${kg(used)}</strong></div><div><span>Restant</span><strong>${kg(Math.max(0,capacity-used))}</strong></div><div><span>Remplissage</span><strong>${Math.round(percent)} %</strong></div></div><div class="stocks-location-detail-list">${list}</div>`;
+    els.locationDetail.querySelector("[data-location-detail-close]").onclick=()=>els.locationDetailDialog.close();
+    els.locationDetailDialog.showModal();
+  }
+
+  function bulkLineTemplate() {
+    const options = items.map(i => `<option value="${i.id}">${esc(i.name)}</option>`).join("");
+    return `<div class="stocks-bulk-line"><select class="stocks-bulk-item" required><option value="">Sélectionner un item…</option>${options}</select><input class="stocks-bulk-qty" type="number" min="1" step="1" value="1" required><div class="stocks-bulk-item-preview"></div><button type="button" class="stocks-bulk-remove" aria-label="Supprimer">×</button></div>`;
+  }
+  async function openBulkMovement() {
+    if (!itemsLoaded || !locationsLoaded || !balances.length) await loadMovements(true);
+    $("stocks-bulk-location").innerHTML = '<option value="">Sélectionner un lieu…</option>' + locations.map(l=>`<option value="${l.id}">${esc(l.name)}</option>`).join("");
+    $("stocks-bulk-type").value="deposit"; $("stocks-bulk-actor").value=""; $("stocks-bulk-lines").innerHTML=bulkLineTemplate(); $("stocks-bulk-error").hidden=true; updateBulkPreview(); els.bulkDialog.showModal();
+  }
+  function updateBulkPreview() {
+    const location = locations.find(l=>String(l.id)===$("stocks-bulk-location").value), type=$("stocks-bulk-type").value;
+    let weight=0, units=0;
+    document.querySelectorAll(".stocks-bulk-line").forEach(line=>{ const item=items.find(i=>String(i.id)===line.querySelector(".stocks-bulk-item").value), qty=Math.max(0,Number(line.querySelector(".stocks-bulk-qty").value||0)); units+=qty; weight+=(item?Number(item.unit_weight||0)*qty:0); line.querySelector(".stocks-bulk-item-preview").innerHTML=item?`${item.image_url?`<img src="${esc(item.image_url)}" alt="">`:"📦"}<span><strong>${esc(item.name)}</strong><small>${esc(item.stock_categories?.name||"Sans catégorie")} · ${kg(item.unit_weight)}</small></span>`:""; });
+    const used=Number(location?.used_weight||0), after=type==="deposit"?used+weight:Math.max(0,used-weight);
+    $("stocks-bulk-preview").innerHTML=`<div><span>Total d’unités</span><strong>${units}</strong></div><div><span>Poids total</span><strong>${kg(weight)}</strong></div><div><span>Poids après mouvement</span><strong>${location?`${kg(after)} / ${kg(location.capacity_weight)}`:"—"}</strong></div>`;
+  }
+  async function saveBulkMovement(e) {
+    e.preventDefault(); const submit=els.bulkForm.querySelector('[type="submit"]'); submit.disabled=true;
+    try {
+      const entries=[...document.querySelectorAll(".stocks-bulk-line")].map(line=>({item_id:line.querySelector(".stocks-bulk-item").value,quantity:Number(line.querySelector(".stocks-bulk-qty").value)}));
+      if (!entries.length || entries.some(x=>!x.item_id || x.quantity<=0)) throw new Error("Complète toutes les lignes.");
+      const {error}=await supabaseClient.rpc("create_stock_movements_bulk",{p_location_id:$("stocks-bulk-location").value,p_movement_type:$("stocks-bulk-type").value,p_entries:entries,p_actor_label:$("stocks-bulk-actor").value.trim()||null});
+      if(error) throw error; els.bulkDialog.close(); invalidateAll(); await loadMovements(true);
+    } catch(error){ $("stocks-bulk-error").textContent=error.message||"Mouvement multiple impossible."; $("stocks-bulk-error").hidden=false; } finally {submit.disabled=false;}
   }
 
   async function uploadImage(file) {
@@ -322,7 +374,8 @@
     e.preventDefault(); const existing = items.find(i => String(i.id) === String(editingItemId));
     try {
       const file = $("stocks-item-image").files[0], imageUrl = file ? await uploadImage(file) : existing?.image_url || null;
-      const payload = { name: $("stocks-item-name").value.trim(), category_id: $("stocks-item-category").value, unit_weight: Number($("stocks-item-weight").value), clean_value: Number($("stocks-item-clean").value), dirty_mode: $("stocks-dirty-mode").value, dirty_input: Number($("stocks-dirty-input").value), critical_threshold: $("stocks-item-threshold").value === "" ? null : Number($("stocks-item-threshold").value), image_url: imageUrl };
+      const categoryId = selectedCategoryId(); if (!categoryId) throw new Error("Sélectionne une catégorie existante dans les suggestions.");
+      const payload = { name: $("stocks-item-name").value.trim(), category_id: selectedCategoryId(), unit_weight: Number($("stocks-item-weight").value), clean_value: Number($("stocks-item-clean").value), dirty_mode: $("stocks-dirty-mode").value, dirty_input: Number($("stocks-dirty-input").value), critical_threshold: $("stocks-item-threshold").value === "" ? null : Number($("stocks-item-threshold").value), image_url: imageUrl };
       const query = editingItemId ? supabaseClient.from("stock_items").update(payload).eq("id", editingItemId) : supabaseClient.from("stock_items").insert(payload);
       const { error } = await query; if (error) throw error;
       els.itemDialog.close(); invalidateAll(); await loadItems(true);
@@ -407,30 +460,34 @@
 
   document.querySelectorAll("[data-stocks-tab]").forEach(button => button.onclick = () => switchTab(button.dataset.stocksTab));
   els.addItem.onclick = () => openItem(); els.addCategory.onclick = () => { $("stocks-category-error").hidden = true; els.categoryDialog.showModal(); };
-  els.addLocation.onclick = () => openLocation(); els.addMovement.onclick = openMovement;
+  els.addLocation.onclick = () => openLocation(); els.addMovement.onclick = openMovement; els.bulkMovement.onclick = openBulkMovement;
   els.refresh.onclick = () => { itemsLoaded = false; loadItems(true); }; els.search.oninput = renderItems;
   els.locationRefresh.onclick = () => { locationsLoaded = false; loadLocations(true); }; els.locationSearch.oninput = renderLocations; els.locationFilter.onchange = renderLocations;
-  els.globalRefresh.onclick = () => { globalLoaded = false; loadGlobal(true); }; els.globalSearch.oninput = renderGlobal; els.globalCategoryFilter.onchange = renderGlobal; els.globalStateFilter.onchange = renderGlobal;
+  els.globalRefresh.onclick = () => { globalLoaded = false; loadGlobal(true); }; els.globalSearch.oninput = renderGlobal; els.globalCategoryFilter.onchange = renderGlobal; els.globalSort.onchange = renderGlobal; els.globalStateFilter.onchange = renderGlobal;
   els.movementSearch.oninput = renderMovements; els.movementTypeFilter.onchange = renderMovements; els.movementLocationFilter.onchange = renderMovements;
   $("stocks-dirty-mode").onchange = previewDirty; $("stocks-dirty-input").oninput = previewDirty; $("stocks-item-clean").oninput = previewDirty;
   ["stocks-movement-item", "stocks-movement-location", "stocks-movement-type", "stocks-movement-quantity"].forEach(id => $(id).addEventListener("input", updateMovementPreview));
   $("stocks-item-image").onchange = e => { const f = e.target.files[0]; $("stocks-image-preview").innerHTML = f ? `<img src="${URL.createObjectURL(f)}" alt="Aperçu">` : "Aucune image sélectionnée"; };
-  els.itemForm.addEventListener("submit", saveItem); els.categoryForm.addEventListener("submit", saveCategory); els.locationForm.addEventListener("submit", saveLocation); els.quickForm.addEventListener("submit", saveQuickLocation); els.movementForm.addEventListener("submit", saveMovement);
+  els.itemForm.addEventListener("submit", saveItem); els.categoryForm.addEventListener("submit", saveCategory); els.locationForm.addEventListener("submit", saveLocation); els.quickForm.addEventListener("submit", saveQuickLocation); els.movementForm.addEventListener("submit", saveMovement); els.bulkForm.addEventListener("submit", saveBulkMovement);
   document.querySelectorAll("[data-stocks-close]").forEach(b => b.onclick = () => els.itemDialog.close());
   document.querySelectorAll("[data-stocks-category-close]").forEach(b => b.onclick = () => els.categoryDialog.close());
   document.querySelectorAll("[data-stocks-location-close]").forEach(b => b.onclick = () => els.locationDialog.close());
   document.querySelectorAll("[data-stocks-quick-close]").forEach(b => b.onclick = () => els.quickDialog.close());
-  document.querySelectorAll("[data-stocks-movement-close]").forEach(b => b.onclick = () => els.movementDialog.close());
-  [els.itemDialog, els.categoryDialog, els.locationDialog, els.quickDialog, els.globalDetailDialog, els.movementDialog].forEach(d => d.addEventListener("click", e => { if (e.target === d) d.close(); }));
+  document.querySelectorAll("[data-stocks-movement-close]").forEach(b => b.onclick = () => els.movementDialog.close()); document.querySelectorAll("[data-stocks-bulk-close]").forEach(b => b.onclick = () => els.bulkDialog.close());
+  [els.itemDialog, els.categoryDialog, els.locationDialog, els.quickDialog, els.globalDetailDialog, els.locationDetailDialog, els.movementDialog, els.bulkDialog].forEach(d => d.addEventListener("click", e => { if (e.target === d) d.close(); }));
+  $("stocks-bulk-add-line").onclick=()=>{ $("stocks-bulk-lines").insertAdjacentHTML("beforeend",bulkLineTemplate()); updateBulkPreview(); };
+  $("stocks-bulk-lines").addEventListener("input",updateBulkPreview); $("stocks-bulk-location").addEventListener("change",updateBulkPreview); $("stocks-bulk-type").addEventListener("change",updateBulkPreview);
+  $("stocks-bulk-lines").addEventListener("click",e=>{const b=e.target.closest(".stocks-bulk-remove"); if(!b)return; const lines=document.querySelectorAll(".stocks-bulk-line"); if(lines.length>1)b.closest(".stocks-bulk-line").remove(); updateBulkPreview();});
   els.grid.addEventListener("click", e => {
     const edit = e.target.closest("[data-edit-item]"), del = e.target.closest("[data-delete-item]");
     if (edit) openItem(items.find(i => String(i.id) === edit.dataset.editItem)); if (del) removeItem(del.dataset.deleteItem);
   });
   els.locationsContent.addEventListener("click", e => {
     const edit = e.target.closest("[data-edit-location]"), del = e.target.closest("[data-delete-location]"), quick = e.target.closest("[data-quick-location]");
-    if (edit) openLocation(locations.find(l => String(l.id) === edit.dataset.editLocation));
-    if (del) removeLocation(del.dataset.deleteLocation);
-    if (quick) openQuickLocation(locations.find(l => String(l.id) === quick.dataset.quickLocation));
+    if (edit) return openLocation(locations.find(l => String(l.id) === edit.dataset.editLocation));
+    if (del) return removeLocation(del.dataset.deleteLocation);
+    if (quick) return openQuickLocation(locations.find(l => String(l.id) === quick.dataset.quickLocation));
+    const card=e.target.closest("[data-location-detail]"); if(card) openLocationDetail(card.dataset.locationDetail);
   });
   els.globalList.addEventListener("click", e => { const row = e.target.closest("[data-global-item]"); if (row) openGlobalDetail(row.dataset.globalItem); });
   window.addEventListener("hub:stocks-visible", async () => { await detectAdmin(); setupRealtime(); activeTab === "items" ? loadItems() : activeTab === "locations" ? loadLocations() : activeTab === "global" ? loadGlobal() : loadMovements(); });

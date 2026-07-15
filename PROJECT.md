@@ -303,3 +303,13 @@ Le module Stocks est considéré comme disponible à partir de la v1.4.
 
 ## Correctif v1.4.7 — couleurs des statuts Stocks
 Les badges du Stock global utilisent désormais des couleurs explicites et forcées : vert pour OK, orange pour Stock bas et rouge pour Rupture.
+
+### v1.4.1 — Améliorations Stocks
+- Consultation du contenu d’un lieu depuis sa carte.
+- Mouvement simple réordonné et aperçu enrichi avec la catégorie.
+- Mouvement multiple atomique via `create_stock_movements_bulk`.
+- Remplissage des lieux coloré progressivement, orange dès 80 %, rouge dès 95 %.
+- Cartes de la banque d’items compactées et images maintenues en tête.
+- Valeurs propres en vert et valeurs sales en rouge.
+- Stock global triable par catégorie puis nom.
+- Sélection des catégories d’items par saisie avec suggestions.

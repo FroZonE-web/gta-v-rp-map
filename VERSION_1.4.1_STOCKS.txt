@@ -1,0 +1,3 @@
+Ashen Wolves HUB v1.4.1 — Amélioration Stocks
+
+Ajoute les améliorations ergonomiques validées pour les lieux, les mouvements, la banque d’items et le stock global.

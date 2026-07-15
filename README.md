@@ -17,3 +17,7 @@ Couleurs personnalisées des badges, tableau Contacts compacté et création de 
 ## Stocks — Mouvements
 
 Pour activer les dépôts, retraits et l'historique, exécuter `STOCK_MOVEMENTS_SETUP.sql` dans l'éditeur SQL Supabase après les scripts Stocks précédents.
+
+## Ashen Wolves HUB v1.4.1 — Amélioration Stocks
+
+Pour une base Supabase existante, exécuter `STOCK_BULK_MOVEMENTS_SETUP.sql` afin d’activer les mouvements multiples atomiques. Les autres changements sont uniquement côté interface.

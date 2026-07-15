@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="reglement.css?v=1.1.1">
   <link rel="stylesheet" href="annuaire.css?v=1.2.7">
   <link rel="stylesheet" href="agenda.css?v=1.3.5">
-  <link rel="stylesheet" href="stocks.css?v=1.4.7">
+  <link rel="stylesheet" href="stocks.css?v=1.4.8">
 </head>
 
 <body class="hub-dashboard-active">
@@ -1152,6 +1152,7 @@
       <section class="stocks-toolbar stocks-global-toolbar">
         <input id="stocks-global-search" type="search" placeholder="Rechercher un item ou une catégorie…">
         <select id="stocks-global-category-filter" aria-label="Filtrer par catégorie"><option value="all">Toutes les catégories</option></select>
+        <select id="stocks-global-sort" aria-label="Trier les items"><option value="name">Nom</option><option value="category">Catégorie puis nom</option></select>
         <select id="stocks-global-state-filter" aria-label="Filtrer par état">
           <option value="all">Tous les états</option>
           <option value="critical">Items en alerte</option>
@@ -1168,7 +1169,7 @@
     <section id="stocks-movements-panel" class="stocks-panel" hidden>
       <section class="stocks-toolbar stocks-movements-toolbar">
         <input id="stocks-movement-search" type="search" placeholder="Rechercher un item, un lieu ou un auteur…">
-        <button id="stocks-add-movement" class="stocks-primary" type="button">+ Nouveau mouvement</button>
+        <button id="stocks-add-movement" class="stocks-primary" type="button">+ Mouvement simple</button><button id="stocks-add-bulk-movement" class="stocks-secondary" type="button">+ Mouvement multiple</button>
         <select id="stocks-movement-type-filter" aria-label="Filtrer par type"><option value="all">Tous les mouvements</option><option value="deposit">Dépôts</option><option value="withdrawal">Retraits</option></select>
         <select id="stocks-movement-location-filter" aria-label="Filtrer par lieu"><option value="all">Tous les lieux</option></select>
         <span id="stocks-movement-counter" class="stocks-counter">0 mouvement</span>
@@ -1183,7 +1184,7 @@
       <div class="stocks-dialog-head"><div><p>Banque d’items</p><h2 id="stocks-item-dialog-title">Nouvel item</h2></div><button type="button" data-stocks-close>×</button></div>
       <div class="stocks-form-grid">
         <label class="stocks-span-2">Nom<input id="stocks-item-name" required maxlength="120"></label>
-        <label>Catégorie<select id="stocks-item-category" required></select></label>
+        <label>Catégorie<input id="stocks-item-category" list="stocks-item-category-list" autocomplete="off" required placeholder="Commencer à écrire…"><datalist id="stocks-item-category-list"></datalist></label>
         <label>Poids unitaire (kg)<input id="stocks-item-weight" type="number" min="0" step="0.001" required></label>
         <label>Valeur propre ($)<input id="stocks-item-clean" type="number" min="0" step="0.01" required></label>
         <label>Seuil critique global<input id="stocks-item-threshold" type="number" min="0" step="1" placeholder="Facultatif"></label>
@@ -1236,15 +1237,34 @@
     <div id="stocks-global-detail"></div>
   </dialog>
 
+
+  <dialog id="stocks-location-detail-dialog" class="stocks-dialog stocks-global-detail-dialog"><div id="stocks-location-detail"></div></dialog>
+
+  <dialog id="stocks-bulk-movement-dialog" class="stocks-dialog stocks-bulk-dialog">
+    <form id="stocks-bulk-movement-form">
+      <div class="stocks-dialog-head"><div><p>Mouvements de stock</p><h2>Mouvement multiple</h2></div><button type="button" data-stocks-bulk-close>×</button></div>
+      <div class="stocks-form-grid">
+        <label class="stocks-span-2">Lieu de stockage<select id="stocks-bulk-location" required></select></label>
+        <label>Type de mouvement<select id="stocks-bulk-type" required><option value="deposit">Dépôt</option><option value="withdrawal">Retrait</option></select></label>
+        <label>Nom / identifiant de la personne<input id="stocks-bulk-actor" maxlength="100" placeholder="Facultatif"></label>
+      </div>
+      <div id="stocks-bulk-lines" class="stocks-bulk-lines"></div>
+      <button id="stocks-bulk-add-line" class="stocks-secondary stocks-bulk-add" type="button">+ Ajouter un item</button>
+      <div id="stocks-bulk-preview" class="stocks-movement-preview"></div>
+      <p id="stocks-bulk-error" class="stocks-error" hidden></p>
+      <div class="stocks-dialog-actions"><button type="button" class="stocks-secondary" data-stocks-bulk-close>Annuler</button><button class="stocks-primary" type="submit">Enregistrer tous les mouvements</button></div>
+    </form>
+  </dialog>
+
   <dialog id="stocks-movement-dialog" class="stocks-dialog">
     <form id="stocks-movement-form">
       <div class="stocks-dialog-head"><div><p>Mouvements de stock</p><h2>Nouveau mouvement</h2></div><button type="button" data-stocks-movement-close>×</button></div>
       <div class="stocks-form-grid">
-        <label>Type de mouvement<select id="stocks-movement-type" required><option value="deposit">Dépôt</option><option value="withdrawal">Retrait</option></select></label>
-        <label>Quantité<input id="stocks-movement-quantity" type="number" min="1" step="1" value="1" required></label>
+        <label class="stocks-span-2">Lieu de stockage<select id="stocks-movement-location" required></select></label>
         <label class="stocks-span-2">Item<select id="stocks-movement-item" required></select></label>
         <div id="stocks-movement-item-preview" class="stocks-movement-item-preview stocks-span-2"></div>
-        <label class="stocks-span-2">Lieu de stockage<select id="stocks-movement-location" required></select></label>
+        <label>Type de mouvement<select id="stocks-movement-type" required><option value="deposit">Dépôt</option><option value="withdrawal">Retrait</option></select></label>
+        <label>Quantité<input id="stocks-movement-quantity" type="number" min="1" step="1" value="1" required></label>
         <label class="stocks-span-2">Nom / identifiant de la personne (facultatif)<input id="stocks-movement-actor" maxlength="100" placeholder="Ex. Raven Blackwood"></label>
         <div id="stocks-movement-preview" class="stocks-movement-preview stocks-span-2"></div>
       </div>
@@ -1784,7 +1804,7 @@
   <script src="contacts.js?v=1.2.3"></script>
   <script src="law.js?v=1.2.1"></script>
   <script src="agenda.js?v=1.3.5"></script>
-  <script src="stocks.js?v=1.4.7"></script>
+  <script src="stocks.js?v=1.4.8"></script>
   <script src="hub.js?v=1.4.5"></script>
 </body>
 </html>
