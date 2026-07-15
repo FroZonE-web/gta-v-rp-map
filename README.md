@@ -25,3 +25,7 @@ Pour une base Supabase existante, exécuter `STOCK_BULK_MOVEMENTS_SETUP.sql` afi
 ## Comptabilité v1.5.3
 
 Cette version ajoute le prototype de la Caisse noire, le calcul des valeurs théoriques des opérations d'items et un thème local plus sombre pour la Comptabilité. Aucune migration SQL n'est nécessaire : les validations restent simulées.
+
+## Comptabilité v1.5.4
+
+Exécuter `COMPTABILITE_SETUP.sql` dans Supabase pour activer les soldes, recettes rapides, transferts, caisse noire, historique et temps réel.

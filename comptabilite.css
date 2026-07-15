@@ -15,3 +15,7 @@
 .compta-black-grid{display:grid;grid-template-columns:minmax(260px,.72fr) minmax(420px,1.28fr);gap:18px}.compta-black-balance{min-height:245px;display:flex;flex-direction:column;justify-content:center}.compta-black-balance span{color:#aaa3b5;font-weight:900}.compta-black-balance strong{font-size:42px;color:#4ade80;margin:16px 0 8px}.compta-black-balance small{color:#8f8998}.compta-black-actions{display:grid;align-content:start;gap:16px}.compta-black-tabs{margin:0}.compta-black-actions form{display:grid;gap:14px}.compta-black-actions label{display:grid;gap:8px;font-weight:800}
 @media(max-width:900px){.compta-black-grid{grid-template-columns:1fr}.compta-operation-summary{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:560px){.compta-operation-summary{grid-template-columns:1fr}}
+
+/* v1.5.4 — opérations comptables simples */
+.compta-simple-form{display:grid;gap:10px}.compta-history-toolbar{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:12px;margin-bottom:14px}.compta-view:not([hidden]){display:block}.compta-action-button:disabled{opacity:.55;cursor:wait}.compta-transactions-scroll .compta-empty-inline{padding:22px 4px}.compta-date{text-transform:capitalize}.compta-transaction-icon{color:#a78bfa}
+@media(max-width:680px){.compta-history-toolbar{grid-template-columns:1fr}}

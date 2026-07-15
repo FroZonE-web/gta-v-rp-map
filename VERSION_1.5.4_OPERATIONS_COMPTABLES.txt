@@ -1,0 +1,9 @@
+Ashen Wolves HUB v1.5.4 — Opérations comptables
+
+- Soldes propre, sale et caisse noire calculés depuis les écritures.
+- Recettes rapides fonctionnelles.
+- Paiements aux membres et transferts vers la caisse noire.
+- Ajouts/retraits de caisse noire avec raison obligatoire au retrait.
+- Historique et transactions récentes.
+- Synchronisation Supabase Realtime.
+- Les opérations complexes liées aux items restent en prototype.

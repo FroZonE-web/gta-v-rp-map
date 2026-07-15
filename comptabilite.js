@@ -3,7 +3,7 @@
   const page = document.getElementById("comptabilite-module");
   if (!page) return;
   const $ = (id) => document.getElementById(id);
-  const state = { items: [], locations: [], balances: [], contacts: [], members: [], loaded: false };
+  const state = { items: [], locations: [], balances: [], contacts: [], members: [], transactions: [], loaded: false, accountingLoaded: false, realtimeChannel: null };
   const esc = (value) => String(value ?? "").replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
   const money = (value) => new Intl.NumberFormat("fr-FR", { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(Number(value || 0));
   const kg = (value) => `${Number(value || 0).toLocaleString("fr-FR", { maximumFractionDigits: 3 })} kg`;
@@ -15,6 +15,78 @@
     return input;
   };
   const toast = (message) => { document.querySelector(".compta-toast")?.remove(); const el=document.createElement("div"); el.className="compta-toast"; el.textContent=message; document.body.appendChild(el); setTimeout(()=>el.remove(),2600); };
+
+  const transactionTitles = {
+    quick_income: "Recette rapide",
+    member_payment: "Paiement à un membre",
+    black_transfer_out: "Transfert vers la caisse noire",
+    black_transfer_in: "Ajout à la caisse noire",
+    black_deposit: "Ajout à la caisse noire",
+    black_withdrawal: "Retrait de la caisse noire"
+  };
+  const signedAmount = (row) => (row.direction === "credit" ? 1 : -1) * Number(row.amount || 0);
+  const formatDateHeading = (value) => new Intl.DateTimeFormat("fr-FR", { weekday:"long", day:"numeric", month:"long", year:"numeric" }).format(new Date(value));
+  const formatTime = (value) => new Intl.DateTimeFormat("fr-FR", { hour:"2-digit", minute:"2-digit" }).format(new Date(value));
+  function calculateBalances() {
+    const result = { clubClean:0, clubDirty:0, black:0 };
+    state.transactions.forEach(row => {
+      const value = signedAmount(row);
+      if (row.account === "black") result.black += value;
+      else if (row.money_type === "dirty") result.clubDirty += value;
+      else result.clubClean += value;
+    });
+    return result;
+  }
+  function renderBalances() {
+    const b = calculateBalances();
+    $("compta-clean-balance").textContent = money(b.clubClean);
+    $("compta-dirty-balance").textContent = money(b.clubDirty);
+    $("compta-black-balance-value").textContent = money(b.black);
+  }
+  function transactionHtml(row) {
+    const positive = row.direction === "credit";
+    const title = row.title || transactionTitles[row.operation_type] || "Opération comptable";
+    const detail = [row.label, row.counterparty, row.account === "black" ? "Caisse noire" : (row.money_type === "dirty" ? "Argent sale" : "Argent propre"), formatTime(row.created_at)].filter(Boolean).join(" · ");
+    return `<article class="compta-transaction"><span class="compta-transaction-icon">▣</span><div><strong>${esc(title)}</strong><small>${esc(detail)}</small></div><span class="compta-amount ${positive?"positive":"negative"}">${positive?"+":"−"} ${money(row.amount)}</span></article>`;
+  }
+  function groupedTransactionsHtml(rows) {
+    if (!rows.length) return '<p class="compta-empty-inline">Aucune opération enregistrée.</p>';
+    const groups = new Map();
+    rows.forEach(row => { const key = String(row.created_at).slice(0,10); if(!groups.has(key)) groups.set(key,[]); groups.get(key).push(row); });
+    return [...groups.entries()].map(([,items])=>`<div class="compta-date">${esc(formatDateHeading(items[0].created_at))}</div>${items.map(transactionHtml).join("")}`).join("");
+  }
+  function renderAccounting() {
+    renderBalances();
+    $("compta-recent-transactions").innerHTML = groupedTransactionsHtml(state.transactions.slice(0,12));
+    renderHistory();
+  }
+  function renderHistory() {
+    const target = $("compta-history-list"); if(!target) return;
+    const query = ($("compta-history-search")?.value || "").trim().toLocaleLowerCase("fr");
+    const account = $("compta-history-account")?.value || "all";
+    const filtered = state.transactions.filter(row => {
+      if(account !== "all" && row.account !== account) return false;
+      const haystack = [row.title,row.label,row.counterparty,row.operation_type,row.money_type].join(" ").toLocaleLowerCase("fr");
+      return !query || haystack.includes(query);
+    });
+    target.innerHTML = groupedTransactionsHtml(filtered);
+  }
+  async function loadAccounting() {
+    const { data, error } = await supabaseClient.from("accounting_transactions").select("*").order("created_at", { ascending:false }).limit(1000);
+    if(error){ console.warn(error); toast("Impossible de charger la comptabilité. Vérifie le script SQL."); return; }
+    state.transactions = data || []; state.accountingLoaded = true; renderAccounting();
+  }
+  async function createSimpleOperation(payload) {
+    const { error } = await supabaseClient.rpc("create_simple_accounting_operation", payload);
+    if(error) throw error;
+    await loadAccounting();
+  }
+  function setupRealtime() {
+    if(state.realtimeChannel) return;
+    state.realtimeChannel = supabaseClient.channel("accounting-live-v154")
+      .on("postgres_changes", { event:"*", schema:"public", table:"accounting_transactions" }, () => loadAccounting())
+      .subscribe();
+  }
 
   async function loadReferenceData(force=false) {
     if (state.loaded && !force) return;
@@ -47,6 +119,7 @@
     ["dashboard","club","history","black"].forEach(name=>$("compta-"+name+"-view").hidden=name!==view);
     $("compta-title").textContent = view === "club" ? "COMPTE DU CLUB" : view === "history" ? "HISTORIQUE" : view === "black" ? "CAISSE NOIRE" : "TABLEAU DE BORD";
     if(view==="club") { loadReferenceData().then(()=>{ if(!$("compta-sale-lines").children.length) addLine("sale"); if(!$("compta-purchase-lines").children.length) addLine("purchase"); }); }
+    if(view==="history") renderHistory();
   }
   function switchOperation(operation) {
     page.querySelectorAll("[data-compta-operation]").forEach(btn=>btn.classList.toggle("is-active",btn.dataset.comptaOperation===operation));
@@ -111,15 +184,36 @@
   $("compta-sale-form").addEventListener("submit",event=>{event.preventDefault(); simulateComplex("sale");});
   $("compta-purchase-form").addEventListener("submit",event=>{event.preventDefault(); simulateComplex("purchase");});
   $("compta-service-form").addEventListener("submit",event=>{event.preventDefault(); toast("Dépense de service simulée — aucune écriture réelle.");});
-  $("compta-black-form").addEventListener("submit",event=>{
+  $("compta-quick-income-form").addEventListener("submit", async event=>{
+    event.preventDefault();
+    const amount=Number($("compta-quick-income-amount").value||0); if(amount<=0) return toast("Saisis un montant valide.");
+    const button=event.submitter; button.disabled=true;
+    try { await createSimpleOperation({ p_operation:"quick_income", p_amount:amount, p_recipient:null, p_label:$("compta-quick-income-label").value.trim() || $("compta-quick-income-type").value }); event.target.reset(); toast("Recette enregistrée."); }
+    catch(error){ toast(error.message || "Impossible d’enregistrer la recette."); }
+    finally{ button.disabled=false; }
+  });
+  $("compta-transfer-form").addEventListener("submit", async event=>{
+    event.preventDefault();
+    const recipient=$("compta-transfer-recipient").value.trim(), amount=Number($("compta-transfer-amount").value||0); if(!recipient) return toast("Sélectionne un destinataire."); if(amount<=0) return toast("Saisis un montant valide.");
+    const button=event.submitter; button.disabled=true;
+    try { await createSimpleOperation({ p_operation:recipient.toLocaleLowerCase("fr")==="caisse noire"?"black_transfer":"member_payment", p_amount:amount, p_recipient:recipient, p_label:$("compta-transfer-label").value.trim() || null }); event.target.reset(); toast("Transfert enregistré."); }
+    catch(error){ toast(error.message || "Impossible d’enregistrer le transfert."); }
+    finally{ button.disabled=false; }
+  });
+  $("compta-black-form").addEventListener("submit",async event=>{
     event.preventDefault();
     const operation=$("compta-black-operation").value;
     const amount=Number($("compta-black-amount").value||0);
     const reason=$("compta-black-reason").value.trim();
     if(amount<=0){ toast("Saisis un montant valide."); return; }
     if(operation==="withdrawal"&&!reason){ toast("La raison du retrait est obligatoire."); $("compta-black-reason").focus(); return; }
-    toast(`${operation==="withdrawal"?"Retrait":"Ajout"} de ${money(amount)} simulé — aucune écriture réelle.`);
+    const button=event.submitter; button.disabled=true;
+    try { await createSimpleOperation({ p_operation:operation==="withdrawal"?"black_withdrawal":"black_deposit", p_amount:amount, p_recipient:null, p_label:reason || null }); event.target.reset(); switchBlackOperation(operation); toast("Opération de caisse noire enregistrée."); }
+    catch(error){ toast(error.message || "Impossible d’enregistrer l’opération."); }
+    finally{ button.disabled=false; }
   });
-  page.querySelectorAll("[data-compta-demo]").forEach(btn=>btn.addEventListener("click",()=>toast("Prototype visuel — aucune écriture comptable réelle.")));
-  loadReferenceData();
+  $("compta-history-search")?.addEventListener("input",renderHistory);
+  $("compta-history-account")?.addEventListener("change",renderHistory);
+  page.querySelectorAll("[data-compta-demo]").forEach(btn=>btn.addEventListener("click",()=>toast("Cette opération complexe sera connectée lors de la prochaine phase.")));
+  loadReferenceData(); loadAccounting(); setupRealtime();
 })();

@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="annuaire.css?v=1.2.7">
   <link rel="stylesheet" href="agenda.css?v=1.3.5">
   <link rel="stylesheet" href="stocks.css?v=1.4.11">
-  <link rel="stylesheet" href="comptabilite.css?v=1.5.3">
+  <link rel="stylesheet" href="comptabilite.css?v=1.5.4">
 </head>
 
 <body class="hub-dashboard-active">
@@ -1129,20 +1129,14 @@
           <div class="compta-dashboard-grid">
             <div class="compta-center">
               <div class="compta-balances">
-                <article class="compta-panel compta-balance clean"><span>SOLDE PROPRE</span><strong>20 044 $US</strong></article>
-                <article class="compta-panel compta-balance dirty"><span>ARGENT SALE</span><strong>12 580 $US</strong></article>
+                <article class="compta-panel compta-balance clean"><span>SOLDE PROPRE</span><strong id="compta-clean-balance">0 $US</strong></article>
+                <article class="compta-panel compta-balance dirty"><span>ARGENT SALE</span><strong id="compta-dirty-balance">0 $US</strong></article>
               </div>
-              <section class="compta-panel compta-transactions"><h2>TRANSACTIONS RÉCENTES</h2><div class="compta-transactions-scroll">
-                <div class="compta-date">Mercredi 15 juillet 2026</div>
-                <article class="compta-transaction"><span class="compta-transaction-icon">▣</span><div><strong>Paiement de Michel Transport Petrol</strong><small>Versement d’une livraison</small></div><span class="compta-amount positive">+ 4 500 $</span></article>
-                <article class="compta-transaction"><span class="compta-transaction-icon">▣</span><div><strong>Paiement à Los Santos Medical Center</strong><small>Achat de matériel médical</small></div><span class="compta-amount negative">− 3 300 $</span></article>
-                <article class="compta-transaction"><span class="compta-transaction-icon">▣</span><div><strong>Versement au compte du club</strong><small>Cotisations hebdomadaires</small></div><span class="compta-amount positive">+ 1 250 $</span></article>
-                <article class="compta-transaction"><span class="compta-transaction-icon">▣</span><div><strong>Paiement au Gouvernement</strong><small>Frais administratifs</small></div><span class="compta-amount negative">− 960 $</span></article>
-              </div></section>
+              <section class="compta-panel compta-transactions"><h2>TRANSACTIONS RÉCENTES</h2><div id="compta-recent-transactions" class="compta-transactions-scroll"><p class="compta-empty-inline">Chargement des opérations…</p></div></section>
             </div>
             <aside class="compta-right">
-              <section class="compta-panel"><h3>RECETTE RAPIDE</h3><select class="compta-field"><option>Cotisation</option><option>Paris</option><option>Don</option><option>Recette diverse</option></select><input class="compta-field" type="number" placeholder="$  Montant"><input class="compta-field" placeholder="Libellé (facultatif)"><button class="compta-action-button" data-compta-demo>Enregistrer</button><p class="compta-demo-note">Prototype visuel : aucune écriture comptable réelle.</p></section>
-              <section class="compta-panel"><h3>TRANSFERT D’ARGENT</h3><input id="compta-transfer-recipient" class="compta-field" list="compta-member-list" placeholder="Caisse noire ou membre…"><datalist id="compta-member-list"><option value="Caisse noire"></option></datalist><input class="compta-field" type="number" placeholder="$  Montant"><input class="compta-field" placeholder="Libellé (facultatif)"><button class="compta-action-button" data-compta-demo>Transférer</button></section>
+              <section class="compta-panel"><h3>RECETTE RAPIDE</h3><form id="compta-quick-income-form" class="compta-simple-form"><select id="compta-quick-income-type" class="compta-field"><option value="Cotisation">Cotisation</option><option value="Paris">Paris</option><option value="Don">Don</option><option value="Recette diverse">Recette diverse</option></select><input id="compta-quick-income-amount" class="compta-field" type="number" min="0.01" step="0.01" required placeholder="$  Montant"><input id="compta-quick-income-label" class="compta-field" placeholder="Libellé (facultatif)"><button class="compta-action-button" type="submit">Enregistrer</button></form></section>
+              <section class="compta-panel"><h3>TRANSFERT D’ARGENT</h3><form id="compta-transfer-form" class="compta-simple-form"><input id="compta-transfer-recipient" class="compta-field" list="compta-member-list" required placeholder="Caisse noire ou membre…"><datalist id="compta-member-list"><option value="Caisse noire"></option></datalist><input id="compta-transfer-amount" class="compta-field" type="number" min="0.01" step="0.01" required placeholder="$  Montant"><input id="compta-transfer-label" class="compta-field" placeholder="Libellé (facultatif)"><button class="compta-action-button" type="submit">Transférer</button></form></section>
             </aside>
           </div>
         </section>
@@ -1202,14 +1196,14 @@
           </section>
         </section>
 
-        <section id="compta-history-view" class="compta-view" hidden><div class="compta-panel compta-placeholder"><h2>HISTORIQUE</h2><p>L’historique complet sera connecté aux écritures comptables lors de la prochaine phase.</p></div></section>
+        <section id="compta-history-view" class="compta-view" hidden><div class="compta-view-head"><div><p>Comptabilité</p><h2>HISTORIQUE</h2></div></div><div class="compta-panel"><div class="compta-history-toolbar"><input id="compta-history-search" class="compta-field" type="search" placeholder="Rechercher une opération…"><select id="compta-history-account" class="compta-field"><option value="all">Tous les comptes</option><option value="club">Compte du club</option><option value="black">Caisse noire</option></select></div><div id="compta-history-list" class="compta-transactions-scroll"><p class="compta-empty-inline">Chargement de l’historique…</p></div></div></section>
         <section id="compta-black-view" class="compta-view" hidden>
           <div class="compta-view-head"><div><p>Compte secondaire</p><h2>CAISSE NOIRE</h2></div><span class="compta-prototype-badge">Argent propre uniquement</span></div>
           <div class="compta-black-grid">
             <article class="compta-panel compta-black-balance">
               <span>SOLDE CAISSE NOIRE</span>
-              <strong>0 $US</strong>
-              <small>Prototype visuel — aucune écriture réelle.</small>
+              <strong id="compta-black-balance-value">0 $US</strong>
+              <small>Argent propre uniquement.</small>
             </article>
             <section class="compta-panel compta-black-actions">
               <div class="compta-operation-tabs compta-black-tabs" role="tablist">
@@ -1221,7 +1215,7 @@
                 <label>Montant<input id="compta-black-amount" class="compta-field" type="number" min="0.01" step="0.01" required placeholder="$ 0"></label>
                 <label id="compta-black-reason-field" hidden>Raison du retrait<textarea id="compta-black-reason" class="compta-field" rows="4" placeholder="Obligatoire pour un retrait"></textarea></label>
                 <p id="compta-black-hint" class="compta-demo-note">Aucune raison n’est demandée pour un ajout.</p>
-                <button class="compta-action-button" type="submit">Simuler l’ajout</button>
+                <button class="compta-action-button" type="submit">Enregistrer l’ajout</button>
               </form>
             </section>
           </div>
@@ -1932,7 +1926,7 @@
   <script src="law.js?v=1.2.1"></script>
   <script src="agenda.js?v=1.3.5"></script>
   <script src="stocks.js?v=1.4.11"></script>
-  <script src="comptabilite.js?v=1.5.3"></script>
+  <script src="comptabilite.js?v=1.5.4"></script>
   <script src="hub.js?v=1.5.0"></script>
 </body>
 </html>

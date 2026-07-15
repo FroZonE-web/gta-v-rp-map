@@ -347,3 +347,11 @@ Les badges du Stock global utilisent désormais des couleurs explicites et forc�
 - Le calcul utilise uniquement la valeur propre ou la valeur sale selon le compte sélectionné.
 - Cette étape reste un prototype sans écriture comptable ni modification de stock.
 - L'interface Comptabilité utilise temporairement des panneaux plus sombres pour le confort visuel ; l'harmonisation globale reste prévue en fin de projet.
+
+## Comptabilité — v1.5.4
+
+Les opérations comptables simples sont stockées dans `accounting_transactions`. Les soldes ne sont jamais édités directement : ils sont recalculés depuis les crédits et débits.
+
+La fonction RPC `create_simple_accounting_operation` gère les recettes rapides, paiements aux membres, transferts vers la caisse noire, ajouts et retraits de caisse noire. Les transferts vers la caisse noire créent deux écritures liées dans une seule transaction.
+
+Les opérations complexes liées aux Stocks restent volontairement en mode prototype jusqu'à la prochaine phase.
