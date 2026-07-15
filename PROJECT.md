@@ -361,3 +361,11 @@ Les opérations complexes liées aux Stocks restent volontairement en mode proto
 Les ventes et achats d’items utilisent la RPC `create_complex_accounting_operation` afin de modifier les soldes, quantités, poids des lieux et historiques dans une seule transaction SQL. Une erreur annule intégralement l’opération.
 
 Les mouvements physiques conservent `deposit` / `withdrawal` et utilisent `source_type` pour distinguer `manual`, `purchase` et `resale`.
+
+
+## Correctif v1.5.6 — Interface et destinataires
+
+- Retrait des mentions visuelles de prototype dans les opérations complexes.
+- Les boutons décrivent désormais les validations réelles.
+- Correction du chargement des membres de `directory_members` : utilisation de `grade_code` et tri hiérarchique par `sort_order`.
+- Le transfert d’argent propose la Caisse noire et tous les membres du club.

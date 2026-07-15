@@ -106,7 +106,7 @@
         supabaseClient.from("stock_locations").select("*").order("name"),
         supabaseClient.from("stock_balances").select("*"),
         supabaseClient.from("directory_contacts").select("first_name,last_name,nickname,entity,job").limit(1000),
-        supabaseClient.from("directory_members").select("first_name,last_name,nickname,grade").limit(50)
+        supabaseClient.from("directory_members").select("first_name,last_name,nickname,grade_code").order("sort_order", { ascending:true }).limit(50)
       ]);
       state.items = itemsRes.data || [];
       state.locations = locationsRes.data || [];
@@ -114,7 +114,7 @@
       state.contacts = contactsRes.data || [];
       state.members = membersRes.data || [];
       fillDatalists(); state.loaded = true;
-    } catch (error) { console.warn("Comptabilité prototype : données de référence indisponibles", error); }
+    } catch (error) { console.warn("Comptabilité : données de référence indisponibles", error); }
   }
   function displayName(row) { return [row.first_name, row.nickname ? `“${row.nickname}”` : "", row.last_name].filter(Boolean).join(" ").trim(); }
   function fillDatalists() {
@@ -216,7 +216,7 @@
     $("compta-black-reason-field").hidden=!withdrawal;
     $("compta-black-reason").required=withdrawal;
     $("compta-black-hint").textContent=withdrawal?"La raison est obligatoire pour tout retrait.":"Aucune raison n’est demandée pour un ajout.";
-    $("compta-black-form").querySelector("button[type=submit]").textContent=withdrawal?"Simuler le retrait":"Simuler l’ajout";
+    $("compta-black-form").querySelector("button[type=submit]").textContent=withdrawal?"Enregistrer le retrait":"Enregistrer l’ajout";
   }
 
   page.querySelectorAll("[data-compta-view]").forEach(btn=>btn.addEventListener("click",()=>switchView(btn.dataset.comptaView)));
