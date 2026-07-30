@@ -405,3 +405,19 @@ Les mouvements physiques conservent `deposit` / `withdrawal` et utilisent `sourc
 - Stocks : la vue Galerie est disponible dans le détail d’un lieu, avec image, quantité et nom au survol.
 - Cache : numéros de version des fichiers CSS/JS relevés pour garantir le chargement des correctifs sur GitHub Pages.
 - SQL : aucune nouvelle migration.
+## Ashen Wolves HUB v1.6.2 correctif mise en page Amendes
+
+- Restauration complète du visuel initial du module Amendes.
+- Affichage des quatre catégories sur une même ligne sur les grands écrans.
+- Grille responsive en deux colonnes puis une colonne.
+- Contenu recentré sur toute la largeur utile de l’écran.
+- Aucun changement sur la Comptabilité, les Stocks ou la liaison Annuaire → casier.
+- Aucun script SQL supplémentaire requis.
+
+## Ashen Wolves HUB v1.6.3 correctif quatre colonnes Amendes
+
+- Le référentiel des amendes affiche désormais exactement quatre colonnes sur les écrans de bureau, une par catégorie.
+- La grille est centrée dans la largeur utile de la page.
+- Le passage à deux colonnes n'intervient plus que sur les petits écrans, puis à une colonne sur mobile.
+- Aucun changement sur la Comptabilité, les Stocks ou la liaison Annuaire → casier.
+- Aucun script SQL supplémentaire requis.

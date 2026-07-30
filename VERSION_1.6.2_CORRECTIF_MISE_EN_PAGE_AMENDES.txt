@@ -1,0 +1,4 @@
+Ashen Wolves HUB v1.6.2 correctif mise en page Amendes
+
+Restauration du visuel initial du module Amendes, centrage du contenu et affichage responsive des quatre catégories.
+Aucun SQL supplémentaire requis.

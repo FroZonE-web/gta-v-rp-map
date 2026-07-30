@@ -1,0 +1,6 @@
+Ashen Wolves HUB v1.6.3 correctif quatre colonnes Amendes
+
+- Quatre colonnes centrées sur écran de bureau, une par catégorie.
+- Deux colonnes uniquement sur petits écrans.
+- Une colonne sur mobile.
+- Aucun nouveau SQL requis.
