@@ -116,7 +116,7 @@
 
   function actions(record) {
     if (!canManage) return "";
-    return `<div class="directory-row-actions"><button class="directory-icon-button" data-law-edit="${escapeHtml(record.id)}" type="button" aria-label="Modifier">✎</button><button class="directory-icon-button is-danger" data-law-delete="${escapeHtml(record.id)}" type="button" aria-label="Supprimer">×</button></div>`;
+    return `<div class="directory-row-actions"><button class="directory-icon-button" data-transfer-source="law" data-transfer-id="${escapeHtml(record.id)}" type="button" aria-label="Transférer">⇄</button><button class="directory-icon-button" data-law-edit="${escapeHtml(record.id)}" type="button" aria-label="Modifier">✎</button><button class="directory-icon-button is-danger" data-law-delete="${escapeHtml(record.id)}" type="button" aria-label="Supprimer">×</button></div>`;
   }
 
   function row(record) {

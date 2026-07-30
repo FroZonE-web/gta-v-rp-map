@@ -421,3 +421,16 @@ Les mouvements physiques conservent `deposit` / `withdrawal` et utilisent `sourc
 - Le passage à deux colonnes n'intervient plus que sur les petits écrans, puis à une colonne sur mobile.
 - Aucun changement sur la Comptabilité, les Stocks ou la liaison Annuaire → casier.
 - Aucun script SQL supplémentaire requis.
+
+
+## v1.6.4 — Correctifs généraux
+
+- Refonte responsive de la Carte pour l’aligner visuellement avec les autres modules.
+- Ajout des zones interdites en `#101010`, avec description disponible uniquement pour cette catégorie.
+- Différenciation visuelle des dépôts et retraits de caisse noire par un fond noir à 50 % sur le montant.
+- Tri des catégories de Stocks sans prise en compte des emojis.
+- Recherche par catégorie pour les mouvements simples et multiples.
+- Badges Annuaire `HC` et `NON-RENSEIGNE` en `#101010`.
+- Système de déplacement entre les tableaux Membres, Contacts et Forces de l’ordre : création dans la destination puis suppression de la source.
+
+Aucune migration SQL supplémentaire n’est requise si les politiques Supabase existantes autorisent déjà l’ajout et la suppression dans les trois tables de l’Annuaire.

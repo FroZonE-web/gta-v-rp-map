@@ -126,6 +126,7 @@
   function actionButtons(member) {
     if (!canManage) return "";
     return `<div class="directory-row-actions">
+      <button class="directory-icon-button" type="button" data-transfer-source="members" data-transfer-id="${escapeHtml(member.id)}" aria-label="Transférer">⇄</button>
       <button class="directory-icon-button" type="button" data-directory-edit="${escapeHtml(member.id)}" aria-label="Modifier ${escapeHtml(member.identity_name)}">✎</button>
       <button class="directory-icon-button is-danger" type="button" data-directory-delete="${escapeHtml(member.id)}" aria-label="Supprimer ${escapeHtml(member.identity_name)}">×</button>
     </div>`;

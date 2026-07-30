@@ -19,3 +19,6 @@
 /* v1.5.4 — opérations comptables simples */
 .compta-simple-form{display:grid;gap:10px}.compta-history-toolbar{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:12px;margin-bottom:14px}.compta-view:not([hidden]){display:block}.compta-action-button:disabled{opacity:.55;cursor:wait}.compta-transactions-scroll .compta-empty-inline{padding:22px 4px}.compta-date{text-transform:capitalize}.compta-transaction-icon{color:#a78bfa}
 @media(max-width:680px){.compta-history-toolbar{grid-template-columns:1fr}}
+
+/* v1.6.4 — différenciation visuelle des dépôts/retraits d’argent sale */
+#compta-black-amount{background:rgba(0,0,0,.5)!important;}

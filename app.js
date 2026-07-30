@@ -104,7 +104,7 @@ const ZONE_COLORS = {
     Champignons: "#0F6A73"
   },
   habitation: { default: "#C792EA" },
-  zone_interdite: { default: "#FF8C00" },
+  zone_interdite: { default: "#101010" },
   autre: { default: "#708090" }
 };
 
@@ -207,6 +207,7 @@ const zoneCategorySelect = document.getElementById("zone-category");
 const zoneSubcategoryField = document.getElementById("zone-subcategory-field");
 const zoneSubcategorySelect = document.getElementById("zone-subcategory");
 const zoneDescriptionInput = document.getElementById("zone-description");
+const zoneDescriptionField = document.getElementById("zone-description-field");
 const zoneStatus = document.getElementById("zone-status");
 const zoneColorPreview = document.getElementById("zone-color-preview");
 const saveZoneButton = document.getElementById("save-zone-button");
@@ -2698,6 +2699,12 @@ function getZoneColor(category, subcategory) {
   return palette[subcategory] || palette.default || "#708090";
 }
 
+function updateZoneDescriptionVisibility() {
+  const enabled = zoneCategorySelect?.value === "zone_interdite";
+  if (zoneDescriptionField) zoneDescriptionField.hidden = !enabled;
+  if (!enabled && zoneDescriptionInput) zoneDescriptionInput.value = "";
+}
+
 function updateZoneSubcategorySelect() {
   const values = getZoneSubcategories(zoneCategorySelect.value);
   zoneSubcategorySelect.innerHTML = "";
@@ -2867,7 +2874,8 @@ function enterZoneEditMode(zone, scrollToForm = false) {
     zoneSubcategorySelect.value = zone.subcategory;
   }
 
-  zoneDescriptionInput.value = zone.description || "";
+  zoneDescriptionInput.value = zone.category === "zone_interdite" ? (zone.description || "") : "";
+  updateZoneDescriptionVisibility();
   updateZoneColorPreview();
 
   showZoneForm();
@@ -3158,7 +3166,7 @@ async function loadZones() {
   renderZones();
 }
 
-zoneCategorySelect.addEventListener("change", updateZoneSubcategorySelect);
+zoneCategorySelect.addEventListener("change", () => { updateZoneSubcategorySelect(); updateZoneDescriptionVisibility(); });
 zoneSubcategorySelect.addEventListener("change", () => {
   updateZoneColorPreview();
   applyPendingZoneStyle();
@@ -3202,7 +3210,7 @@ zoneForm.addEventListener("submit", async (event) => {
   const subcategory = zoneSubcategoryField.hidden ? null : zoneSubcategorySelect.value;
   const basePayload = {
     name: zoneNameInput.value.trim(),
-    description: zoneDescriptionInput.value.trim(),
+    description: zoneCategorySelect.value === "zone_interdite" ? zoneDescriptionInput.value.trim() : "",
     category,
     subcategory,
     color: getZoneColor(category, subcategory)

@@ -1,0 +1,9 @@
+Ashen Wolves HUB v1.6.4 correctifs généraux Carte, Stocks, Comptabilité et Annuaire
+
+- Carte harmonisée et responsive.
+- Zones interdites en #101010 avec description dédiée.
+- Montants caisse noire sur fond noir à 50 %.
+- Tri des catégories Stocks sans tenir compte des emojis.
+- Recherche par catégorie dans les mouvements simples et multiples.
+- Badges HC et NON-RENSEIGNE en #101010.
+- Déplacement sécurisé entre Membres, Contacts et FDO.

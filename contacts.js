@@ -93,7 +93,8 @@
 
   function badge(type, value) {
     if (!value) return "—";
-    const [background, color] = labelStyle(type, value);
+    let [background, color] = labelStyle(type, value);
+    if (["hc", "non-renseigne", "non renseigne", "non-renseigné", "non renseigné"].includes(normalize(value))) background = "#101010";
     return `<span class="directory-contact-badge${type === "entity" ? " directory-entity-badge" : ""}" style="--badge-bg:${escapeHtml(background)};--badge-color:${escapeHtml(color)}">${escapeHtml(value)}</span>`;
   }
 
@@ -140,7 +141,7 @@
 
   function rowActions(c) {
     if (!canManage) return "";
-    return `<div class="directory-row-actions"><button class="directory-icon-button" data-contact-edit="${escapeHtml(c.id)}" type="button" aria-label="Modifier">✎</button><button class="directory-icon-button is-danger" data-contact-delete="${escapeHtml(c.id)}" type="button" aria-label="Supprimer">×</button></div>`;
+    return `<div class="directory-row-actions"><button class="directory-icon-button" data-transfer-source="contacts" data-transfer-id="${escapeHtml(c.id)}" type="button" aria-label="Transférer">⇄</button><button class="directory-icon-button" data-contact-edit="${escapeHtml(c.id)}" type="button" aria-label="Modifier">✎</button><button class="directory-icon-button is-danger" data-contact-delete="${escapeHtml(c.id)}" type="button" aria-label="Supprimer">×</button></div>`;
   }
 
   function contactRow(c) {

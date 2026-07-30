@@ -2630,3 +2630,30 @@ body.admin-drawer-open .admin-drawer-toggle {
     font-size: 21px;
   }
 }
+
+
+/* =========================================================
+   v1.6.4 — Carte harmonisée et responsive
+   ========================================================= */
+.hub-map-module{background:#070912;color:#f8f7ff;min-height:100dvh;overflow:hidden;}
+.hub-map-module #sidebar{background:#0d0b18;border-right:1px solid rgba(139,92,246,.22);box-shadow:18px 0 50px rgba(0,0,0,.28);}
+.hub-map-module .panel{background:#121020;border:1px solid rgba(139,92,246,.18);border-radius:16px;box-shadow:0 12px 30px rgba(0,0,0,.16);}
+.hub-map-module input,.hub-map-module select,.hub-map-module textarea{background:#090812;border:1px solid rgba(139,92,246,.22);border-radius:10px;color:#fff;}
+.hub-map-module .primary-button{background:linear-gradient(135deg,#6d35ff,#8b5cf6);border-radius:10px;}
+.hub-map-module .secondary-button,.hub-map-module .small-secondary-button{border-radius:10px;}
+.hub-map-home{z-index:1200;}
+@media(max-width:820px){
+  .hub-map-module{display:flex!important;flex-direction:column;overflow:auto;}
+  .hub-map-module #sidebar{position:relative!important;inset:auto!important;width:100%!important;max-width:none!important;height:auto!important;max-height:none!important;overflow:visible!important;order:2;border-right:0;border-top:1px solid rgba(139,92,246,.22);padding:14px;}
+  .hub-map-module #map{position:relative!important;inset:auto!important;width:100%!important;height:56dvh!important;min-height:360px;order:1;}
+  .hub-map-home{position:fixed!important;top:10px!important;left:10px!important;}
+  .hub-map-module .sidebar-header{padding-top:42px;}
+  .hub-map-module .panel{margin-bottom:12px;}
+  .hub-map-module .leaflet-control-layers,.hub-map-module .leaflet-draw{font-size:14px;}
+}
+@media(max-width:480px){
+  .hub-map-module #map{height:50dvh!important;min-height:310px;}
+  .hub-map-module #sidebar{padding:10px;}
+  .hub-map-module .zone-form-actions{grid-template-columns:1fr;}
+  .hub-map-module .panel-title-row{align-items:flex-start;gap:8px;}
+}

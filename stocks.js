@@ -186,7 +186,7 @@
       const matchesState = state === "all" || (state === "critical" && row.critical) || (state === "present" && row.quantity > 0) || (state === "empty" && row.quantity === 0);
       return matchesText && matchesCategory && matchesState;
     }).sort((a,b) => els.globalSort.value === "category"
-      ? String(a.item.stock_categories?.name || "").localeCompare(String(b.item.stock_categories?.name || ""), "fr", {sensitivity:"base"}) || a.item.name.localeCompare(b.item.name, "fr", {sensitivity:"base"})
+      ? compareCategoryNames(a.item.stock_categories?.name,b.item.stock_categories?.name) || a.item.name.localeCompare(b.item.name, "fr", {sensitivity:"base"})
       : a.item.name.localeCompare(b.item.name, "fr", {sensitivity:"base"}));
     const totals = all.reduce((acc, row) => ({
       weight: acc.weight + row.totalWeight, clean: acc.clean + row.cleanTotal, dirty: acc.dirty + row.dirtyTotal, alerts: acc.alerts + (row.critical ? 1 : 0)
@@ -305,9 +305,23 @@
     $("stocks-location-quick-value").value = location.location || ""; $("stocks-location-quick-error").hidden = true; els.quickDialog.showModal();
     requestAnimationFrame(() => $("stocks-location-quick-value").focus());
   }
+  function movementItemOptions(query = "") {
+    const q = normalizedCategorySearch(query);
+    return items
+      .filter(i => !q || normalizedCategorySearch(i.stock_categories?.name || "Sans catégorie").includes(q))
+      .sort((a,b)=>compareCategoryNames(a.stock_categories?.name,b.stock_categories?.name)||a.name.localeCompare(b.name,"fr",{sensitivity:"base"}))
+      .map(i => `<option value="${i.id}">${esc(i.name)} — ${esc(i.stock_categories?.name || "Sans catégorie")}</option>`).join("");
+  }
+  function refreshMovementItems() {
+    const select=$("stocks-movement-item"), previous=select.value;
+    select.innerHTML='<option value="">Sélectionner un item…</option>'+movementItemOptions($("stocks-movement-category-search")?.value || "");
+    if ([...select.options].some(o=>o.value===previous)) select.value=previous; else select.value="";
+    updateMovementPreview();
+  }
+
   async function openMovement() {
     if (!itemsLoaded || !locationsLoaded) await loadMovements(true);
-    $("stocks-movement-item").innerHTML = '<option value="">Sélectionner un item…</option>' + items.map(i => `<option value="${i.id}">${esc(i.name)}</option>`).join("");
+    $("stocks-movement-category-search").value = ""; refreshMovementItems();
     $("stocks-movement-location").innerHTML = '<option value="">Sélectionner un lieu…</option>' + locations.map(l => `<option value="${l.id}">${esc(l.name)}</option>`).join("");
     $("stocks-movement-type").value = "deposit"; $("stocks-movement-quantity").value = 1; $("stocks-movement-actor").value = "";
     $("stocks-movement-error").hidden = true; updateMovementPreview(); els.movementDialog.showModal();
@@ -333,8 +347,8 @@
   function openLocationDetail(locationId, selectedCategory = "all", mode = "list") {
     const location = locations.find(l => String(l.id) === String(locationId)); if (!location) return;
     const allRows = balances.filter(b => String(b.location_id) === String(location.id) && Number(b.quantity) > 0).map(b => { const item=items.find(i=>String(i.id)===String(b.item_id)); const quantity=Number(b.quantity||0); return item?{item,quantity,weight:quantity*Number(item.unit_weight||0),clean:quantity*Number(item.clean_value||0),dirty:quantity*dirtyValue(item)}:null; }).filter(Boolean);
-    const categoryNames=[...new Set(allRows.map(r=>r.item.stock_categories?.name||"Sans catégorie"))].sort((a,b)=>a.localeCompare(b,"fr",{sensitivity:"base"}));
-    const rows=allRows.filter(r=>selectedCategory==="all"||(r.item.stock_categories?.name||"Sans catégorie")===selectedCategory).sort((a,b)=>(a.item.stock_categories?.name||"").localeCompare(b.item.stock_categories?.name||"","fr")||a.item.name.localeCompare(b.item.name,"fr"));
+    const categoryNames=[...new Set(allRows.map(r=>r.item.stock_categories?.name||"Sans catégorie"))].sort(compareCategoryNames);
+    const rows=allRows.filter(r=>selectedCategory==="all"||(r.item.stock_categories?.name||"Sans catégorie")===selectedCategory).sort((a,b)=>compareCategoryNames(a.item.stock_categories?.name||"",b.item.stock_categories?.name||"")||a.item.name.localeCompare(b.item.name,"fr"));
     const used=Number(location.used_weight||0),capacity=Number(location.capacity_weight||0),percent=capacity?Math.min(100,used/capacity*100):0;
     const categoryOptions=['<option value="all">Toutes les catégories</option>'].concat(categoryNames.map(name=>`<option value="${esc(name)}"${selectedCategory===name?' selected':''}>${esc(name)}</option>`)).join("");
     const list=rows.length?rows.map(r=>`<div class="stocks-location-detail-row"><span class="stocks-global-image">${r.item.image_url?`<img src="${esc(r.item.image_url)}" alt="">`:"📦"}</span><span class="stocks-global-name"><strong>${esc(r.item.name)}</strong><small>${esc(r.item.stock_categories?.name||"Sans catégorie")}</small></span><span><small>Quantité</small><strong>${r.quantity}</strong></span><span><small>Poids</small><strong>${kg(r.weight)}</strong></span><span><small>Propre</small><strong class="money-clean">${money(r.clean)}</strong></span><span><small>Sale</small><strong class="money-dirty">${money(r.dirty)}</strong></span></div>`).join(""):'<p class="stocks-global-no-distribution">Aucun item dans cette catégorie.</p>';
@@ -347,8 +361,8 @@
   }
 
   function bulkLineTemplate() {
-    const options = items.map(i => `<option value="${i.id}">${esc(i.name)}</option>`).join("");
-    return `<div class="stocks-bulk-line"><select class="stocks-bulk-item" required><option value="">Sélectionner un item…</option>${options}</select><input class="stocks-bulk-qty" type="number" min="1" step="1" value="1" required><div class="stocks-bulk-item-preview"></div><button type="button" class="stocks-bulk-remove" aria-label="Supprimer">×</button></div>`;
+    const options = items.slice().sort((a,b)=>compareCategoryNames(a.stock_categories?.name,b.stock_categories?.name)||a.name.localeCompare(b.name,"fr",{sensitivity:"base"})).map(i => `<option value="${i.id}">${esc(i.name)} — ${esc(i.stock_categories?.name || "Sans catégorie")}</option>`).join("");
+    return `<div class="stocks-bulk-line"><input class="stocks-bulk-category-search" type="search" placeholder="Rechercher une catégorie…"><select class="stocks-bulk-item" required><option value="">Sélectionner un item…</option>${options}</select><input class="stocks-bulk-qty" type="number" min="1" step="1" value="1" required><div class="stocks-bulk-item-preview"></div><button type="button" class="stocks-bulk-remove" aria-label="Supprimer">×</button></div>`;
   }
   async function openBulkMovement() {
     if (!itemsLoaded || !locationsLoaded || !balances.length) await loadMovements(true);
@@ -477,7 +491,7 @@
   $("stocks-dirty-mode").onchange = previewDirty; $("stocks-dirty-input").oninput = previewDirty; $("stocks-item-clean").oninput = previewDirty;
   ["stocks-movement-item", "stocks-movement-location", "stocks-movement-type", "stocks-movement-quantity"].forEach(id => $(id).addEventListener("input", updateMovementPreview));
   $("stocks-item-image").onchange = e => { const f = e.target.files[0]; $("stocks-image-preview").innerHTML = f ? `<img src="${URL.createObjectURL(f)}" alt="Aperçu">` : "Aucune image sélectionnée"; };
-  els.itemForm.addEventListener("submit", saveItem); els.categoryForm.addEventListener("submit", saveCategory); els.locationForm.addEventListener("submit", saveLocation); els.quickForm.addEventListener("submit", saveQuickLocation); els.movementForm.addEventListener("submit", saveMovement); els.bulkForm.addEventListener("submit", saveBulkMovement);
+  els.itemForm.addEventListener("submit", saveItem); els.categoryForm.addEventListener("submit", saveCategory); els.locationForm.addEventListener("submit", saveLocation); els.quickForm.addEventListener("submit", saveQuickLocation); els.movementForm.addEventListener("submit", saveMovement); $("stocks-movement-category-search")?.addEventListener("input", refreshMovementItems); els.bulkForm.addEventListener("submit", saveBulkMovement);
   document.querySelectorAll("[data-stocks-close]").forEach(b => b.onclick = () => els.itemDialog.close());
   document.querySelectorAll("[data-stocks-category-close]").forEach(b => b.onclick = () => els.categoryDialog.close());
   document.querySelectorAll("[data-stocks-location-close]").forEach(b => b.onclick = () => els.locationDialog.close());
@@ -485,7 +499,14 @@
   document.querySelectorAll("[data-stocks-movement-close]").forEach(b => b.onclick = () => els.movementDialog.close()); document.querySelectorAll("[data-stocks-bulk-close]").forEach(b => b.onclick = () => els.bulkDialog.close());
   [els.itemDialog, els.categoryDialog, els.locationDialog, els.quickDialog, els.globalDetailDialog, els.locationDetailDialog, els.movementDialog, els.bulkDialog].forEach(d => d.addEventListener("click", e => { if (e.target === d) d.close(); }));
   $("stocks-bulk-add-line").onclick=()=>{ $("stocks-bulk-lines").insertAdjacentHTML("beforeend",bulkLineTemplate()); updateBulkPreview(); };
-  $("stocks-bulk-lines").addEventListener("input",updateBulkPreview); $("stocks-bulk-location").addEventListener("change",updateBulkPreview); $("stocks-bulk-type").addEventListener("change",updateBulkPreview);
+  $("stocks-bulk-lines").addEventListener("input",e=>{
+    if(e.target.matches(".stocks-bulk-category-search")){
+      const line=e.target.closest(".stocks-bulk-line"), select=line.querySelector(".stocks-bulk-item"), previous=select.value, q=normalizedCategorySearch(e.target.value);
+      select.innerHTML='<option value="">Sélectionner un item…</option>'+items.filter(i=>!q||normalizedCategorySearch(i.stock_categories?.name||"Sans catégorie").includes(q)).sort((a,b)=>compareCategoryNames(a.stock_categories?.name,b.stock_categories?.name)||a.name.localeCompare(b.name,"fr",{sensitivity:"base"})).map(i=>`<option value="${i.id}">${esc(i.name)} — ${esc(i.stock_categories?.name||"Sans catégorie")}</option>`).join("");
+      if([...select.options].some(o=>o.value===previous)) select.value=previous; else select.value="";
+    }
+    updateBulkPreview();
+  }); $("stocks-bulk-location").addEventListener("change",updateBulkPreview); $("stocks-bulk-type").addEventListener("change",updateBulkPreview);
   $("stocks-bulk-lines").addEventListener("click",e=>{const b=e.target.closest(".stocks-bulk-remove"); if(!b)return; const lines=document.querySelectorAll(".stocks-bulk-line"); if(lines.length>1)b.closest(".stocks-bulk-line").remove(); updateBulkPreview();});
   els.grid.addEventListener("click", e => {
     const edit = e.target.closest("[data-edit-item]"), del = e.target.closest("[data-delete-item]");
