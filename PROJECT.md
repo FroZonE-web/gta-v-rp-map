@@ -482,3 +482,12 @@ Tables ajoutées :
 - `craft_run_ingredients`
 
 Script obligatoire : `CRAFT_SETUP.sql`.
+
+## v1.7.1 — Harmonisation du module Craft
+
+- Correction du mode d’affichage de la route Craft : la classe `hub-craft-active` utilise désormais le même mode de page que les autres modules.
+- Le module Craft occupe toute la largeur disponible et son conteneur principal est centré horizontalement.
+- Largeur, marges et comportement responsive harmonisés avec les autres modules du HUB.
+- Invalidation du cache des ressources Craft et HUB en `v1.7.1`.
+
+Aucune migration SQL supplémentaire n’est requise.
