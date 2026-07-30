@@ -443,3 +443,12 @@ Aucune migration SQL supplémentaire n’est requise si les politiques Supabase 
 - Comptabilité : contraste noir à 50 % rendu visible sur les montants des dépôts et retraits de caisse noire.
 - Annuaire : badges HC et NON-RENSEIGNÉ forcés en `#101010`.
 - Cache : versionnement `v=1.6.5` des ressources modifiées.
+
+
+## v1.6.6 — Harmonisation interface et correctifs généraux
+- Bandeau central cliquable uniforme sur Carte, Règlement, Annuaire, Agenda, Comptabilité, Stocks et Amendes.
+- Suppression des boutons de retour HUB redondants.
+- Transactions en argent sale distinguées par un montant sur fond noir à 50 %.
+- Mouvements de stock restaurés dans leur présentation d’origine avec un menu déroulant de catégorie filtrant la liste des items.
+- Tri des catégories fondé sur leur libellé sans tenir compte des emojis.
+- Invalidation du cache des ressources en v1.6.6.

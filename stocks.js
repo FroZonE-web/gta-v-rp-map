@@ -74,7 +74,7 @@
       ]);
       if (catRes.error) throw catRes.error;
       if (itemRes.error) throw itemRes.error;
-      categories = catRes.data || []; items = itemRes.data || []; itemsLoaded = true; els.status.textContent = ""; renderItems();
+      categories = (catRes.data || []).sort((a,b)=>compareCategoryNames(a.name,b.name)); items = itemRes.data || []; itemsLoaded = true; els.status.textContent = ""; renderItems();
     } catch (error) {
       console.error(error); els.status.textContent = "Impossible de charger la banque d’items. Vérifie que STOCKS_SETUP.sql a été exécuté.";
     } finally { els.refresh.disabled = false; }
@@ -314,23 +314,30 @@
     $("stocks-location-quick-value").value = location.location || ""; $("stocks-location-quick-error").hidden = true; els.quickDialog.showModal();
     requestAnimationFrame(() => $("stocks-location-quick-value").focus());
   }
-  function movementItemOptions(query = "") {
-    const q = normalizedCategorySearch(query);
+  function sortedCategories() {
+    const source = categories.length ? categories : [...new Map(items.map(item => [String(item.category_id || item.stock_categories?.name || ""), { id: item.category_id || item.stock_categories?.name, name: item.stock_categories?.name || "Sans catégorie" }])).values()];
+    return source.slice().sort((a,b) => compareCategoryNames(a.name, b.name));
+  }
+  function movementItemOptions(categoryId = "") {
     return items
-      .filter(i => !q || normalizedCategorySearch(i.stock_categories?.name || "Sans catégorie").includes(q))
-      .sort((a,b)=>compareCategoryNames(a.stock_categories?.name,b.stock_categories?.name)||a.name.localeCompare(b.name,"fr",{sensitivity:"base"}))
-      .map(i => `<option value="${i.id}">${esc(i.name)} — ${esc(i.stock_categories?.name || "Sans catégorie")}</option>`).join("");
+      .filter(i => !categoryId || String(i.category_id) === String(categoryId))
+      .sort((a,b)=>a.name.localeCompare(b.name,"fr",{sensitivity:"base",numeric:true}))
+      .map(i => `<option value="${i.id}">${esc(i.name)}</option>`).join("");
+  }
+  function fillMovementCategories() {
+    const select = $("stocks-movement-category");
+    select.innerHTML = '<option value="">Toutes les catégories</option>' + sortedCategories().map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join("");
   }
   function refreshMovementItems() {
     const select=$("stocks-movement-item"), previous=select.value;
-    select.innerHTML='<option value="">Sélectionner un item…</option>'+movementItemOptions($("stocks-movement-category-search")?.value || "");
+    select.innerHTML='<option value="">Sélectionner un item…</option>'+movementItemOptions($("stocks-movement-category")?.value || "");
     if ([...select.options].some(o=>o.value===previous)) select.value=previous; else select.value="";
     updateMovementPreview();
   }
 
   async function openMovement() {
     if (!itemsLoaded || !locationsLoaded) await loadMovements(true);
-    $("stocks-movement-category-search").value = ""; refreshMovementItems();
+    fillMovementCategories(); $("stocks-movement-category").value = ""; refreshMovementItems();
     $("stocks-movement-location").innerHTML = '<option value="">Sélectionner un lieu…</option>' + locations.map(l => `<option value="${l.id}">${esc(l.name)}</option>`).join("");
     $("stocks-movement-type").value = "deposit"; $("stocks-movement-quantity").value = 1; $("stocks-movement-actor").value = "";
     $("stocks-movement-error").hidden = true; updateMovementPreview(); els.movementDialog.showModal();
@@ -370,8 +377,8 @@
   }
 
   function bulkLineTemplate() {
-    const options = items.slice().sort((a,b)=>compareCategoryNames(a.stock_categories?.name,b.stock_categories?.name)||a.name.localeCompare(b.name,"fr",{sensitivity:"base"})).map(i => `<option value="${i.id}">${esc(i.name)} — ${esc(i.stock_categories?.name || "Sans catégorie")}</option>`).join("");
-    return `<div class="stocks-bulk-line"><input class="stocks-bulk-category-search" type="search" placeholder="Rechercher une catégorie…"><select class="stocks-bulk-item" required><option value="">Sélectionner un item…</option>${options}</select><input class="stocks-bulk-qty" type="number" min="1" step="1" value="1" required><div class="stocks-bulk-item-preview"></div><button type="button" class="stocks-bulk-remove" aria-label="Supprimer">×</button></div>`;
+    const categoryOptions = sortedCategories().map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join("");
+    return `<div class="stocks-bulk-line"><select class="stocks-bulk-category"><option value="">Toutes les catégories</option>${categoryOptions}</select><select class="stocks-bulk-item" required><option value="">Sélectionner un item…</option>${movementItemOptions("")}</select><input class="stocks-bulk-qty" type="number" min="1" step="1" value="1" required><div class="stocks-bulk-item-preview"></div><button type="button" class="stocks-bulk-remove" aria-label="Supprimer">×</button></div>`;
   }
   async function openBulkMovement() {
     if (!itemsLoaded || !locationsLoaded || !balances.length) await loadMovements(true);
@@ -500,7 +507,7 @@
   $("stocks-dirty-mode").onchange = previewDirty; $("stocks-dirty-input").oninput = previewDirty; $("stocks-item-clean").oninput = previewDirty;
   ["stocks-movement-item", "stocks-movement-location", "stocks-movement-type", "stocks-movement-quantity"].forEach(id => $(id).addEventListener("input", updateMovementPreview));
   $("stocks-item-image").onchange = e => { const f = e.target.files[0]; $("stocks-image-preview").innerHTML = f ? `<img src="${URL.createObjectURL(f)}" alt="Aperçu">` : "Aucune image sélectionnée"; };
-  els.itemForm.addEventListener("submit", saveItem); els.categoryForm.addEventListener("submit", saveCategory); els.locationForm.addEventListener("submit", saveLocation); els.quickForm.addEventListener("submit", saveQuickLocation); els.movementForm.addEventListener("submit", saveMovement); $("stocks-movement-category-search")?.addEventListener("input", refreshMovementItems); els.bulkForm.addEventListener("submit", saveBulkMovement);
+  els.itemForm.addEventListener("submit", saveItem); els.categoryForm.addEventListener("submit", saveCategory); els.locationForm.addEventListener("submit", saveLocation); els.quickForm.addEventListener("submit", saveQuickLocation); els.movementForm.addEventListener("submit", saveMovement); $("stocks-movement-category")?.addEventListener("change", refreshMovementItems); els.bulkForm.addEventListener("submit", saveBulkMovement);
   document.querySelectorAll("[data-stocks-close]").forEach(b => b.onclick = () => els.itemDialog.close());
   document.querySelectorAll("[data-stocks-category-close]").forEach(b => b.onclick = () => els.categoryDialog.close());
   document.querySelectorAll("[data-stocks-location-close]").forEach(b => b.onclick = () => els.locationDialog.close());
@@ -509,9 +516,9 @@
   [els.itemDialog, els.categoryDialog, els.locationDialog, els.quickDialog, els.globalDetailDialog, els.locationDetailDialog, els.movementDialog, els.bulkDialog].forEach(d => d.addEventListener("click", e => { if (e.target === d) d.close(); }));
   $("stocks-bulk-add-line").onclick=()=>{ $("stocks-bulk-lines").insertAdjacentHTML("beforeend",bulkLineTemplate()); updateBulkPreview(); };
   $("stocks-bulk-lines").addEventListener("input",e=>{
-    if(e.target.matches(".stocks-bulk-category-search")){
-      const line=e.target.closest(".stocks-bulk-line"), select=line.querySelector(".stocks-bulk-item"), previous=select.value, q=normalizedCategorySearch(e.target.value);
-      select.innerHTML='<option value="">Sélectionner un item…</option>'+items.filter(i=>!q||normalizedCategorySearch(i.stock_categories?.name||"Sans catégorie").includes(q)).sort((a,b)=>compareCategoryNames(a.stock_categories?.name,b.stock_categories?.name)||a.name.localeCompare(b.name,"fr",{sensitivity:"base"})).map(i=>`<option value="${i.id}">${esc(i.name)} — ${esc(i.stock_categories?.name||"Sans catégorie")}</option>`).join("");
+    if(e.target.matches(".stocks-bulk-category")){
+      const line=e.target.closest(".stocks-bulk-line"), select=line.querySelector(".stocks-bulk-item"), previous=select.value;
+      select.innerHTML='<option value="">Sélectionner un item…</option>'+movementItemOptions(e.target.value);
       if([...select.options].some(o=>o.value===previous)) select.value=previous; else select.value="";
     }
     updateBulkPreview();

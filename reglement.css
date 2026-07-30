@@ -419,3 +419,6 @@
   .regulation-chapter-header { padding: 23px 20px; }
   .regulation-footer { display: grid; }
 }
+
+/* v1.6.6 — bandeau commun */
+.regulation-topbar-brand{color:inherit;text-decoration:none}.regulation-home-link{display:none!important}

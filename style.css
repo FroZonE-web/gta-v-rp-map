@@ -2687,3 +2687,10 @@ body.admin-drawer-open .admin-drawer-toggle {
   .map-module-brand-mark{width:36px;height:36px;border-radius:10px}
   .map-module-home{font-size:0}.map-module-home::after{content:"← HUB";font-size:12px}
 }
+
+
+/* v1.6.6 — bandeau Carte harmonisé */
+.map-module-topbar{justify-content:center!important;height:64px!important;padding:0 24px!important;background:#101117!important;border-bottom:1px solid #29243a!important}
+.map-module-brand{margin:0 auto}.map-module-home{display:none!important}
+.map-module-brand-mark{width:38px!important;height:38px!important;border-radius:10px!important;background:#171320!important;border:1px solid #7047b8!important;color:#c7a8ff!important;box-shadow:none!important}
+@media(max-width:720px){.map-module-topbar{min-height:60px!important;padding:0 14px!important}.map-module-brand small{display:block!important}}

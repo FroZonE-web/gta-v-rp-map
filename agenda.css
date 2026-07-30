@@ -25,3 +25,6 @@ body.hub-agenda-active #hub-placeholder{display:none!important}
 .agenda-day-events{display:grid;grid-template-rows:repeat(2,minmax(0,auto));gap:5px;overflow:hidden}
 .agenda-day-events>.agenda-event-chip:nth-child(n+3){display:none}
 .agenda-more-events{display:block;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* v1.6.6 — bandeau commun */
+.agenda-topbar{min-height:64px;background:#101117;border-bottom-color:#29243a}.agenda-brand-mark{background:#171320;border:1px solid #7047b8;color:#c7a8ff}
