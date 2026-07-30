@@ -396,3 +396,12 @@ Les mouvements physiques conservent `deposit` / `withdrawal` et utilisent `sourc
 - Historique général filtrable par membre, catégorie, date, paiement et récidive.
 - Le prénom des membres dans l'Annuaire redirige vers leur casier.
 - Migration à exécuter : `AMENDES_SETUP.sql`.
+
+
+## v1.6.1 — Correctifs Amendes et Stocks
+
+- Amendes : module pleine largeur, contenu centré et référentiel adaptatif affichant les quatre catégories.
+- Annuaire : le prénom pointe vers `#/amendes/<prenom>` et ouvre le casier correspondant.
+- Stocks : la vue Galerie est disponible dans le détail d’un lieu, avec image, quantité et nom au survol.
+- Cache : numéros de version des fichiers CSS/JS relevés pour garantir le chargement des correctifs sur GitHub Pages.
+- SQL : aucune nouvelle migration.

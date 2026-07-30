@@ -1,0 +1,10 @@
+ASHEN WOLVES HUB — v1.6.1
+
+Correctifs :
+- Module Amendes affiché sur toute la largeur et centré.
+- Les quatre catégories sont visibles en quatre colonnes sur grand écran, deux sur écran intermédiaire et une sur mobile.
+- Correction du lien Annuaire vers le casier via le prénom.
+- Correction et isolation de la vue Galerie des lieux de stockage.
+- Mise à jour des versions de ressources pour forcer le rafraîchissement du cache navigateur.
+
+Aucune migration SQL supplémentaire n’est nécessaire.
