@@ -18,6 +18,7 @@
 
   const transactionTitles = {
     quick_income: "Recette rapide",
+    quick_dirty_income: "Argent sale trouvé",
     member_payment: "Paiement à un membre",
     black_transfer_out: "Transfert vers la caisse noire",
     black_transfer_in: "Ajout à la caisse noire",
@@ -258,6 +259,12 @@
     try { await createSimpleOperation({ p_operation:"quick_income", p_amount:amount, p_recipient:null, p_label:$("compta-quick-income-label").value.trim() || $("compta-quick-income-type").value }); event.target.reset(); toast("Recette enregistrée."); }
     catch(error){ toast(error.message || "Impossible d’enregistrer la recette."); }
     finally{ button.disabled=false; }
+  });
+  $("compta-dirty-found-form")?.addEventListener("submit", async event=>{
+    event.preventDefault(); const amount=Number($("compta-dirty-found-amount").value||0); if(amount<=0)return toast("Saisis un montant valide.");
+    const button=event.submitter; button.disabled=true;
+    try{await createSimpleOperation({p_operation:"quick_dirty_income",p_amount:amount,p_recipient:null,p_label:"Argent sale trouvé"});event.target.reset();toast("Argent sale ajouté au compte du club.");}
+    catch(error){toast(error.message||"Impossible d’enregistrer l’argent trouvé.");}finally{button.disabled=false;}
   });
   $("compta-transfer-form").addEventListener("submit", async event=>{
     event.preventDefault();

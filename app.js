@@ -79,6 +79,9 @@ const CATEGORIES = {
     subcategories: []
   },
 
+  radar: { label: "Radars", icon: "📸", subcategories: [] },
+  poubelle: { label: "Poubelles", icon: "🗑️", subcategories: [] },
+
   autre: {
     label: "Autres",
     icon: "📍",

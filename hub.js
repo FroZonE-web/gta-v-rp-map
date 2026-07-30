@@ -41,6 +41,7 @@ const HUB_MODULES = {
     icon: "🧮",
     description: "Recettes, ressources nécessaires, quantités et coûts totaux."
   },
+  amendes: { title: "Amendes", icon: "⚖️", description: "Référentiel officiel, récidives et casiers judiciaires des membres." },
   "notes-grades": {
     title: "Notes des gradés",
     icon: "🔒",
@@ -56,6 +57,7 @@ const directoryRoute = document.getElementById("annuaire-module");
 const agendaRoute = document.getElementById("agenda-module");
 const stocksRoute = document.getElementById("stocks-module");
 const accountingRoute = document.getElementById("comptabilite-module");
+const finesRoute = document.getElementById("amendes-module");
 const placeholderIcon = document.getElementById("hub-placeholder-icon");
 const placeholderTitle = document.getElementById("hub-placeholder-title");
 const placeholderDescription = document.getElementById("hub-placeholder-description");
@@ -93,8 +95,9 @@ function displayHubRoute() {
   const showAgenda = route === "agenda";
   const showStocks = route === "stocks";
   const showAccounting = route === "comptabilite";
-  const showPlaceholder = Boolean(module) && !showRegulation && !showDirectory && !showAgenda && !showStocks && !showAccounting;
-  const showDashboard = !showMap && !showRegulation && !showDirectory && !showAgenda && !showStocks && !showAccounting && !showPlaceholder;
+  const showFines = route === "amendes";
+  const showPlaceholder = Boolean(module) && !showRegulation && !showDirectory && !showAgenda && !showStocks && !showAccounting && !showFines;
+  const showDashboard = !showMap && !showRegulation && !showDirectory && !showAgenda && !showStocks && !showAccounting && !showFines && !showPlaceholder;
 
   dashboardRoute.hidden = !showDashboard;
   placeholderRoute.hidden = !showPlaceholder;
@@ -103,6 +106,7 @@ function displayHubRoute() {
   agendaRoute.hidden = !showAgenda;
   stocksRoute.hidden = !showStocks;
   accountingRoute.hidden = !showAccounting;
+  finesRoute.hidden = !showFines;
 
   mapRoute.classList.toggle("is-active", showMap);
   mapRoute.setAttribute("aria-hidden", String(!showMap));
@@ -115,6 +119,7 @@ function displayHubRoute() {
   document.body.classList.toggle("hub-agenda-active", showAgenda);
   document.body.classList.toggle("hub-stocks-active", showStocks);
   document.body.classList.toggle("hub-accounting-active", showAccounting);
+  document.body.classList.toggle("hub-fines-active", showFines);
 
   if (showRegulation) {
     document.title = "Règlement — Ashen Wolves HUB";
@@ -130,6 +135,10 @@ function displayHubRoute() {
     window.dispatchEvent(new CustomEvent("hub:agenda-visible"));
   } else if (showAccounting) {
     document.title = "Comptabilité — Ashen Wolves HUB";
+    window.dispatchEvent(new CustomEvent("hub:accounting-visible"));
+  } else if (showFines) {
+    document.title = "Amendes — Ashen Wolves HUB";
+    window.dispatchEvent(new CustomEvent("hub:fines-visible", { detail: { member: getHubRouteParts()[1] || "" } }));
   } else if (showStocks) {
     document.title = "Stocks — Ashen Wolves HUB";
     window.dispatchEvent(new CustomEvent("hub:stocks-visible"));

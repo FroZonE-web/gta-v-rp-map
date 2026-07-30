@@ -26,7 +26,8 @@
   <link rel="stylesheet" href="annuaire.css?v=1.2.7">
   <link rel="stylesheet" href="agenda.css?v=1.3.5">
   <link rel="stylesheet" href="stocks.css?v=1.4.11">
-  <link rel="stylesheet" href="comptabilite.css?v=1.5.6">
+  <link rel="stylesheet" href="comptabilite.css?v=1.5.7">
+  <link rel="stylesheet" href="amendes.css?v=1.6.0">
 </head>
 
 <body class="hub-dashboard-active">
@@ -52,6 +53,7 @@
         <a class="hub-module-card is-available" href="#/annuaire"><span class="hub-module-icon">👥</span><span class="hub-module-copy"><strong>Annuaire</strong><small>Membres, contacts rencontrés et forces de l’ordre</small></span><span class="hub-module-status">Disponible</span></a>
         <a class="hub-module-card" href="#/plans-op"><span class="hub-module-icon">🎯</span><span class="hub-module-copy"><strong>Plans d’OP</strong><small>Préparation et comptes rendus d’opérations</small></span><span class="hub-module-status">À venir</span></a>
         <a class="hub-module-card is-available" href="#/agenda"><span class="hub-module-icon">📅</span><span class="hub-module-copy"><strong>Agenda</strong><small>Réunions, opérations et événements</small></span><span class="hub-module-status">Disponible</span></a>
+        <a class="hub-module-card is-available" href="#/amendes"><span class="hub-module-icon">⚖️</span><span class="hub-module-copy"><strong>Amendes</strong><small>Référentiel, récidives et casiers des membres</small></span><span class="hub-module-status">Disponible</span></a>
         <a class="hub-module-card is-available" href="#/reglement"><span class="hub-module-icon">📜</span><span class="hub-module-copy"><strong>Règlement</strong><small>Code officiel, chapitres et recherche</small></span><span class="hub-module-status">Disponible</span></a>
         <a class="hub-module-card" href="#/calculatrice-craft"><span class="hub-module-icon">🧮</span><span class="hub-module-copy"><strong>Calculatrice de craft</strong><small>Recettes, ressources et coûts</small></span><span class="hub-module-status">À venir</span></a>
         <a class="hub-module-card" href="#/notes-grades"><span class="hub-module-icon">🔒</span><span class="hub-module-copy"><strong>Notes des gradés</strong><small>Espace privé réservé aux grades autorisés</small></span><span class="hub-module-status">À venir</span></a>
@@ -1136,6 +1138,7 @@
             </div>
             <aside class="compta-right">
               <section class="compta-panel"><h3>RECETTE RAPIDE</h3><form id="compta-quick-income-form" class="compta-simple-form"><select id="compta-quick-income-type" class="compta-field"><option value="Cotisation">Cotisation</option><option value="Paris">Paris</option><option value="Don">Don</option><option value="Recette diverse">Recette diverse</option></select><input id="compta-quick-income-amount" class="compta-field" type="number" min="0.01" step="0.01" required placeholder="$  Montant"><input id="compta-quick-income-label" class="compta-field" placeholder="Libellé (facultatif)"><button class="compta-action-button" type="submit">Enregistrer</button></form></section>
+              <section class="compta-panel compta-dirty-found"><h3>ARGENT SALE TROUVÉ</h3><p class="compta-helper">Crédite l’argent sale du compte du club.</p><form id="compta-dirty-found-form" class="compta-simple-form"><input id="compta-dirty-found-amount" class="compta-field" type="number" min="0.01" step="0.01" required placeholder="$  Montant"><button class="compta-action-button" type="submit">Enregistrer</button></form></section>
               <section class="compta-panel"><h3>TRANSFERT D’ARGENT</h3><form id="compta-transfer-form" class="compta-simple-form"><input id="compta-transfer-recipient" class="compta-field" list="compta-member-list" required placeholder="Caisse noire ou membre…"><datalist id="compta-member-list"><option value="Caisse noire"></option></datalist><input id="compta-transfer-amount" class="compta-field" type="number" min="0.01" step="0.01" required placeholder="$  Montant"><input id="compta-transfer-label" class="compta-field" placeholder="Libellé (facultatif)"><button class="compta-action-button" type="submit">Transférer</button></form></section>
             </aside>
           </div>
@@ -1393,6 +1396,34 @@
       <div class="stocks-dialog-actions"><button type="button" class="stocks-secondary" data-stocks-movement-close>Annuler</button><button class="stocks-primary" type="submit">Enregistrer le mouvement</button></div>
     </form>
   </dialog>
+</section>
+<section id="amendes-module" class="hub-route amendes-page" hidden>
+  <header class="amendes-header">
+    <a class="amendes-brand" href="#/"><span>AW</span><div><strong>ASHEN WOLVES HUB</strong><small>Amendes & casiers</small></div></a>
+    <nav class="amendes-tabs" aria-label="Navigation des amendes">
+      <button class="is-active" data-amendes-tab="catalogue">Référentiel</button>
+      <button data-amendes-tab="members">Membres</button>
+      <button data-amendes-tab="history">Historique</button>
+    </nav>
+    <button id="amendes-add" class="amendes-primary" type="button">+ Enregistrer une amende</button>
+  </header>
+  <main class="amendes-main">
+    <section id="amendes-catalogue-view" class="amendes-view">
+      <div class="amendes-title"><div><p>Référentiel officiel</p><h1>LISTE DES AMENDES</h1></div><input id="amendes-catalogue-search" type="search" placeholder="Rechercher une infraction…"></div>
+      <div id="amendes-catalogue" class="amendes-catalogue"><p class="amendes-empty">Chargement…</p></div>
+    </section>
+    <section id="amendes-members-view" class="amendes-view" hidden>
+      <div class="amendes-title"><div><p>Suivi interne</p><h1>MEMBRES</h1></div><input id="amendes-member-search" type="search" placeholder="Rechercher un prénom…"></div>
+      <div id="amendes-members" class="amendes-member-grid"><p class="amendes-empty">Chargement…</p></div>
+    </section>
+    <section id="amendes-history-view" class="amendes-view" hidden>
+      <div class="amendes-title"><div><p>Registre complet</p><h1>HISTORIQUE</h1></div></div>
+      <div class="amendes-filters"><input id="amendes-history-search" type="search" placeholder="Membre ou infraction…"><select id="amendes-history-category"><option value="all">Toutes les catégories</option><option value="1">Catégorie 1</option><option value="2">Catégorie 2</option><option value="3">Catégorie 3</option><option value="4">Catégorie 4</option></select><select id="amendes-history-paid"><option value="all">Payée et impayée</option><option value="true">Payée</option><option value="false">Impayée</option></select><select id="amendes-history-recurrence"><option value="all">Toutes les récidives</option><option value="active">Récidive active</option><option value="inactive">Sans récidive active</option></select><input id="amendes-history-date" type="date"></div>
+      <div id="amendes-history" class="amendes-history"><p class="amendes-empty">Chargement…</p></div>
+    </section>
+    <section id="amendes-record-view" class="amendes-view" hidden><div id="amendes-record"></div></section>
+  </main>
+  <dialog id="amendes-dialog" class="amendes-dialog"><form id="amendes-form"><div class="amendes-dialog-head"><div><p>Nouveau registre</p><h2>Enregistrer une amende</h2></div><button type="button" data-amendes-close>×</button></div><label>Membre<input id="amendes-form-member" list="amendes-member-list" required autocomplete="off" placeholder="Prénom du membre"><datalist id="amendes-member-list"></datalist></label><label>Infraction<select id="amendes-form-fine" required></select></label><label>Date de l’amende<input id="amendes-form-date" type="date" required></label><label class="amendes-check"><input id="amendes-form-paid" type="checkbox" checked><span>Amende payée</span></label><label>Date de paiement<input id="amendes-form-paid-date" type="date"></label><label>Notes<textarea id="amendes-form-notes" rows="3" placeholder="Facultatif"></textarea></label><p id="amendes-form-error" class="amendes-error" hidden></p><div class="amendes-dialog-actions"><button type="button" class="amendes-secondary" data-amendes-close>Annuler</button><button class="amendes-primary" type="submit">Enregistrer</button></div></form></dialog>
 </section>
   <div id="map-module" class="hub-route hub-map-module" aria-hidden="true">
     <a class="hub-map-home" href="#/" aria-label="Retour au tableau de bord">
@@ -1926,7 +1957,8 @@
   <script src="law.js?v=1.2.1"></script>
   <script src="agenda.js?v=1.3.5"></script>
   <script src="stocks.js?v=1.4.12"></script>
-  <script src="comptabilite.js?v=1.5.6"></script>
-  <script src="hub.js?v=1.5.0"></script>
+  <script src="comptabilite.js?v=1.5.7"></script>
+  <script src="amendes.js?v=1.6.0"></script>
+  <script src="hub.js?v=1.6.0"></script>
 </body>
 </html>

@@ -369,3 +369,30 @@ Les mouvements physiques conservent `deposit` / `withdrawal` et utilisent `sourc
 - Les boutons décrivent désormais les validations réelles.
 - Correction du chargement des membres de `directory_members` : utilisation de `grade_code` et tri hiérarchique par `sort_order`.
 - Le transfert d’argent propose la Caisse noire et tous les membres du club.
+
+## Version 1.6.0 — Amendes et améliorations transversales
+
+### Carte
+- Ajout des catégories `Radars` et `Poubelles` pour les marqueurs.
+
+### Stocks
+- Ajout d'une vue `Galerie` dans le détail d'un lieu de stockage.
+- La galerie affiche uniquement les visuels, la quantité en bas à droite et le nom au survol.
+- Le type `Frigo` était déjà présent et n'a pas été modifié.
+
+### Comptabilité
+- Ajout du raccourci `Argent sale trouvé` sur le tableau de bord.
+- Cette opération crédite exclusivement l'argent sale du compte du club.
+- Elle apparaît automatiquement dans l'historique et les transactions récentes.
+- Elle n'alimente jamais la caisse noire, qui reste réservée à l'argent propre.
+- Migration à exécuter : `COMPTABILITE_ARGENT_SALE_TROUVE.sql`.
+
+### Amendes
+- Nouveau module indépendant de la Comptabilité.
+- Référentiel officiel des quatre catégories d'amendes.
+- Liste des membres avec trois statuts : pas de récidive, récidive, récidives multiples.
+- Une récidive multiple correspond à plusieurs infractions différentes encore actives.
+- Casier individuel accessible par le prénom via `#/amendes/<prenom>`.
+- Historique général filtrable par membre, catégorie, date, paiement et récidive.
+- Le prénom des membres dans l'Annuaire redirige vers leur casier.
+- Migration à exécuter : `AMENDES_SETUP.sql`.

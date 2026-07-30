@@ -1,0 +1,10 @@
+ASHEN WOLVES HUB — VERSION 1.6.0
+
+- Carte : catégories Radars et Poubelles.
+- Stocks : galerie dans le détail d'un stockage.
+- Comptabilité : raccourci Argent sale trouvé, crédité sur l'argent sale du compte club uniquement.
+- Amendes : référentiel, membres, casiers, historique et lien depuis l'Annuaire par prénom.
+
+SQL à exécuter :
+1. AMENDES_SETUP.sql
+2. COMPTABILITE_ARGENT_SALE_TROUVE.sql

@@ -151,7 +151,7 @@
     tableBody.innerHTML = visible.map((member) => `
       <tr>
         <td><span class="directory-grade">${escapeHtml(member.grade_code)}</span></td>
-        <td class="directory-name">${escapeHtml(member.first_name)}</td>
+        <td class="directory-name"><a class="directory-record-link" href="#/amendes/${encodeURIComponent(member.first_name)}">${escapeHtml(member.first_name)}</a></td>
         <td class="directory-nickname">${escapeHtml(member.nickname || "—")}</td>
         <td class="directory-name">${escapeHtml(member.last_name)}</td>
         <td>${escapeHtml(member.identity_name)}</td>
@@ -170,7 +170,7 @@
           <h3>${escapeHtml(member.identity_name)}</h3>
         </div>
         <dl>
-          <dt>Prénom</dt><dd>${escapeHtml(member.first_name)}</dd>
+          <dt>Prénom</dt><dd><a class="directory-record-link" href="#/amendes/${encodeURIComponent(member.first_name)}">${escapeHtml(member.first_name)}</a></dd>
           <dt>Surnom</dt><dd class="directory-nickname">${escapeHtml(member.nickname || "—")}</dd>
           <dt>Nom</dt><dd>${escapeHtml(member.last_name)}</dd>
           <dt>RIB</dt><dd class="directory-sensitive">${escapeHtml(member.rib || "—")}</dd>
