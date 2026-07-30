@@ -1,0 +1,10 @@
+Ashen Wolves HUB v1.6.5 correctifs stabilité Carte, Stocks, Comptabilité et Annuaire
+
+- Bandeau Carte avec retour au HUB.
+- Réparation complète des mouvements et de l’affichage par lieu dans Stocks.
+- Tri des catégories sans tenir compte des emojis.
+- Montants caisse noire en fond noir 50 %.
+- Badges HC et NON-RENSEIGNÉ en #101010.
+- Invalidation du cache des ressources concernées.
+
+Aucun SQL supplémentaire requis.

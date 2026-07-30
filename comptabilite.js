@@ -51,7 +51,8 @@
     const positive = row.direction === "credit";
     const title = row.title || transactionTitles[row.operation_type] || "Opération comptable";
     const detail = [row.label, row.counterparty, row.account === "black" ? "Caisse noire" : (row.money_type === "dirty" ? "Argent sale" : "Argent propre"), formatTime(row.created_at)].filter(Boolean).join(" · ");
-    return `<article class="compta-transaction"><span class="compta-transaction-icon">▣</span><div><strong>${esc(title)}</strong><small>${esc(detail)}</small></div><span class="compta-amount ${positive?"positive":"negative"}">${positive?"+":"−"} ${money(row.amount)}</span></article>`;
+    const blackCashMovement = ["black_deposit", "black_withdrawal"].includes(row.operation);
+    return `<article class="compta-transaction"><span class="compta-transaction-icon">▣</span><div><strong>${esc(title)}</strong><small>${esc(detail)}</small></div><span class="compta-amount ${positive?"positive":"negative"}${blackCashMovement?" is-black-cash":""}">${positive?"+":"−"} ${money(row.amount)}</span></article>`;
   }
   function groupedTransactionsHtml(rows) {
     if (!rows.length) return '<p class="compta-empty-inline">Aucune opération enregistrée.</p>';

@@ -94,7 +94,7 @@
   function badge(type, value) {
     if (!value) return "—";
     let [background, color] = labelStyle(type, value);
-    if (["hc", "non-renseigne", "non renseigne", "non-renseigné", "non renseigné"].includes(normalize(value))) background = "#101010";
+    if (["HC", "NON-RENSEIGNE", "NON RENSEIGNE", "NON-RENSEIGNÉ", "NON RENSEIGNÉ"].includes(normalize(value))) background = "#101010";
     return `<span class="directory-contact-badge${type === "entity" ? " directory-entity-badge" : ""}" style="--badge-bg:${escapeHtml(background)};--badge-color:${escapeHtml(color)}">${escapeHtml(value)}</span>`;
   }
 

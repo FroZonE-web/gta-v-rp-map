@@ -434,3 +434,12 @@ Les mouvements physiques conservent `deposit` / `withdrawal` et utilisent `sourc
 - Système de déplacement entre les tableaux Membres, Contacts et Forces de l’ordre : création dans la destination puis suppression de la source.
 
 Aucune migration SQL supplémentaire n’est requise si les politiques Supabase existantes autorisent déjà l’ajout et la suppression dans les trois tables de l’Annuaire.
+
+
+## Version 1.6.5 — correctifs de stabilité
+
+- Carte : ajout d’un véritable bandeau supérieur avec identité du HUB et retour cliquable vers l’accueil, y compris sur mobile.
+- Stocks : réparation de la régression JavaScript qui bloquait les mouvements et l’affichage des stocks par lieu ; tri alphabétique des catégories en ignorant les emojis.
+- Comptabilité : contraste noir à 50 % rendu visible sur les montants des dépôts et retraits de caisse noire.
+- Annuaire : badges HC et NON-RENSEIGNÉ forcés en `#101010`.
+- Cache : versionnement `v=1.6.5` des ressources modifiées.

@@ -20,6 +20,15 @@
   const money = (v) => new Intl.NumberFormat("fr-FR", { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(Number(v || 0));
   const kg = (v) => `${Number(v || 0).toLocaleString("fr-FR", { maximumFractionDigits: 3 })} kg`;
   const dt = (v) => new Intl.DateTimeFormat("fr-FR", { dateStyle: "short", timeStyle: "short" }).format(new Date(v));
+  const categorySortKey = (value) => String(value || "")
+    .replace(/[\p{Extended_Pictographic}\p{Emoji_Presentation}\uFE0F\u200D]/gu, "")
+    .replace(/^[^\p{L}\p{N}]+/gu, "")
+    .trim();
+  const normalizedCategorySearch = (value) => categorySortKey(value)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("fr");
+  const compareCategoryNames = (a, b) => categorySortKey(a).localeCompare(categorySortKey(b), "fr", { sensitivity: "base", numeric: true });
 
   function dirtyValue(item) {
     const clean = Number(item.clean_value || 0), input = Number(item.dirty_input || 0);

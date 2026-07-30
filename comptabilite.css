@@ -22,3 +22,8 @@
 
 /* v1.6.4 — différenciation visuelle des dépôts/retraits d’argent sale */
 #compta-black-amount{background:rgba(0,0,0,.5)!important;}
+
+
+/* v1.6.5 — montants des dépôts/retraits de caisse noire */
+.compta-amount.is-black-cash{background:rgba(0,0,0,.5)!important;color:#fff!important;border:1px solid rgba(255,255,255,.12)}
+#compta-black-amount{background:rgba(0,0,0,.5)!important;color:#fff!important;border-color:rgba(255,255,255,.18)!important}
