@@ -452,3 +452,33 @@ Aucune migration SQL supplémentaire n’est requise si les politiques Supabase 
 - Mouvements de stock restaurés dans leur présentation d’origine avec un menu déroulant de catégorie filtrant la liste des items.
 - Tri des catégories fondé sur leur libellé sans tenir compte des emojis.
 - Invalidation du cache des ressources en v1.6.6.
+
+## v1.7.0 — Module Craft
+
+Nouveau module accessible via `#/craft`, isolé dans `craft.js` et `craft.css`.
+
+Fonctionnalités :
+
+- catégories de crafts créables par tous les utilisateurs ;
+- référentiel partagé des recettes ;
+- création d’un craft avec nom, image et plusieurs composants issus de la banque d’items des Stocks ;
+- filtre par catégorie pour sélectionner les composants ;
+- création automatique de l’item fabriqué dans `stock_items` ;
+- choix de la quantité à fabriquer ;
+- répartition précise de chaque composant entre plusieurs lieux de stockage ;
+- destinations : stocker, vendre ou garder ;
+- vente avec choix argent propre/sale et écriture automatique dans la Comptabilité ;
+- historique complet des fabrications ;
+- mouvements de Stocks identifiés avec la source `craft` ;
+- mise à jour atomique des composants, du produit fini et de la transaction comptable via la RPC `execute_craft` ;
+- actualisation Realtime des crafts, Stocks et écritures comptables.
+
+Tables ajoutées :
+
+- `craft_categories`
+- `craft_recipes`
+- `craft_recipe_ingredients`
+- `craft_runs`
+- `craft_run_ingredients`
+
+Script obligatoire : `CRAFT_SETUP.sql`.

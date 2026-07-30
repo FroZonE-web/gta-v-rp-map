@@ -26,7 +26,8 @@
     black_withdrawal: "Retrait de la caisse noire",
     item_sale: "Vente d’items",
     item_purchase: "Achat d’items",
-    service_expense: "Achat de service"
+    service_expense: "Achat de service",
+    craft_sale: "Vente de craft"
   };
   const signedAmount = (row) => (row.direction === "credit" ? 1 : -1) * Number(row.amount || 0);
   const formatDateHeading = (value) => new Intl.DateTimeFormat("fr-FR", { weekday:"long", day:"numeric", month:"long", year:"numeric" }).format(new Date(value));

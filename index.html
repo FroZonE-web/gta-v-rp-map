@@ -20,14 +20,15 @@
     href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css"
   >
 
-  <link rel="stylesheet" href="style.css?v=1.6.6">
-  <link rel="stylesheet" href="hub.css?v=1.6.6">
-  <link rel="stylesheet" href="reglement.css?v=1.6.6">
-  <link rel="stylesheet" href="annuaire.css?v=1.6.6">
-  <link rel="stylesheet" href="agenda.css?v=1.6.6">
-  <link rel="stylesheet" href="stocks.css?v=1.6.6">
-  <link rel="stylesheet" href="comptabilite.css?v=1.6.6">
-  <link rel="stylesheet" href="amendes.css?v=1.6.6">
+  <link rel="stylesheet" href="style.css?v=1.7.0">
+  <link rel="stylesheet" href="hub.css?v=1.7.0">
+  <link rel="stylesheet" href="reglement.css?v=1.7.0">
+  <link rel="stylesheet" href="annuaire.css?v=1.7.0">
+  <link rel="stylesheet" href="agenda.css?v=1.7.0">
+  <link rel="stylesheet" href="stocks.css?v=1.7.0">
+  <link rel="stylesheet" href="comptabilite.css?v=1.7.0">
+  <link rel="stylesheet" href="amendes.css?v=1.7.0">
+  <link rel="stylesheet" href="craft.css?v=1.7.0">
 </head>
 
 <body class="hub-dashboard-active">
@@ -55,11 +56,11 @@
         <a class="hub-module-card is-available" href="#/agenda"><span class="hub-module-icon">📅</span><span class="hub-module-copy"><strong>Agenda</strong><small>Réunions, opérations et événements</small></span><span class="hub-module-status">Disponible</span></a>
         <a class="hub-module-card is-available" href="#/amendes"><span class="hub-module-icon">⚖️</span><span class="hub-module-copy"><strong>Amendes</strong><small>Référentiel, récidives et casiers des membres</small></span><span class="hub-module-status">Disponible</span></a>
         <a class="hub-module-card is-available" href="#/reglement"><span class="hub-module-icon">📜</span><span class="hub-module-copy"><strong>Règlement</strong><small>Code officiel, chapitres et recherche</small></span><span class="hub-module-status">Disponible</span></a>
-        <a class="hub-module-card" href="#/calculatrice-craft"><span class="hub-module-icon">🧮</span><span class="hub-module-copy"><strong>Calculatrice de craft</strong><small>Recettes, ressources et coûts</small></span><span class="hub-module-status">À venir</span></a>
+        <a class="hub-module-card is-available" href="#/craft"><span class="hub-module-icon">🛠️</span><span class="hub-module-copy"><strong>Craft</strong><small>Recettes, fabrication, stocks et ventes</small></span><span class="hub-module-status">Disponible</span></a>
         <a class="hub-module-card" href="#/notes-grades"><span class="hub-module-icon">🔒</span><span class="hub-module-copy"><strong>Notes des gradés</strong><small>Espace privé réservé aux grades autorisés</small></span><span class="hub-module-status">À venir</span></a>
       </nav>
 
-      <footer class="hub-dashboard-footer">Ashen Wolves HUB <span>v1.5</span></footer>
+      <footer class="hub-dashboard-footer">Ashen Wolves HUB <span>v1.7</span></footer>
     </div>
   </section>
 
@@ -1425,6 +1426,34 @@
   </main>
   <dialog id="amendes-dialog" class="amendes-dialog"><form id="amendes-form"><div class="amendes-dialog-head"><div><p>Nouveau registre</p><h2>Enregistrer une amende</h2></div><button type="button" data-amendes-close>×</button></div><label>Membre<input id="amendes-form-member" list="amendes-member-list" required autocomplete="off" placeholder="Prénom du membre"><datalist id="amendes-member-list"></datalist></label><label>Infraction<select id="amendes-form-fine" required></select></label><label>Date de l’amende<input id="amendes-form-date" type="date" required></label><label class="amendes-check"><input id="amendes-form-paid" type="checkbox" checked><span>Amende payée</span></label><label>Date de paiement<input id="amendes-form-paid-date" type="date"></label><label>Notes<textarea id="amendes-form-notes" rows="3" placeholder="Facultatif"></textarea></label><p id="amendes-form-error" class="amendes-error" hidden></p><div class="amendes-dialog-actions"><button type="button" class="amendes-secondary" data-amendes-close>Annuler</button><button class="amendes-primary" type="submit">Enregistrer</button></div></form></dialog>
 </section>
+<section id="craft-module" class="hub-route craft-page" hidden aria-labelledby="craft-title">
+  <header class="craft-topbar"><a class="craft-brand" href="#/" aria-label="Retour au HUB"><span>AW</span><div><strong>ASHEN WOLVES HUB</strong><small>Crafts & fabrication</small></div></a></header>
+  <div class="craft-shell">
+    <h1 id="craft-title" style="position:absolute;left:-9999px">Craft</h1>
+    <nav class="craft-tabs" aria-label="Navigation Craft"><button class="is-active" data-craft-tab="recipes">Référentiel</button><button data-craft-tab="make">Fabriquer</button><button data-craft-tab="history">Historique</button></nav>
+    <p id="craft-status" class="craft-status"></p>
+    <section id="craft-recipes-panel">
+      <div class="craft-head"><div><p>Banque de données</p><h2>CRAFTS DISPONIBLES</h2></div><div class="craft-toolbar"><button id="craft-add-category" class="craft-btn">+ Catégorie</button><button id="craft-add-recipe" class="craft-btn primary">+ Nouveau craft</button></div></div>
+      <div class="craft-toolbar" style="margin-bottom:16px"><input id="craft-search" class="craft-field" type="search" placeholder="Rechercher un craft…" style="flex:1"><select id="craft-category-filter" class="craft-field" style="max-width:300px"><option value="">Toutes les catégories</option></select></div>
+      <div id="craft-recipes-grid" class="craft-grid"></div>
+    </section>
+    <section id="craft-make-panel" hidden>
+      <div class="craft-head"><div><p>Production</p><h2>FABRIQUER UN ITEM</h2></div></div>
+      <form id="craft-make-form" class="craft-panel">
+        <div class="craft-form-grid"><label class="craft-label">Craft<select id="craft-recipe-select" class="craft-field" required></select></label><label class="craft-label">Quantité à fabriquer<input id="craft-quantity" class="craft-field" type="number" min="1" value="1" required></label><label class="craft-label wide">Nom / identifiant de la personne<input id="craft-actor" class="craft-field" placeholder="Facultatif"></label></div>
+        <h3>Prélèvement des composants</h3><div id="craft-allocation-list"><div class="craft-empty">Sélectionne un craft.</div></div>
+        <div class="craft-form-grid" style="margin-top:18px"><label class="craft-label wide">Destination du craft<select id="craft-destination" class="craft-field"><option value="stock">Stocker l’item</option><option value="sell">Vendre l’item</option><option value="keep">Garder l’item</option></select></label></div>
+        <div id="craft-stock-fields" class="craft-destination-fields"><label class="craft-label">Lieu de stockage<select id="craft-destination-location" class="craft-field"></select></label></div>
+        <div id="craft-sale-fields" class="craft-destination-fields craft-form-grid" hidden><label class="craft-label">Client<input id="craft-customer" class="craft-field" placeholder="Personne ou entité"></label><label class="craft-label">Prix de vente<input id="craft-sale-amount" class="craft-field" type="number" min="0.01" step="0.01"></label><label class="craft-label">Paiement<select id="craft-money-type" class="craft-field"><option value="clean">Argent propre</option><option value="dirty">Argent sale</option></select></label></div>
+        <footer style="display:flex;justify-content:flex-end;margin-top:20px"><button class="craft-btn primary" type="submit">Valider le craft</button></footer>
+      </form>
+    </section>
+    <section id="craft-history-panel" hidden><div class="craft-head"><div><p>Traçabilité</p><h2>HISTORIQUE DES CRAFTS</h2></div></div><input id="craft-history-search" class="craft-field" type="search" placeholder="Rechercher un craft, une personne ou un client…"><div id="craft-history-list" class="craft-panel" style="margin-top:14px"></div></section>
+  </div>
+  <dialog id="craft-category-dialog" class="craft-dialog"><form id="craft-category-form"><header><div><small>Organisation</small><h2>Nouvelle catégorie</h2></div><button type="button" data-craft-close>×</button></header><label class="craft-label">Nom de la catégorie<input id="craft-category-name" class="craft-field" required maxlength="80" placeholder="Ex. 🧰 Équipement"></label><footer><button type="button" class="craft-btn" data-craft-close>Annuler</button><button class="craft-btn primary" type="submit">Créer</button></footer></form></dialog>
+  <dialog id="craft-recipe-dialog" class="craft-dialog"><form id="craft-recipe-form"><header><div><small>Banque de données</small><h2>Nouveau craft</h2></div><button type="button" data-craft-close>×</button></header><div class="craft-form-grid"><label class="craft-label">Catégorie<select id="craft-recipe-category" class="craft-field" required></select></label><label class="craft-label">Nom de l’item fabriqué<input id="craft-item-name" class="craft-field" required maxlength="120"></label><label class="craft-label wide">Image de l’item<input id="craft-item-image" class="craft-field" type="file" accept="image/*"></label></div><h3>Composants nécessaires</h3><div id="craft-ingredients"></div><button id="craft-add-ingredient" class="craft-btn" type="button">+ Ajouter un composant</button><footer><button type="button" class="craft-btn" data-craft-close>Annuler</button><button class="craft-btn primary" type="submit">Créer le craft</button></footer></form></dialog>
+</section>
+
   <div id="map-module" class="hub-route hub-map-module" aria-hidden="true">
     <header class="map-module-topbar">
       <a class="map-module-brand" href="#/" aria-label="Retour au HUB">
@@ -1955,8 +1984,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script src="config.js"></script>
-  <script src="app.js?v=1.6.6"></script>
-  <script src="reglement.js?v=1.6.6"></script>
+  <script src="app.js?v=1.7.0"></script>
+  <script src="reglement.js?v=1.7.0"></script>
 
   <dialog id="directory-transfer-dialog" class="directory-transfer-dialog">
     <form id="directory-transfer-form" method="dialog">
@@ -1967,14 +1996,15 @@
       <footer><button type="button" data-transfer-close>Annuler</button><button type="submit">Déplacer la fiche</button></footer>
     </form>
   </dialog>
-  <script src="annuaire.js?v=1.6.6"></script>
-  <script src="contacts.js?v=1.6.6"></script>
-  <script src="law.js?v=1.6.6"></script>
-  <script src="agenda.js?v=1.6.6"></script>
-  <script src="stocks.js?v=1.6.6"></script>
-  <script src="comptabilite.js?v=1.6.6"></script>
-  <script src="amendes.js?v=1.6.6"></script>
-  <script src="transfer.js?v=1.6.6"></script>
-  <script src="hub.js?v=1.6.6"></script>
+  <script src="annuaire.js?v=1.7.0"></script>
+  <script src="contacts.js?v=1.7.0"></script>
+  <script src="law.js?v=1.7.0"></script>
+  <script src="agenda.js?v=1.7.0"></script>
+  <script src="stocks.js?v=1.7.0"></script>
+  <script src="comptabilite.js?v=1.7.0"></script>
+  <script src="amendes.js?v=1.7.0"></script>
+  <script src="craft.js?v=1.7.0"></script>
+  <script src="transfer.js?v=1.7.0"></script>
+  <script src="hub.js?v=1.7.0"></script>
 </body>
 </html>

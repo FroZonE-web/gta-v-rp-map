@@ -36,10 +36,10 @@ const HUB_MODULES = {
     icon: "📜",
     description: "Chapitres administrables, recherche et suivi des modifications."
   },
-  "calculatrice-craft": {
-    title: "Calculatrice de craft",
-    icon: "🧮",
-    description: "Recettes, ressources nécessaires, quantités et coûts totaux."
+  craft: {
+    title: "Craft",
+    icon: "🛠️",
+    description: "Recettes, fabrication, consommation des stocks et ventes."
   },
   amendes: { title: "Amendes", icon: "⚖️", description: "Référentiel officiel, récidives et casiers judiciaires des membres." },
   "notes-grades": {
@@ -58,6 +58,7 @@ const agendaRoute = document.getElementById("agenda-module");
 const stocksRoute = document.getElementById("stocks-module");
 const accountingRoute = document.getElementById("comptabilite-module");
 const finesRoute = document.getElementById("amendes-module");
+const craftRoute = document.getElementById("craft-module");
 const placeholderIcon = document.getElementById("hub-placeholder-icon");
 const placeholderTitle = document.getElementById("hub-placeholder-title");
 const placeholderDescription = document.getElementById("hub-placeholder-description");
@@ -96,8 +97,9 @@ function displayHubRoute() {
   const showStocks = route === "stocks";
   const showAccounting = route === "comptabilite";
   const showFines = route === "amendes";
-  const showPlaceholder = Boolean(module) && !showRegulation && !showDirectory && !showAgenda && !showStocks && !showAccounting && !showFines;
-  const showDashboard = !showMap && !showRegulation && !showDirectory && !showAgenda && !showStocks && !showAccounting && !showFines && !showPlaceholder;
+  const showCraft = route === "craft";
+  const showPlaceholder = Boolean(module) && !showRegulation && !showDirectory && !showAgenda && !showStocks && !showAccounting && !showFines && !showCraft;
+  const showDashboard = !showMap && !showRegulation && !showDirectory && !showAgenda && !showStocks && !showAccounting && !showFines && !showCraft && !showPlaceholder;
 
   dashboardRoute.hidden = !showDashboard;
   placeholderRoute.hidden = !showPlaceholder;
@@ -107,6 +109,7 @@ function displayHubRoute() {
   stocksRoute.hidden = !showStocks;
   accountingRoute.hidden = !showAccounting;
   finesRoute.hidden = !showFines;
+  craftRoute.hidden = !showCraft;
 
   mapRoute.classList.toggle("is-active", showMap);
   mapRoute.setAttribute("aria-hidden", String(!showMap));
@@ -120,6 +123,7 @@ function displayHubRoute() {
   document.body.classList.toggle("hub-stocks-active", showStocks);
   document.body.classList.toggle("hub-accounting-active", showAccounting);
   document.body.classList.toggle("hub-fines-active", showFines);
+  document.body.classList.toggle("hub-craft-active", showCraft);
 
   if (showRegulation) {
     document.title = "Règlement — Ashen Wolves HUB";
@@ -139,6 +143,9 @@ function displayHubRoute() {
   } else if (showFines) {
     document.title = "Amendes — Ashen Wolves HUB";
     window.dispatchEvent(new CustomEvent("hub:fines-visible", { detail: { member: getHubRouteParts()[1] || "" } }));
+  } else if (showCraft) {
+    document.title = "Craft — Ashen Wolves HUB";
+    window.dispatchEvent(new CustomEvent("hub:craft-visible"));
   } else if (showStocks) {
     document.title = "Stocks — Ashen Wolves HUB";
     window.dispatchEvent(new CustomEvent("hub:stocks-visible"));

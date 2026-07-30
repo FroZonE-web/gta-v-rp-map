@@ -1,0 +1,4 @@
+Ashen Wolves HUB v1.7.0 ajout module Craft
+
+Ajout du référentiel, de la fabrication, de l'historique, de l'intégration Stocks et des ventes liées à la Comptabilité.
+Exécuter CRAFT_SETUP.sql avant utilisation.

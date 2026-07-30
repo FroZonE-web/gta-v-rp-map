@@ -271,7 +271,7 @@
     if (!rows.length) { els.movementsList.innerHTML = '<div class="stocks-empty">Aucun mouvement à afficher.</div>'; return; }
     els.movementsList.innerHTML = rows.map(m => {
       const deposit = m.movement_type === "deposit";
-      const movementLabel = m.source_type === "purchase" ? "Achat" : m.source_type === "resale" ? "Revente" : (deposit ? "Dépôt" : "Retrait");
+      const movementLabel = m.source_type === "purchase" ? "Achat" : m.source_type === "resale" ? "Revente" : m.source_type === "craft" ? (deposit ? "Craft — production" : "Craft — composant") : (deposit ? "Dépôt" : "Retrait");
       return `<article class="stocks-movement-row">
         <div class="stocks-movement-image">${m.stock_items?.image_url ? `<img src="${esc(m.stock_items.image_url)}" alt="">` : "📦"}</div>
         <div class="stocks-movement-main"><div><span class="stocks-movement-kind ${deposit ? "deposit" : "withdraw"}">${movementLabel}</span><strong>${esc(m.stock_items?.name || "Item supprimé")}</strong></div><small>${dt(m.created_at)}${m.created_by_label ? ` · ${esc(m.created_by_label)}` : ""}</small></div>
